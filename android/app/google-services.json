@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "837879977254",
+    "project_id": "med-flow-aut",
+    "storage_bucket": "med-flow-aut.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:837879977254:android:6a24e3b5bda18e53609de7",
+        "android_client_info": {
+          "package_name": "com.example.med"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDXViqFi1_qEsacIk8qZOtrorl5sgyd6v4"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
