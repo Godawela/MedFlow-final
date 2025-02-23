@@ -38,6 +38,8 @@ dependencies:
   auto_route_generator: ^8.0.0
   shared_preferences: ^2.0.15
   http: ^1.3.0
+  flutter_native_splash: ^2.3.1
+  flutter_svg: ^2.0.17
 
 
   # The following adds the Cupertino Icons font to your application.
@@ -71,6 +73,7 @@ flutter:
   assets:
     - assets/icons/
     - assets/images/
+    - assets/icons/g_logo.png
   #   - images/a_dot_ham.jpeg
 
   # An image asset can refer to one or more resolution-specific "variants", see
@@ -105,3 +108,13 @@ flutter_icons:
   image_path: "assets/icons/app_icon.png"
   adaptive_icon_background: "#ffffff"    # (Optional) Background color for Android adaptive icons
 
+flutter_native_splash:
+  color: "#ffffff"                      # Background color
+  image: assets/icons/app_icon.png       # Path to your splash image
+  android: true
+  ios: true
+  fullscreen: true                      # Show the image fullscreen
+
+  android_12:
+    image: assets/icons/app_icon.png     # For Android 12+
+    icon_background_color: "#ffffff"    # Background color for adaptive icons
