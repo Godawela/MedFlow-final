@@ -11,7 +11,7 @@ class AuthHeader extends StatelessWidget {
         SizedBox(height: 9),
         CircleAvatar(
           radius: 33.5,
-          backgroundImage: NetworkImage('https://cdn.builder.io/api/v1/image/assets/TEMP/1a4d6a25074baaad02b85df12e5380b4ef368b38d46550453b4487519d8d76b9?placeholderIfAbsent=true&apiKey=f815b67fc3874cb68d73fa67ce14b3f4'),
+          backgroundImage: AssetImage('assets/images/logo.png'),
         ),
         SizedBox(height: 10),
         Text(
