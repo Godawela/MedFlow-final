@@ -1,6 +1,8 @@
+import 'dart:convert';
 import 'package:auto_route/auto_route.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
 import 'package:med/routes/router.dart';
 import 'package:med/widgets/custom_text_field.dart';
 
@@ -15,41 +17,73 @@ class _AuthFormState extends State<AuthForm> {
   final FirebaseAuth _auth = FirebaseAuth.instance;
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
+  final TextEditingController _nameController = TextEditingController();
   bool isLoading = false;
   bool isPasswordVisible = false;
 
-  Future<void> handleSignUp() async {
-    setState(() {
-      isLoading = true;
-    });
-
+  // Function to handle user sign-up with Firebase Authentication
+  Future<void> signUpUser(String email, String password, String name) async {
     try {
+      setState(() {
+        isLoading = true;
+      });
+
+      // Create user in Firebase
       UserCredential userCredential = await _auth.createUserWithEmailAndPassword(
-        email: _emailController.text.trim(),
-        password: _passwordController.text.trim(),
+        email: email,
+        password: password,
       );
 
-      if (userCredential.user != null) {
-        AutoRouter.of(context).push(HomeRoute());
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Sign-up successful!'),
-            backgroundColor: Colors.green,
-          ),
-        );
-      }
+      // Send additional user data (name) to MongoDB
+      await sendToMongoDB(userCredential.user!.uid, email, name);
+
+      // Navigate to HomePage if sign-up is successful
+      AutoRouter.of(context).push(const HomeRoute());
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Error: ${e.toString()}'),
-          backgroundColor: Colors.red,
-        ),
-      );
+      print('Error during sign-up: $e');
+      showErrorSnackBar('Error during sign-up: $e');
     } finally {
       setState(() {
         isLoading = false;
       });
     }
+  }
+
+  // Function to send data to your MongoDB backend API
+  Future<void> sendToMongoDB(String uid, String email, String name) async {
+    final url = Uri.parse('http://your-backend-url/api/users');
+    
+    try {
+      final response = await http.post(
+        url,
+        headers: {'Content-Type': 'application/json'},
+        body: json.encode({
+          'uid': uid,
+          'email': email,
+          'name': name,
+        }),
+      );
+
+      if (response.statusCode == 200) {
+        print('User data saved to MongoDB successfully');
+      } else {
+        print('Error saving data to MongoDB: ${response.body}');
+        showErrorSnackBar('Error saving data to MongoDB');
+      }
+    } catch (e) {
+      print('Error while sending data to MongoDB: $e');
+      showErrorSnackBar('Error sending data to MongoDB');
+    }
+  }
+
+  // Function to show error messages in a SnackBar
+  void showErrorSnackBar(String message) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(message),
+        backgroundColor: Colors.red,
+      ),
+    );
   }
 
   @override
@@ -97,10 +131,29 @@ class _AuthFormState extends State<AuthForm> {
               ),
             ),
             const SizedBox(height: 24),
+            CustomTextField(
+              controller: _nameController,
+              label: 'Name',
+              hintText: 'Enter your name',
+              keyboardType: TextInputType.text,
+            ),
+            const SizedBox(height: 24),
             SizedBox(
               width: double.infinity,
               child: ElevatedButton(
-                onPressed: isLoading ? null : handleSignUp,
+                onPressed: isLoading
+                    ? null
+                    : () {
+                        setState(() {
+                          isLoading = true;
+                        });
+
+                        String email = _emailController.text.trim();
+                        String password = _passwordController.text.trim();
+                        String name = _nameController.text.trim();
+
+                        signUpUser(email, password, name);
+                      },
                 style: ElevatedButton.styleFrom(
                   backgroundColor: const Color.fromRGBO(15, 121, 134, 1),
                   padding: const EdgeInsets.symmetric(vertical: 12),

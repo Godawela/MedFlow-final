@@ -6,6 +6,7 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:med/routes/router.dart';
 import 'package:med/widgets/custom_text_field.dart';
 import 'package:med/widgets/social_login_button.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 @RoutePage()
 class LoginScreen extends StatefulWidget {
@@ -42,6 +43,20 @@ class _LoginScreenState extends State<LoginScreen> {
       );
       
       if (userCredential.user != null) {
+         String? token = await userCredential.user!.getIdToken();
+        String uid = userCredential.user!.uid;
+        
+        // Store token and uid using SharedPreferences
+        SharedPreferences prefs = await SharedPreferences.getInstance();
+        await prefs.setString('authToken', token ?? '');
+        await prefs.setString('uid', uid);
+        
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Sign-up successful! Token and UID saved.'),
+            backgroundColor: Colors.green,
+          ),
+        );
         AutoRouter.of(context).push(HomeRoute());
       }
     } catch (e) {
@@ -56,6 +71,11 @@ class _LoginScreenState extends State<LoginScreen> {
         isLoading = false;
       });
     }
+  }
+
+    Future<String?> getUid() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    return prefs.getString('uid');
   }
 
   @override
