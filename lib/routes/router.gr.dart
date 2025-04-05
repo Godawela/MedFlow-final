@@ -21,7 +21,7 @@ abstract class _$AppRouter extends RootStackRouter {
         routeData: routeData,
         child: DeviceListPage(
           key: args.key,
-          categoryId: args.categoryId,
+          category: args.categoryId,
         ),
       );
     },
