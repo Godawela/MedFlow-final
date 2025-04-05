@@ -1,43 +1,54 @@
-import 'dart:convert';
 import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
 import 'package:google_fonts/google_fonts.dart';
-import 'package:med/models/category_model.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
+
+import 'package:med/pages/device_list_page.dart';
+
 
 class MachinePage extends StatefulWidget {
-  const MachinePage({Key? key}) : super(key: key);
+  const MachinePage({super.key});
 
   @override
-  State<MachinePage> createState() => _MachinePageState();
+  _MachinePageState createState() => _MachinePageState();
 }
 
 class _MachinePageState extends State<MachinePage> {
-  List<Category> categories = [];
+  List<String> categories = [];
   bool isLoading = true;
+  String? error;
 
   @override
   void initState() {
     super.initState();
-    fetchCategoryNames();
+    fetchCategories();
   }
 
+  Future<void> fetchCategories() async {
+    try {
+      final response = await http.get(
+        Uri.parse('http://10.0.2.2:8000/api/categories'),
+      );
 
-
-Future<List<String>> fetchCategoryNames() async {
-  try {
-    final response = await http.get(Uri.parse('http://localhost:8000/api/devices/category/'));
-
-    if (response.statusCode == 200) {
-      final List<dynamic> data = jsonDecode(response.body);
-      return data.map((item) => item['category'].toString()).toList();
-    } else {
-      throw Exception('Failed to load categories');
+      if (response.statusCode == 200) {
+        final List<dynamic> fetchedCategories = json.decode(response.body);
+        setState(() {
+          categories = fetchedCategories.cast<String>();
+          isLoading = false;
+        });
+      } else {
+        setState(() {
+          error = 'Failed to load categories: ${response.statusCode}';
+          isLoading = false;
+        });
+      }
+    } catch (e) {
+      setState(() {
+        error = 'Error: $e';
+        isLoading = false;
+      });
     }
-  } catch (e) {
-    throw Exception('Error fetching categories: $e');
   }
-}
-
 
   @override
   Widget build(BuildContext context) {
@@ -48,46 +59,72 @@ Future<List<String>> fetchCategoryNames() async {
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
           onPressed: () {
-            Navigator.pop(context);
+            Navigator.pop(context); // Navigate back to the previous page
           },
         ),
       ),
       body: SafeArea(
-  child: Center(
-    child: Padding(
-      padding: const EdgeInsets.all(16.0),
-      child: FutureBuilder<List<String>>(
-        future: fetchCategoryNames(),
-        builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return const CircularProgressIndicator();
-          } else if (snapshot.hasError) {
-            return Text('Error: ${snapshot.error}');
-          } else if (snapshot.hasData && snapshot.data!.isNotEmpty) {
-            return Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: snapshot.data!.map((category) {
-                return Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 10),
-                  child: DeviceButton(
-                    label: category,
-                    onTap: () {
-                      // Handle button tap
-                      print('Selected category: $category');
-                    },
-                  ),
-                );
-              }).toList(),
-            );
-          } else {
-            return const Text('No categories found');
-          }
-        },
+        child: Center(
+          child: Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: isLoading
+                ? const CircularProgressIndicator()
+                : error != null
+                    ? Text(
+                        'Error loading categories: $error',
+                        style: GoogleFonts.inter(
+                          fontSize: 16,
+                          color: Colors.red,
+                        ),
+                      )
+                    : Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        children: [
+                          Text(
+                            'Hi! User',
+                            style: GoogleFonts.goblinOne(
+                              fontSize: 20,
+                              color: Colors.black,
+                            ),
+                          ),
+                          const SizedBox(height: 44),
+                          Text(
+                            'Please select a device type',
+                            style: GoogleFonts.inter(
+                              fontSize: 20,
+                              color: Colors.black,
+                            ),
+                          ),
+                          const SizedBox(height: 44),
+                          Expanded(
+                            child: ListView.builder(
+                              itemCount: categories.length,
+                              itemBuilder: (context, index) {
+                                return Padding(
+                                  padding: const EdgeInsets.only(bottom: 20),
+                                  child: DeviceButton(
+                                    label: categories[index],
+                                    onTap: () {
+                                      Navigator.push(
+                                        context,
+                                        MaterialPageRoute(
+                                          builder: (context) => DeviceListPage(
+                                            category: categories[index],
+                                          ),
+                                        ),
+                                      );
+                                    },
+                                  ),
+                                );
+                              },
+                            ),
+                          ),
+                        ],
+                      ),
+          ),
+        ),
       ),
-    ),
-  ),
-),
-
     );
   }
 }
@@ -97,10 +134,10 @@ class DeviceButton extends StatelessWidget {
   final VoidCallback onTap;
 
   const DeviceButton({
-    Key? key,
+    super.key,
     required this.label,
     required this.onTap,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
