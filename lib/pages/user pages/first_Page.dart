@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:med/pages/machine.dart';
-import 'package:med/pages/symptom.dart';
+import 'package:med/pages/user%20pages/machine.dart';
+import 'package:med/pages/user%20pages/symptom.dart';
 import 'package:med/widgets/menu_items.dart';
 
 class FirstPage extends StatelessWidget {

@@ -3,7 +3,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 
-import 'package:med/pages/symptom_details_page.dart';
+import 'package:med/pages/user%20pages/symptom_details_page.dart';
 
 
 class SymptomPage extends StatefulWidget {

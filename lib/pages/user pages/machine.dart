@@ -3,7 +3,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 
-import 'package:med/pages/device_list_page.dart';
+import 'package:med/pages/user%20pages/device_list_page.dart';
 
 
 class MachinePage extends StatefulWidget {

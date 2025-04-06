@@ -1,6 +1,6 @@
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
-import 'package:med/pages/symptom.dart';
+import 'package:med/pages/user%20pages/symptom.dart';
 import 'package:med/routes/router.dart';
 import 'package:med/widgets/buildActionButton.dart';
 
