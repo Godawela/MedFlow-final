@@ -30,7 +30,7 @@ class SignUpPrompt extends StatelessWidget {
             recognizer: _tapGestureRecognizer,
           ),
         ],
-      ),
+      )
     );
   }
 }

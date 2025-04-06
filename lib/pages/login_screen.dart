@@ -7,6 +7,8 @@ import 'package:med/routes/router.dart';
 import 'package:med/widgets/custom_text_field.dart';
 import 'package:med/widgets/social_login_button.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:google_sign_in/google_sign_in.dart'; // Added import
+
 
 @RoutePage()
 class LoginScreen extends StatefulWidget {
@@ -41,19 +43,19 @@ class _LoginScreenState extends State<LoginScreen> {
         email: _emailController.text.trim(),
         password: _passwordController.text.trim(),
       );
-      
+
       if (userCredential.user != null) {
-         String? token = await userCredential.user!.getIdToken();
+        String? token = await userCredential.user!.getIdToken();
         String uid = userCredential.user!.uid;
-        
+
         // Store token and uid using SharedPreferences
         SharedPreferences prefs = await SharedPreferences.getInstance();
         await prefs.setString('authToken', token ?? '');
         await prefs.setString('uid', uid);
-        
+
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Sign-up successful! Token and UID saved.'),
+            content: Text('Sign-in successful! Token and UID saved.'),
             backgroundColor: Colors.green,
           ),
         );
@@ -73,9 +75,67 @@ class _LoginScreenState extends State<LoginScreen> {
     }
   }
 
-    Future<String?> getUid() async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    return prefs.getString('uid');
+  Future<void> handleGoogleSignIn() async {
+    try {
+      setState(() {
+        isLoading = true;
+      });
+
+      // Initialize Google Sign-In
+      GoogleSignIn googleSignIn = GoogleSignIn();
+
+      // Trigger the Google Sign-In flow
+      GoogleSignInAccount? googleUser = await googleSignIn.signIn();
+
+      if (googleUser == null) {
+        // User canceled the sign-in flow
+        setState(() {
+          isLoading = false;
+        });
+        return;
+      }
+
+      // Obtain authentication details
+      GoogleSignInAuthentication googleAuth = await googleUser.authentication;
+
+      // Create a new credential for Firebase Auth
+      OAuthCredential credential = GoogleAuthProvider.credential(
+        accessToken: googleAuth.accessToken,
+        idToken: googleAuth.idToken,
+      );
+
+      // Sign in to Firebase with the Google credentials
+      UserCredential userCredential = await _auth.signInWithCredential(credential);
+
+      if (userCredential.user != null) {
+        String? token = await userCredential.user!.getIdToken();
+        String uid = userCredential.user!.uid;
+
+        // Store token and uid using SharedPreferences
+        SharedPreferences prefs = await SharedPreferences.getInstance();
+        await prefs.setString('authToken', token ?? '');
+        await prefs.setString('uid', uid);
+
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Google Sign-In successful! Token and UID saved.'),
+            backgroundColor: Colors.green,
+          ),
+        );
+        AutoRouter.of(context).push(HomeRoute());
+      }
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Error: ${e.toString()}'),
+          backgroundColor: Colors.red,
+        ),
+      );
+    } finally {
+      setState(() {
+        isLoading = false;
+      });
+    }
   }
 
   @override
@@ -201,24 +261,11 @@ class _LoginScreenState extends State<LoginScreen> {
                   ),
                 ),
                 const SizedBox(height: 45),
-                const Row(
-                  children: [
-                    Expanded(
-                      child: SocialLoginButton(
-                        icon: FontAwesomeIcons.google,
-                        text: 'Google',
-                        iconColor: Colors.red,
-                      ),
-                    ),
-                    SizedBox(width: 20),
-                    Expanded(
-                      child: SocialLoginButton(
-                        icon: FontAwesomeIcons.facebook,
-                        text: 'Facebook',
-                        iconColor: Colors.blue,
-                      ),
-                    ),
-                  ],
+                SocialLoginButton(
+                  icon: FontAwesomeIcons.google,
+                  text: 'Google',
+                  iconColor: Colors.red,
+                  onPressed: handleGoogleSignIn, // Trigger Google Sign-In
                 ),
                 const SizedBox(height: 31),
                 Center(

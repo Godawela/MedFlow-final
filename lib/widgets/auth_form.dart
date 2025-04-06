@@ -20,9 +20,10 @@ class _AuthFormState extends State<AuthForm> {
   final TextEditingController _nameController = TextEditingController();
   bool isLoading = false;
   bool isPasswordVisible = false;
+  String _selectedRole = 'student'; // default role
 
   // Function to handle user sign-up with Firebase Authentication
-  Future<void> signUpUser(String email, String password, String name) async {
+  Future<void> signUpUser(String email, String password, String name, String role) async {
     try {
       setState(() {
         isLoading = true;
@@ -34,8 +35,8 @@ class _AuthFormState extends State<AuthForm> {
         password: password,
       );
 
-      // Send additional user data (name) to MongoDB
-      await sendToMongoDB(userCredential.user!.uid, email, name);
+      // Send additional user data (name + role) to MongoDB
+      await sendToMongoDB(userCredential.user!.uid, email, name, role);
 
       // Navigate to HomePage if sign-up is successful
       AutoRouter.of(context).push(const HomeRoute());
@@ -50,9 +51,9 @@ class _AuthFormState extends State<AuthForm> {
   }
 
   // Function to send data to your MongoDB backend API
-  Future<void> sendToMongoDB(String uid, String email, String name) async {
-    final url = Uri.parse('http://your-backend-url/api/users');
-    
+  Future<void> sendToMongoDB(String uid, String email, String name, String role) async {
+    final url = Uri.parse('http://your-backend-url/api/users'); // Change this to your backend endpoint
+
     try {
       final response = await http.post(
         url,
@@ -61,6 +62,7 @@ class _AuthFormState extends State<AuthForm> {
           'uid': uid,
           'email': email,
           'name': name,
+          'role': role,
         }),
       );
 
@@ -116,9 +118,9 @@ class _AuthFormState extends State<AuthForm> {
                 hintText: 'Enter your password',
                 prefixIcon: const Icon(Icons.lock),
                 suffixIcon: IconButton(
-                  icon: Icon(isPasswordVisible
-                      ? Icons.visibility
-                      : Icons.visibility_off),
+                  icon: Icon(
+                    isPasswordVisible ? Icons.visibility : Icons.visibility_off,
+                  ),
                   onPressed: () {
                     setState(() {
                       isPasswordVisible = !isPasswordVisible;
@@ -138,21 +140,38 @@ class _AuthFormState extends State<AuthForm> {
               keyboardType: TextInputType.text,
             ),
             const SizedBox(height: 24),
+
+            // Dropdown for role
+            DropdownButtonFormField<String>(
+              value: _selectedRole,
+              decoration: const InputDecoration(
+                labelText: 'Role',
+                border: OutlineInputBorder(),
+              ),
+              items: <String>['admin', 'student']
+                  .map((role) => DropdownMenuItem(
+                        value: role,
+                        child: Text(role[0].toUpperCase() + role.substring(1)),
+                      ))
+                  .toList(),
+              onChanged: (value) {
+                setState(() {
+                  _selectedRole = value!;
+                });
+              },
+            ),
+
+            const SizedBox(height: 24),
             SizedBox(
               width: double.infinity,
               child: ElevatedButton(
                 onPressed: isLoading
                     ? null
                     : () {
-                        setState(() {
-                          isLoading = true;
-                        });
-
                         String email = _emailController.text.trim();
                         String password = _passwordController.text.trim();
                         String name = _nameController.text.trim();
-
-                        signUpUser(email, password, name);
+                        signUpUser(email, password, name, _selectedRole);
                       },
                 style: ElevatedButton.styleFrom(
                   backgroundColor: const Color.fromRGBO(15, 121, 134, 1),
