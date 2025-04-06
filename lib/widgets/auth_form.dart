@@ -7,7 +7,7 @@ import 'package:med/routes/router.dart';
 import 'package:med/widgets/custom_text_field.dart';
 
 class AuthForm extends StatefulWidget {
-  const AuthForm({Key? key}) : super(key: key);
+  const AuthForm({super.key});
 
   @override
   State<AuthForm> createState() => _AuthFormState();

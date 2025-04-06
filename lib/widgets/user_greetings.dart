@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 class UserGreeting extends StatelessWidget {
-  const UserGreeting({Key? key}) : super(key: key);
+  const UserGreeting({super.key});
 
   @override
   Widget build(BuildContext context) {

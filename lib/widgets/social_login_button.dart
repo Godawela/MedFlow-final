@@ -7,12 +7,12 @@ class SocialLoginButton extends StatelessWidget {
   final VoidCallback? onPressed; // 👈 New parameter
 
   const SocialLoginButton({
-    Key? key,
+    super.key,
     required this.icon,
     required this.text,
     this.iconColor = Colors.black,
     this.onPressed, // 👈 Assign it here
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

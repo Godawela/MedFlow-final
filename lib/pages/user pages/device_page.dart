@@ -8,7 +8,7 @@ import 'dart:convert';
 class DeviceListPage extends StatelessWidget {
   final int category;
 
-  const DeviceListPage({Key? key, required this.category}) : super(key: key);
+  const DeviceListPage({super.key, required this.category});
 
   Future<List<Map<String, dynamic>>> fetchDevices() async {
     final url = Uri.parse("http://localhost:8000/api/devices/category/$category");

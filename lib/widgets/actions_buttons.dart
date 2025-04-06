@@ -5,14 +5,14 @@ import 'package:med/routes/router.dart';
 import 'package:med/widgets/buildActionButton.dart';
 
 class ActionButtons extends StatelessWidget {
-  const ActionButtons({Key? key}) : super(key: key);
+  const ActionButtons({super.key});
 
   @override
   Widget build(BuildContext context) {
     return Column(
       children: [
         buildActionButton('Machines', () {
-          AutoRouter.of(context).push(MachineRoute());
+          AutoRouter.of(context).push(const MachineRoute());
         }),
         const SizedBox(height: 20),
         buildActionButton('Symptom', () {

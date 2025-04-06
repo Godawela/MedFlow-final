@@ -1,48 +1,63 @@
 import 'package:flutter/material.dart';
-import 'package:med/pages/user%20pages/draw.dart';
 
 class MenuItems extends StatelessWidget {
   const MenuItems({super.key});
-  
+
   @override
   Widget build(BuildContext context) {
-    return Container(); // Replace with your widget tree
+    return Container(
+      padding: const EdgeInsets.all(16),
+      height: 280,
+      decoration: const BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          _buildMenuItem(context, 'Settings', Icons.settings),
+          _buildMenuItem(context, 'Profile', Icons.person),
+          _buildMenuItem(context, 'Notes', Icons.note),
+          _buildMenuItem(context, 'Chatbot', Icons.chat),
+        ],
+      ),
+    );
   }
 
-  // Make this static so it can be called without an instance
+  Widget _buildMenuItem(BuildContext context, String title, IconData icon) {
+    return ListTile(
+      leading: Icon(icon),
+      title: Text(title),
+      onTap: () {
+        Navigator.pop(context); // Close the bottom sheet
+        handleMenuItemTap(context, title);
+      },
+    );
+  }
+
   static void handleMenuItemTap(BuildContext context, String item) {
     switch (item) {
       case 'Settings':
-        // Navigate to settings page
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Settings page coming soon')),
         );
         break;
       case 'Profile':
-        // Navigate to profile page
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Profile page coming soon')),
         );
         break;
       case 'Notes':
-        // Navigate to notes page
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Notes page coming soon')),
         );
         break;
       case 'Chatbot':
-        // Navigate to chatbot page
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Chatbot page coming soon')),
         );
         break;
-      case 'Draw with me':
-        // Navigate to drawing page
-        Navigator.push(
-          context,
-          MaterialPageRoute(builder: (context) => const DrawingApp()),
-        );
-        break;
+    
     }
   }
 }

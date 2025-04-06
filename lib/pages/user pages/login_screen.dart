@@ -12,6 +12,8 @@ import 'package:google_sign_in/google_sign_in.dart'; // Added import
 
 @RoutePage()
 class LoginScreen extends StatefulWidget {
+  const LoginScreen({super.key});
+
   @override
   _LoginScreenState createState() => _LoginScreenState();
 }
@@ -54,12 +56,12 @@ class _LoginScreenState extends State<LoginScreen> {
         await prefs.setString('uid', uid);
 
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
+          const SnackBar(
             content: Text('Sign-in successful! Token and UID saved.'),
             backgroundColor: Colors.green,
           ),
         );
-        AutoRouter.of(context).push(HomeRoute());
+        AutoRouter.of(context).push(const HomeRoute());
       }
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -117,12 +119,12 @@ class _LoginScreenState extends State<LoginScreen> {
         await prefs.setString('uid', uid);
 
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
+          const SnackBar(
             content: Text('Google Sign-In successful! Token and UID saved.'),
             backgroundColor: Colors.green,
           ),
         );
-        AutoRouter.of(context).push(HomeRoute());
+        AutoRouter.of(context).push(const HomeRoute());
       }
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -279,7 +281,7 @@ class _LoginScreenState extends State<LoginScreen> {
                           style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.black),
                           recognizer: TapGestureRecognizer()
                             ..onTap = () {
-                              AutoRouter.of(context).replace(SignUpRoute());
+                              AutoRouter.of(context).replace(const SignUpRoute());
                             },
                         ),
                       ],

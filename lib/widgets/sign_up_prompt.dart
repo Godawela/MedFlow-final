@@ -4,11 +4,11 @@ import 'package:flutter/material.dart';
 import 'package:med/routes/router.dart';
 
 class SignUpPrompt extends StatelessWidget {
-  const SignUpPrompt({Key? key}) : super(key: key);
+  const SignUpPrompt({super.key});
 
   @override
   Widget build(BuildContext context) {
-    final TapGestureRecognizer _tapGestureRecognizer = TapGestureRecognizer()
+    final TapGestureRecognizer tapGestureRecognizer = TapGestureRecognizer()
       ..onTap = () {
         AutoRouter.of(context).replace(const LoginRoute());
       };
@@ -16,18 +16,18 @@ class SignUpPrompt extends StatelessWidget {
     return RichText(
       text: TextSpan(
         text: "Already have an account? ",
-        style: TextStyle(
+        style: const TextStyle(
           color: Color.fromRGBO(0, 0, 0, 0.5),
           fontSize: 16,
         ),
         children: [
           TextSpan(
             text: 'Sign In',
-            style: TextStyle(
+            style: const TextStyle(
               fontWeight: FontWeight.bold,
               color: Colors.black,
             ),
-            recognizer: _tapGestureRecognizer,
+            recognizer: tapGestureRecognizer,
           ),
         ],
       )
