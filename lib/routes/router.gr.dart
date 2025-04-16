@@ -21,7 +21,7 @@ abstract class _$AppRouter extends RootStackRouter {
         routeData: routeData,
         child: DeviceListPage(
           key: args.key,
-          category: args.categoryId,
+          category: args.category,
         ),
       );
     },
@@ -34,13 +34,13 @@ abstract class _$AppRouter extends RootStackRouter {
     LoginRoute.name: (routeData) {
       return AutoRoutePage<dynamic>(
         routeData: routeData,
-        child: LoginScreen(),
+        child: const LoginScreen(),
       );
     },
-    MachineRoute.name: (routeData) {
+    NoteRoute.name: (routeData) {
       return AutoRoutePage<dynamic>(
         routeData: routeData,
-        child: const MachinePage(),
+        child: const NotePage(),
       );
     },
     SignUpRoute.name: (routeData) {
@@ -57,13 +57,13 @@ abstract class _$AppRouter extends RootStackRouter {
 class DeviceListRoute extends PageRouteInfo<DeviceListRouteArgs> {
   DeviceListRoute({
     Key? key,
-    required int categoryId,
+    required int category,
     List<PageRouteInfo>? children,
   }) : super(
           DeviceListRoute.name,
           args: DeviceListRouteArgs(
             key: key,
-            categoryId: categoryId,
+            category: category,
           ),
           initialChildren: children,
         );
@@ -77,16 +77,16 @@ class DeviceListRoute extends PageRouteInfo<DeviceListRouteArgs> {
 class DeviceListRouteArgs {
   const DeviceListRouteArgs({
     this.key,
-    required this.categoryId,
+    required this.category,
   });
 
   final Key? key;
 
-  final int categoryId;
+  final int category;
 
   @override
   String toString() {
-    return 'DeviceListRouteArgs{key: $key, categoryId: $categoryId}';
+    return 'DeviceListRouteArgs{key: $key, category: $category}';
   }
 }
 
@@ -119,15 +119,15 @@ class LoginRoute extends PageRouteInfo<void> {
 }
 
 /// generated route for
-/// [MachinePage]
-class MachineRoute extends PageRouteInfo<void> {
-  const MachineRoute({List<PageRouteInfo>? children})
+/// [NotePage]
+class NoteRoute extends PageRouteInfo<void> {
+  const NoteRoute({List<PageRouteInfo>? children})
       : super(
-          MachineRoute.name,
+          NoteRoute.name,
           initialChildren: children,
         );
 
-  static const String name = 'MachineRoute';
+  static const String name = 'NoteRoute';
 
   static const PageInfo<void> page = PageInfo<void>(name);
 }

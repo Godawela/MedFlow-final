@@ -1,4 +1,6 @@
+import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
+import 'package:med/routes/router.dart';
 
 class MenuItems extends StatelessWidget {
   const MenuItems({super.key});
@@ -48,9 +50,7 @@ class MenuItems extends StatelessWidget {
         );
         break;
       case 'Notes':
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Notes page coming soon')),
-        );
+        context.router.push(const NoteRoute());
         break;
       case 'Chatbot':
         ScaffoldMessenger.of(context).showSnackBar(
