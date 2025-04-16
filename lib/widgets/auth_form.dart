@@ -4,7 +4,6 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:med/routes/router.dart';
-import 'package:med/widgets/custom_text_field.dart';
 
 class AuthForm extends StatefulWidget {
   const AuthForm({super.key});
@@ -103,44 +102,57 @@ class _AuthFormState extends State<AuthForm> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            CustomTextField(
-              controller: _emailController,
-              label: 'Email',
-              hintText: 'Enter your email',
-              keyboardType: TextInputType.emailAddress,
-            ),
-            const SizedBox(height: 24),
             TextField(
-              controller: _passwordController,
-              obscureText: !isPasswordVisible,
-              decoration: InputDecoration(
-                labelText: 'Password',
-                hintText: 'Enter your password',
-                prefixIcon: const Icon(Icons.lock),
-                suffixIcon: IconButton(
-                  icon: Icon(
-                    isPasswordVisible ? Icons.visibility : Icons.visibility_off,
-                  ),
-                  onPressed: () {
-                    setState(() {
-                      isPasswordVisible = !isPasswordVisible;
-                    });
-                  },
-                ),
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12),
-                ),
-              ),
-            ),
-            const SizedBox(height: 24),
-            CustomTextField(
-              controller: _nameController,
-              label: 'Name',
-              hintText: 'Enter your name',
-              keyboardType: TextInputType.text,
-            ),
-            const SizedBox(height: 24),
+  controller: _emailController,
+  keyboardType: TextInputType.emailAddress,
+  decoration: InputDecoration(
+    labelText: 'Email',
+    hintText: 'Enter your email',
+    prefixIcon: const Icon(Icons.email),
+    border: OutlineInputBorder(
+      borderRadius: BorderRadius.circular(12),
+    ),
+  ),
+),
+const SizedBox(height: 15),
 
+TextField(
+  controller: _passwordController,
+  obscureText: !isPasswordVisible,
+  decoration: InputDecoration(
+    labelText: 'Password',
+    hintText: 'Enter your password',
+    prefixIcon: const Icon(Icons.lock),
+    suffixIcon: IconButton(
+      icon: Icon(
+        isPasswordVisible ? Icons.visibility : Icons.visibility_off,
+      ),
+      onPressed: () {
+        setState(() {
+          isPasswordVisible = !isPasswordVisible;
+        });
+      },
+    ),
+    border: OutlineInputBorder(
+      borderRadius: BorderRadius.circular(12),
+    ),
+  ),
+),
+const SizedBox(height: 15),
+
+ TextField(
+  controller: _nameController,
+  keyboardType: TextInputType.text,
+  decoration: InputDecoration(
+    labelText: 'Name',
+    hintText: 'Enter your Name',
+    prefixIcon: const Icon(Icons.person),
+    border: OutlineInputBorder(
+      borderRadius: BorderRadius.circular(12),
+    ),
+  ),
+),
+const SizedBox(height: 15),
             // Dropdown for role
             DropdownButtonFormField<String>(
               value: _selectedRole,
@@ -161,7 +173,7 @@ class _AuthFormState extends State<AuthForm> {
               },
             ),
 
-            const SizedBox(height: 24),
+            const SizedBox(height: 15),
             SizedBox(
               width: double.infinity,
               child: ElevatedButton(

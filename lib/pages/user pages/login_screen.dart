@@ -4,11 +4,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter/gestures.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:med/routes/router.dart';
-import 'package:med/widgets/custom_text_field.dart';
 import 'package:med/widgets/social_login_button.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:google_sign_in/google_sign_in.dart'; // Added import
-
+import 'package:google_sign_in/google_sign_in.dart'; 
 
 @RoutePage()
 class LoginScreen extends StatefulWidget {
@@ -107,7 +105,8 @@ class _LoginScreenState extends State<LoginScreen> {
       );
 
       // Sign in to Firebase with the Google credentials
-      UserCredential userCredential = await _auth.signInWithCredential(credential);
+      UserCredential userCredential =
+          await _auth.signInWithCredential(credential);
 
       if (userCredential.user != null) {
         String? token = await userCredential.user!.getIdToken();
@@ -187,13 +186,19 @@ class _LoginScreenState extends State<LoginScreen> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        CustomTextField(
+                        TextField(
                           controller: _emailController,
-                          label: 'Email',
-                          hintText: 'Enter your email',
                           keyboardType: TextInputType.emailAddress,
+                          decoration: InputDecoration(
+                            labelText: 'Email',
+                            hintText: 'Enter your email',
+                            prefixIcon: const Icon(Icons.email),
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                          ),
                         ),
-                        const SizedBox(height: 24),
+                        const SizedBox(height: 15),
                         TextField(
                           controller: _passwordController,
                           obscureText: !isPasswordVisible,
@@ -202,9 +207,11 @@ class _LoginScreenState extends State<LoginScreen> {
                             hintText: 'Enter your password',
                             prefixIcon: const Icon(Icons.lock),
                             suffixIcon: IconButton(
-                              icon: Icon(isPasswordVisible
-                                  ? Icons.visibility
-                                  : Icons.visibility_off),
+                              icon: Icon(
+                                isPasswordVisible
+                                    ? Icons.visibility
+                                    : Icons.visibility_off,
+                              ),
                               onPressed: () {
                                 setState(() {
                                   isPasswordVisible = !isPasswordVisible;
@@ -222,14 +229,16 @@ class _LoginScreenState extends State<LoginScreen> {
                           child: ElevatedButton(
                             onPressed: isLoading ? null : handleAuth,
                             style: ElevatedButton.styleFrom(
-                              backgroundColor: const Color.fromRGBO(15, 121, 134, 1),
+                              backgroundColor:
+                                  const Color.fromRGBO(15, 121, 134, 1),
                               padding: const EdgeInsets.symmetric(vertical: 12),
                               shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(8),
                               ),
                             ),
                             child: isLoading
-                                ? const CircularProgressIndicator(color: Colors.white)
+                                ? const CircularProgressIndicator(
+                                    color: Colors.white)
                                 : const Text(
                                     'Sign In',
                                     style: TextStyle(color: Colors.white),
@@ -273,15 +282,18 @@ class _LoginScreenState extends State<LoginScreen> {
                 Center(
                   child: RichText(
                     text: TextSpan(
-                      style: const TextStyle(color: Color.fromRGBO(0, 0, 0, 0.5), fontSize: 16),
+                      style: const TextStyle(
+                          color: Color.fromRGBO(0, 0, 0, 0.5), fontSize: 16),
                       children: [
                         const TextSpan(text: "Don't have an account? "),
                         TextSpan(
                           text: 'Sign Up',
-                          style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.black),
+                          style: const TextStyle(
+                              fontWeight: FontWeight.bold, color: Colors.black),
                           recognizer: TapGestureRecognizer()
                             ..onTap = () {
-                              AutoRouter.of(context).replace(const SignUpRoute());
+                              AutoRouter.of(context)
+                                  .replace(const SignUpRoute());
                             },
                         ),
                       ],

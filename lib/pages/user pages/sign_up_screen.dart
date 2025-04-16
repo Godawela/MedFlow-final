@@ -100,7 +100,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                     fontSize: 16,
                   ),
                 ),
-                const SizedBox(height: 45),
+                const SizedBox(height: 15),
                 GestureDetector(
                   onTap: signInWithGoogle,
                   child: const SocialLoginButton(
@@ -109,7 +109,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                     iconColor: Colors.red,
                   ),
                 ),
-                const SizedBox(height: 31),
+                const SizedBox(height: 15),
                 const SignUpPrompt(),
               ],
             ),
