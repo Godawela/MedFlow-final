@@ -89,7 +89,9 @@ class _SignUpScreenState extends State<SignUpScreen> {
             padding: const EdgeInsets.symmetric(horizontal: 17),
             child: Column(
               children: [
-                const AuthHeader(),
+                const Center(
+                  child: AuthHeader(),
+                ),
                 const SizedBox(height: 26),
                 const AuthForm(),
                 const SizedBox(height: 20),

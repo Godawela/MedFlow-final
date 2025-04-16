@@ -151,11 +151,14 @@ class _LoginScreenState extends State<LoginScreen> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 const SizedBox(height: 11),
-                const CircleAvatar(
+                const Center(
+                  child: CircleAvatar(
                   radius: 33.5,
                   backgroundImage: AssetImage('assets/images/logo.png'),
+                  ),
                 ),
-                const Text(
+                const Center(
+                  child: Text(
                   'Welcome!',
                   style: TextStyle(
                     fontFamily: 'Goblin One',
@@ -163,16 +166,19 @@ class _LoginScreenState extends State<LoginScreen> {
                     color: Colors.black,
                     fontWeight: FontWeight.bold,
                   ),
+                  ),
                 ),
                 const SizedBox(height: 15),
-                const Text(
+                const Center(
+                  child: Text(
                   'Sign in to your account',
                   style: TextStyle(
                     color: Color.fromRGBO(0, 0, 0, 0.5),
                     fontSize: 16,
                   ),
+                  ),
                 ),
-                const SizedBox(height: 46),
+                const SizedBox(height: 30),
                 Form(
                   child: Container(
                     padding: const EdgeInsets.all(24),
