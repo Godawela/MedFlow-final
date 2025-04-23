@@ -28,6 +28,12 @@ class HomeScreen extends StatelessWidget {
                   padding:  const EdgeInsets.only(top: 13),
                   child: Column(
                     children:  [
+                      const Center(
+                  child: CircleAvatar(
+                  radius: 33.5,
+                  backgroundImage: AssetImage('assets/images/logo.png'),
+                  ),
+                ),
                       const UserGreeting(),
                       Align(
                         alignment: Alignment.topRight,

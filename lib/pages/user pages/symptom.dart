@@ -4,6 +4,8 @@ import 'package:http/http.dart' as http;
 import 'dart:convert';
 
 import 'package:med/pages/user%20pages/symptom_details_page.dart';
+import 'package:med/widgets/symptom_button.dart';
+import 'package:med/widgets/user_greetings.dart';
 
 class SymptomPage extends StatefulWidget {
   const SymptomPage({super.key});
@@ -77,14 +79,18 @@ class _SymptomPageState extends State<SymptomPage> {
                         mainAxisAlignment: MainAxisAlignment.center,
                         crossAxisAlignment: CrossAxisAlignment.center,
                         children: [
-                          Text(
-                            'Hi! User',
-                            style: GoogleFonts.goblinOne(
-                              fontSize: 20,
-                              color: Colors.black,
+                         const SizedBox(height: 16),
+                          const Center(
+                            child: CircleAvatar(
+                              radius: 33.5,
+                              backgroundImage:
+                                  AssetImage('assets/images/logo.png'),
                             ),
                           ),
-                          const SizedBox(height: 44),
+                          const SizedBox(height: 13),
+                          // User greeting widget
+                       const UserGreeting(),
+                          const SizedBox(height: 24),
                           Text(
                             'Please select a symptom',
                             style: GoogleFonts.inter(
@@ -127,36 +133,3 @@ class _SymptomPageState extends State<SymptomPage> {
   }
 }
 
-class SymptomButton extends StatelessWidget {
-  final String label;
-  final VoidCallback onTap;
-
-  const SymptomButton({
-    super.key,
-    required this.label,
-    required this.onTap,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return ElevatedButton(
-      onPressed: onTap,
-      style: ElevatedButton.styleFrom(
-        backgroundColor: const Color(0xFF9CE6F6),
-        padding: const EdgeInsets.symmetric(vertical: 14),
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(8),
-        ),
-      ),
-      child: Center(
-        child: Text(
-          label,
-          style: GoogleFonts.inter(
-            fontSize: 20,
-            color: Colors.black,
-          ),
-        ),
-      ),
-    );
-  }
-}
