@@ -21,16 +21,16 @@ abstract class _$AppRouter extends RootStackRouter {
         child: const BottomNavigation(),
       );
     },
-    DeviceListRoute.name: (routeData) {
-      final args = routeData.argsAs<DeviceListRouteArgs>();
-      return AutoRoutePage<dynamic>(
-        routeData: routeData,
-        child: DeviceListPage(
-          key: args.key,
-          category: args.category,
-        ),
-      );
-    },
+    // DeviceListRoute.name: (routeData) {
+    //   final args = routeData.argsAs<DeviceListRouteArgs>();
+    //   return AutoRoutePage<dynamic>(
+    //     routeData: routeData,
+    //     child: DevicePage(
+    //       key: args.key,
+    //       category: args.category.toString(),
+    //     ),
+    //   );
+    // },
     HomeRoute.name: (routeData) {
       return AutoRoutePage<dynamic>(
         routeData: routeData,

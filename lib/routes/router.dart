@@ -2,7 +2,6 @@ import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:med/pages/admin%20pages/home_screen.dart';
 import 'package:med/pages/user%20pages/bottom_nav.dart';
-import 'package:med/pages/user%20pages/device_page.dart';
 import 'package:med/pages/user%20pages/home_screen.dart';
 import 'package:med/pages/user%20pages/login_screen.dart';
 import 'package:med/pages/user%20pages/note_page.dart';
