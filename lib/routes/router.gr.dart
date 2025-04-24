@@ -15,6 +15,12 @@ abstract class _$AppRouter extends RootStackRouter {
 
   @override
   final Map<String, PageFactory> pagesMap = {
+    BottomNavigationRoute.name: (routeData) {
+      return AutoRoutePage<dynamic>(
+        routeData: routeData,
+        child: const BottomNavigation(),
+      );
+    },
     DeviceListRoute.name: (routeData) {
       final args = routeData.argsAs<DeviceListRouteArgs>();
       return AutoRoutePage<dynamic>(
@@ -29,6 +35,12 @@ abstract class _$AppRouter extends RootStackRouter {
       return AutoRoutePage<dynamic>(
         routeData: routeData,
         child: const HomeScreen(),
+      );
+    },
+    HomeRouteAdmin.name: (routeData) {
+      return AutoRoutePage<dynamic>(
+        routeData: routeData,
+        child: const HomeScreenAdmin(),
       );
     },
     LoginRoute.name: (routeData) {
@@ -50,6 +62,20 @@ abstract class _$AppRouter extends RootStackRouter {
       );
     },
   };
+}
+
+/// generated route for
+/// [BottomNavigation]
+class BottomNavigationRoute extends PageRouteInfo<void> {
+  const BottomNavigationRoute({List<PageRouteInfo>? children})
+      : super(
+          BottomNavigationRoute.name,
+          initialChildren: children,
+        );
+
+  static const String name = 'BottomNavigation';
+
+  static const PageInfo<void> page = PageInfo<void>(name);
 }
 
 /// generated route for
@@ -100,6 +126,20 @@ class HomeRoute extends PageRouteInfo<void> {
         );
 
   static const String name = 'HomeRoute';
+
+  static const PageInfo<void> page = PageInfo<void>(name);
+}
+
+/// generated route for
+/// [HomeScreenAdmin]
+class HomeRouteAdmin extends PageRouteInfo<void> {
+  const HomeRouteAdmin({List<PageRouteInfo>? children})
+      : super(
+          HomeRouteAdmin.name,
+          initialChildren: children,
+        );
+
+  static const String name = 'HomeRouteAdmin';
 
   static const PageInfo<void> page = PageInfo<void>(name);
 }

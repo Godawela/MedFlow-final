@@ -150,7 +150,14 @@ class _NotePageState extends State<NotePage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        leading: IconButton(
+    icon: const Icon(Icons.note), 
+    onPressed: () {
+  
+    },
+  ),
         title: const Text('My Notes'),
+         automaticallyImplyLeading: false,
         actions: [
           IconButton(
             icon: const Icon(Icons.delete_forever),
@@ -183,10 +190,14 @@ class _NotePageState extends State<NotePage> {
           ),
         ],
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () => openNoteDialog(),
-        child: const Icon(Icons.add),
-      ),
+      floatingActionButton: Padding(
+  padding: const EdgeInsets.only(bottom: 50.0), // Adjust the position of the button
+  child: FloatingActionButton(
+    onPressed: () => openNoteDialog(),
+    child: const Icon(Icons.add),
+  ),
+),
+
       body: Padding(
         padding: const EdgeInsets.all(12.0),
         child: currentNotes.isEmpty

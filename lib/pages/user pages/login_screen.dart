@@ -59,7 +59,7 @@ class _LoginScreenState extends State<LoginScreen> {
             backgroundColor: Colors.green,
           ),
         );
-        AutoRouter.of(context).push(const HomeRoute());
+        AutoRouter.of(context).push(const BottomNavigationRoute());
       }
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
