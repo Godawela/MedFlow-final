@@ -18,7 +18,7 @@ class DeviceButton extends StatelessWidget {
     return ElevatedButton(
       onPressed: onTap,
       style: ElevatedButton.styleFrom(
-        backgroundColor: const Color(0xFF9CE6F6),
+        backgroundColor:  Colors.white,
         padding: const EdgeInsets.symmetric(vertical: 14),
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(8),

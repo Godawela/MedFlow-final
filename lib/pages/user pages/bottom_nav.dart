@@ -6,6 +6,7 @@ import 'package:med/data/providers.dart';
 import 'package:med/pages/admin%20pages/home_screen.dart';
 import 'package:med/pages/user%20pages/home_screen.dart';
 import 'package:med/pages/user%20pages/note_page.dart';
+import 'package:med/pages/user%20pages/profile_page.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 
@@ -34,6 +35,7 @@ class BottomNavigation extends ConsumerWidget {
           }
         },
       ),
+       ProfilePage(),
       const NotePage(),
       const HomeScreenAdmin(),
     ];
@@ -42,7 +44,7 @@ class BottomNavigation extends ConsumerWidget {
       extendBody: true,
       body: pages[currentIndex],
       bottomNavigationBar: CurvedNavigationBar(
-        color: Colors.blueGrey,
+        color: Colors.lightBlue,
         buttonBackgroundColor: Colors.lightBlue,
         backgroundColor: Colors.transparent,
         animationDuration: const Duration(milliseconds: 200),
@@ -50,6 +52,7 @@ class BottomNavigation extends ConsumerWidget {
         items: const [
           Icon(Icons.home_filled, color:  Colors.white),
           Icon(Icons.person, color: Colors.white),
+          Icon(Icons.note, color: Colors.white),
           Icon(Icons.settings, color: Colors.white),
         ],
 

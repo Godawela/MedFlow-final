@@ -21,16 +21,6 @@ abstract class _$AppRouter extends RootStackRouter {
         child: const BottomNavigation(),
       );
     },
-    // DeviceListRoute.name: (routeData) {
-    //   final args = routeData.argsAs<DeviceListRouteArgs>();
-    //   return AutoRoutePage<dynamic>(
-    //     routeData: routeData,
-    //     child: DevicePage(
-    //       key: args.key,
-    //       category: args.category.toString(),
-    //     ),
-    //   );
-    // },
     HomeRoute.name: (routeData) {
       return AutoRoutePage<dynamic>(
         routeData: routeData,
@@ -55,6 +45,12 @@ abstract class _$AppRouter extends RootStackRouter {
         child: const NotePage(),
       );
     },
+    ProfileRoute.name: (routeData) {
+      return AutoRoutePage<dynamic>(
+        routeData: routeData,
+        child: ProfilePage(),
+      );
+    },
     SignUpRoute.name: (routeData) {
       return AutoRoutePage<dynamic>(
         routeData: routeData,
@@ -76,44 +72,6 @@ class BottomNavigationRoute extends PageRouteInfo<void> {
   static const String name = 'BottomNavigation';
 
   static const PageInfo<void> page = PageInfo<void>(name);
-}
-
-/// generated route for
-/// [DeviceListPage]
-class DeviceListRoute extends PageRouteInfo<DeviceListRouteArgs> {
-  DeviceListRoute({
-    Key? key,
-    required int category,
-    List<PageRouteInfo>? children,
-  }) : super(
-          DeviceListRoute.name,
-          args: DeviceListRouteArgs(
-            key: key,
-            category: category,
-          ),
-          initialChildren: children,
-        );
-
-  static const String name = 'DeviceListRoute';
-
-  static const PageInfo<DeviceListRouteArgs> page =
-      PageInfo<DeviceListRouteArgs>(name);
-}
-
-class DeviceListRouteArgs {
-  const DeviceListRouteArgs({
-    this.key,
-    required this.category,
-  });
-
-  final Key? key;
-
-  final int category;
-
-  @override
-  String toString() {
-    return 'DeviceListRouteArgs{key: $key, category: $category}';
-  }
 }
 
 /// generated route for
@@ -168,6 +126,20 @@ class NoteRoute extends PageRouteInfo<void> {
         );
 
   static const String name = 'NoteRoute';
+
+  static const PageInfo<void> page = PageInfo<void>(name);
+}
+
+/// generated route for
+/// [ProfilePage]
+class ProfileRoute extends PageRouteInfo<void> {
+  const ProfileRoute({List<PageRouteInfo>? children})
+      : super(
+          ProfileRoute.name,
+          initialChildren: children,
+        );
+
+  static const String name = 'ProfileRoute';
 
   static const PageInfo<void> page = PageInfo<void>(name);
 }

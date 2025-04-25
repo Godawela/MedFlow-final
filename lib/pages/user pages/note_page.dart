@@ -157,6 +157,9 @@ class _NotePageState extends State<NotePage> {
     },
   ),
         title: const Text('My Notes'),
+        centerTitle: true,
+        backgroundColor: Colors.transparent,
+        elevation: 0,
          automaticallyImplyLeading: false,
         actions: [
           IconButton(
