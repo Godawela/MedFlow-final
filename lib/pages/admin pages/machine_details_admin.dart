@@ -1,37 +1,53 @@
-import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
+//individual device information page
+
+
 import 'dart:convert';
+import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:http/http.dart' as http;
 
-class SymptomDetailPage extends StatefulWidget {
-  final String symptomName;
 
-  const SymptomDetailPage({super.key, required this.symptomName});
+class MachineDetailPageAdmin extends StatefulWidget {
+  final String machineName;
+
+  const MachineDetailPageAdmin({super.key, required this.machineName});
 
   @override
-  State<SymptomDetailPage> createState() => _SymptomDetailPageState();
+  _MachineDetailPageAdminState createState() => _MachineDetailPageAdminState();
 }
 
-class _SymptomDetailPageState extends State<SymptomDetailPage> {
-  Map<String, dynamic>? symptomDetails;
+class _MachineDetailPageAdminState extends State<MachineDetailPageAdmin> {
+  Map<String, dynamic>? machineDetails;
   bool isLoading = true;
 
   @override
   void initState() {
     super.initState();
-    fetchSymptomDetails();
+    fetchMachineDetails();
   }
 
-  Future<void> fetchSymptomDetails() async {
-    final response = await http.get(Uri.parse('http://10.0.2.2:8000/api/symptoms/name/${widget.symptomName}'));
+  Future<void> fetchMachineDetails() async {
+    final response = await http.get(
+      Uri.parse('http://10.0.2.2:8000/api/devices/name/${widget.machineName}'),
+    );
 
     if (response.statusCode == 200) {
-      final Map<String, dynamic> detail = json.decode(response.body);
-      setState(() {
-        symptomDetails = detail;
-        isLoading = false;
-      });
+      final List<dynamic> decodedResponse = json.decode(response.body);
+
+      if (decodedResponse.isNotEmpty) {
+        setState(() {
+          machineDetails = decodedResponse.first;
+          isLoading = false;
+        });
+      } else {
+        setState(() {
+          isLoading = false;
+        });
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('No machine details found')),
+        );
+      }
     } else {
       setState(() {
         isLoading = false;
@@ -55,19 +71,21 @@ class _SymptomDetailPageState extends State<SymptomDetailPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(widget.symptomName),
+        title: Text(widget.machineName),
         backgroundColor: Colors.transparent,
+        elevation: 0,
+        centerTitle: true,
       ),
       body: isLoading
           ? const Center(child: CircularProgressIndicator())
-          : symptomDetails != null
+          : machineDetails != null
               ? SingleChildScrollView(
-                  padding: const EdgeInsets.all(16),
+                  padding: const EdgeInsets.all(16.0),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        'Name:',
+                        'Category:',
                         style: TextStyle(
                           fontSize: 22,
                           fontWeight: FontWeight.bold,
@@ -76,7 +94,7 @@ class _SymptomDetailPageState extends State<SymptomDetailPage> {
                       ),
                       const SizedBox(height: 5),
                       Text(
-                        symptomDetails!['name'],
+                        machineDetails!['category'],
                         style: GoogleFonts.inter(fontSize: 18),
                       ),
                       const SizedBox(height: 20),
@@ -90,20 +108,34 @@ class _SymptomDetailPageState extends State<SymptomDetailPage> {
                       ),
                       const SizedBox(height: 5),
                       Text(
-                        symptomDetails!['description'],
+                        machineDetails!['description'],
                         style: GoogleFonts.inter(fontSize: 18, height: 1.5),
                       ),
+                      const SizedBox(height: 20),
+                      Text(
+                        'Reference:',
+                        style: TextStyle(
+                          fontSize: 22,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.blueAccent.shade700,
+                        ),
+                      ),
+                      const SizedBox(height: 5),
+                      Text(
+                        machineDetails!['reference'],
+                        style: GoogleFonts.inter(fontSize: 18),
+                      ),
                       const SizedBox(height: 30),
-                      if (symptomDetails!['resourceLink'] != null &&
-                          symptomDetails!['resourceLink'].toString().isNotEmpty)
+                      if (machineDetails!['linkOfResource'] != null)
                         Center(
                           child: ElevatedButton(
                             onPressed: () {
-                              _launchURL(symptomDetails!['resourceLink']);
+                              _launchURL(machineDetails!['linkOfResource']);
                             },
                             style: ElevatedButton.styleFrom(
                               backgroundColor: Colors.blueAccent,
-                              padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 15),
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: 30, vertical: 15),
                               shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(10),
                               ),
@@ -118,7 +150,7 @@ class _SymptomDetailPageState extends State<SymptomDetailPage> {
                     ],
                   ),
                 )
-              : const Center(child: Text('Symptom not found')),
+              : const Center(child: Text('Machine not found')),
     );
   }
 }

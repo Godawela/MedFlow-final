@@ -56,6 +56,7 @@ class _SymptomPageState extends State<SymptomPage> {
       backgroundColor: Colors.white,
       appBar: AppBar(
         title: const Text('Symptoms'),
+        backgroundColor: Colors.transparent,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
           onPressed: () => Navigator.pop(context),
