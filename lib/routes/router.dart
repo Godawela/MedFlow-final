@@ -1,6 +1,7 @@
 import 'package:auto_route/auto_route.dart';
 import 'package:med/pages/admin%20pages/home_screen.dart';
 import 'package:med/pages/user%20pages/bottom_nav.dart';
+import 'package:med/pages/user%20pages/forget_password.dart';
 import 'package:med/pages/user%20pages/home_screen.dart';
 import 'package:med/pages/user%20pages/login_screen.dart';
 import 'package:med/pages/user%20pages/note_page.dart';
@@ -20,5 +21,6 @@ class AppRouter extends _$AppRouter {
     AutoRoute(page: HomeRouteAdmin.page),
     AutoRoute(page: BottomNavigationRoute.page),
     AutoRoute(page: ProfileRoute.page),
+    AutoRoute(page: ForgotPasswordRoute.page),
   ];
 }

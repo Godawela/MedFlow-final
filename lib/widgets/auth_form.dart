@@ -37,8 +37,8 @@ class _AuthFormState extends State<AuthForm> {
       // Send additional user data (name + role) to MongoDB
       await sendToMongoDB(userCredential.user!.uid, email, name, role);
 
-      // Navigate to HomePage if sign-up is successful
-      AutoRouter.of(context).push(const HomeRoute());
+      // Navigate to bottom nav bar if sign-up is successful
+      AutoRouter.of(context).push(const BottomNavigationRoute());
     } catch (e) {
       print('Error during sign-up: $e');
       showErrorSnackBar('Error during sign-up: $e');

@@ -253,7 +253,10 @@ class _LoginScreenState extends State<LoginScreen> {
                         ),
                         const SizedBox(height: 24),
                         TextButton(
-                          onPressed: () {},
+                          onPressed: () {
+                            AutoRouter.of(context)
+                                .replace(const ForgotPasswordRoute());
+                          },
                           child: const Text(
                             'Forgot password?',
                             style: TextStyle(
