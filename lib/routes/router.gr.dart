@@ -21,6 +21,12 @@ abstract class _$AppRouter extends RootStackRouter {
         child: const AddCategoryPage(),
       );
     },
+    AddDeviceRoute.name: (routeData) {
+      return AutoRoutePage<dynamic>(
+        routeData: routeData,
+        child: const AddDevicePage(),
+      );
+    },
     BottomNavigationRoute.name: (routeData) {
       return AutoRoutePage<dynamic>(
         routeData: routeData,
@@ -82,6 +88,20 @@ class AddCategoryRoute extends PageRouteInfo<void> {
         );
 
   static const String name = 'AddCategoryRoute';
+
+  static const PageInfo<void> page = PageInfo<void>(name);
+}
+
+/// generated route for
+/// [AddDevicePage]
+class AddDeviceRoute extends PageRouteInfo<void> {
+  const AddDeviceRoute({List<PageRouteInfo>? children})
+      : super(
+          AddDeviceRoute.name,
+          initialChildren: children,
+        );
+
+  static const String name = 'AddDeviceRoute';
 
   static const PageInfo<void> page = PageInfo<void>(name);
 }

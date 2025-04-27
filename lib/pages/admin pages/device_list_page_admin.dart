@@ -2,23 +2,26 @@
 
 
 import 'dart:ui';
+import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:http/http.dart' as http;
-import 'package:med/pages/user%20pages/machine_details.dart';
+import 'package:med/pages/admin%20pages/machine_details_admin.dart';
 import 'dart:convert';
 
+import 'package:med/routes/router.dart';
 
-class DeviceListPage extends StatefulWidget {
+
+class DeviceListPageAdmin extends StatefulWidget {
   final String category;
 
-  const DeviceListPage({super.key, required this.category});
+  const DeviceListPageAdmin({super.key, required this.category});
 
   @override
-  _DeviceListPageState createState() => _DeviceListPageState();
+  _DeviceListPageAdminState createState() => _DeviceListPageAdminState();
 }
 
-class _DeviceListPageState extends State<DeviceListPage> {
+class _DeviceListPageAdminState extends State<DeviceListPageAdmin> {
   List<dynamic> devices = [];
   bool isLoading = true;
   String? error;
@@ -118,7 +121,7 @@ backgroundColor: Colors.transparent,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                'About This Category',
+                'About Category',
                 style: GoogleFonts.inter(
                   fontSize: 18,
                   fontWeight: FontWeight.bold,
@@ -177,7 +180,7 @@ backgroundColor: Colors.transparent,
                                 Navigator.push(
                                   context,
                                   MaterialPageRoute(
-                                    builder: (context) => MachineDetailPage(
+                                    builder: (context) => MachineDetailPageAdmin(
                                       machineName: device['name'],
                                     ),
                                   ),
@@ -190,6 +193,15 @@ backgroundColor: Colors.transparent,
               ),
             ],
           ),
+          floatingActionButton: FloatingActionButton(
+        onPressed: () {
+          // Add a new machine details
+          context.router.push(const AddDeviceRoute());
+        },
+        backgroundColor: Colors.blue,
+                child: const Icon(Icons.add),
+
+      ),
     );
   }
 }

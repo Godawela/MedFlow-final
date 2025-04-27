@@ -4,9 +4,9 @@ import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:http/http.dart' as http;
+import 'package:med/pages/admin%20pages/device_list_page_admin.dart';
 import 'dart:convert';
 
-import 'package:med/pages/user%20pages/device_list_page.dart';
 import 'package:med/routes/router.dart';
 import 'package:med/widgets/device_button.dart';
 import 'package:med/widgets/user_greetings.dart';
@@ -125,7 +125,7 @@ Future<void> fetchCategories() async {
                                 Navigator.push(
                                   context,
                                   MaterialPageRoute(
-                                    builder: (context) => DeviceListPage(
+                                    builder: (context) => DeviceListPageAdmin(
                                       category: categories[index],
                                     ),
                                   ),
