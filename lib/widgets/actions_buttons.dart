@@ -43,7 +43,7 @@ class ActionButtons extends StatelessWidget {
     return Column(
       children: [
         buildActionButton('Machines', () async {
-          final role = await fetchUserRole(); // 👈 call the API method
+          final role = await fetchUserRole(); 
 
           if (role == 'admin') {
             Navigator.push(

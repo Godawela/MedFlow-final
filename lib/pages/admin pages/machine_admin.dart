@@ -1,11 +1,13 @@
 // Category List Page 
 
+import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 
 import 'package:med/pages/user%20pages/device_list_page.dart';
+import 'package:med/routes/router.dart';
 import 'package:med/widgets/device_button.dart';
 import 'package:med/widgets/user_greetings.dart';
 
@@ -28,31 +30,32 @@ class _MachinePageAdminState extends State<MachinePageAdmin> {
     fetchCategories();
   }
 
-  Future<void> fetchCategories() async {
-    try {
-      final response = await http.get(
-        Uri.parse('http://10.0.2.2:8000/api/categories'),
-      );
+Future<void> fetchCategories() async {
+  try {
+    final response = await http.get(
+      Uri.parse('http://10.0.2.2:8000/api/category'),
+    );
 
-      if (response.statusCode == 200) {
-        final List<dynamic> fetchedCategories = json.decode(response.body);
-        setState(() {
-          categories = fetchedCategories.cast<String>();
-          isLoading = false;
-        });
-      } else {
-        setState(() {
-          error = 'Failed to load categories: ${response.statusCode}';
-          isLoading = false;
-        });
-      }
-    } catch (e) {
+    if (response.statusCode == 200) {
+      final List<dynamic> fetchedCategories = json.decode(response.body);
       setState(() {
-        error = 'Error: $e';
+        categories = fetchedCategories.map((category) => category['name'] as String).toList();
+        isLoading = false;
+      });
+    } else {
+      setState(() {
+        error = 'Failed to load categories: ${response.statusCode}';
         isLoading = false;
       });
     }
+  } catch (e) {
+    setState(() {
+      error = 'Error: $e';
+      isLoading = false;
+    });
   }
+}
+
 
 
 
@@ -140,7 +143,8 @@ class _MachinePageAdminState extends State<MachinePageAdmin> {
 ),
 floatingActionButton: FloatingActionButton(
         onPressed: () {
-          // Add your action here
+          // Add a new machine category
+          context.router.push(const AddCategoryRoute());
         },
         backgroundColor: Colors.blue,
                 child: const Icon(Icons.add),
