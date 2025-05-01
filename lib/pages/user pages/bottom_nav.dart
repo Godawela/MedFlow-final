@@ -37,7 +37,6 @@ class BottomNavigation extends ConsumerWidget {
       ),
        ProfilePage(),
       const NotePage(),
-      const HomeScreenAdmin(),
     ];
 
     return Scaffold(
@@ -53,7 +52,6 @@ class BottomNavigation extends ConsumerWidget {
           Icon(Icons.home_filled, color:  Colors.white),
           Icon(Icons.person, color: Colors.white),
           Icon(Icons.note, color: Colors.white),
-          Icon(Icons.settings, color: Colors.white),
         ],
 
         // Set the current index to the selected index

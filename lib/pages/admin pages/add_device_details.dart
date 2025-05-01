@@ -106,6 +106,8 @@ class _AddDevicePageState extends State<AddDevicePage> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Add New Device'),
+        backgroundColor: Colors.transparent,
+        centerTitle: true,
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),

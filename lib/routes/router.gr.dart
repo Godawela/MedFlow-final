@@ -27,6 +27,12 @@ abstract class _$AppRouter extends RootStackRouter {
         child: const AddDevicePage(),
       );
     },
+    AddSymptomRoute.name: (routeData) {
+      return AutoRoutePage<dynamic>(
+        routeData: routeData,
+        child: const AddSymptomPage(),
+      );
+    },
     BottomNavigationRoute.name: (routeData) {
       return AutoRoutePage<dynamic>(
         routeData: routeData,
@@ -102,6 +108,20 @@ class AddDeviceRoute extends PageRouteInfo<void> {
         );
 
   static const String name = 'AddDeviceRoute';
+
+  static const PageInfo<void> page = PageInfo<void>(name);
+}
+
+/// generated route for
+/// [AddSymptomPage]
+class AddSymptomRoute extends PageRouteInfo<void> {
+  const AddSymptomRoute({List<PageRouteInfo>? children})
+      : super(
+          AddSymptomRoute.name,
+          initialChildren: children,
+        );
+
+  static const String name = 'AddSymptomRoute';
 
   static const PageInfo<void> page = PageInfo<void>(name);
 }

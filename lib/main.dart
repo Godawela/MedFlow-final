@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:med/routes/router.dart';
 
 void main() async {
+    // Gemini.init(apiKey: GEMINI_API_KEY);
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp();
    Future.delayed(const Duration(seconds: 1), () {

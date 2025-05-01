@@ -3,6 +3,7 @@ import 'package:http/http.dart' as http;
 import 'dart:convert';
 
 import 'package:med/pages/admin%20pages/machine_admin.dart';
+import 'package:med/pages/admin%20pages/symptom_admin.dart';
 import 'package:med/pages/user%20pages/machine.dart';
 import 'package:med/pages/user%20pages/symptom.dart';
 import 'package:med/widgets/buildActionButton.dart';
@@ -58,11 +59,20 @@ class ActionButtons extends StatelessWidget {
           }
         }),
         const SizedBox(height: 20),
-        buildActionButton('Symptom', () {
-          Navigator.push(
-            context,
-            MaterialPageRoute(builder: (context) => const SymptomPage()),
-          );
+           buildActionButton('Symptom', () async {
+          final role = await fetchUserRole(); 
+
+          if (role == 'admin') {
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => const SymptomPageAdmin()),
+            );
+          } else {
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => const SymptomPage()),
+            );
+          }
         }),
       ],
     );
