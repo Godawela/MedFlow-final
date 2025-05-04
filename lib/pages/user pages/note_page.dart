@@ -1,5 +1,6 @@
 
 import 'package:auto_route/auto_route.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
@@ -22,23 +23,37 @@ class _NotePageState extends State<NotePage> {
   List<Note> currentNotes = [];
   final String baseUrl = 'http://10.0.2.2:8000/api/notes';
 
-  Future<List<Note>> fetchNotes() async {
-    final response = await http.get(Uri.parse(baseUrl));
-    if (response.statusCode == 200) {
-      final List data = json.decode(response.body);
-      return data.map((note) => Note.fromJson(note)).toList();
-    } else {
-      throw Exception('Failed to load notes');
-    }
+Future<List<Note>> fetchNotes() async {
+ final user = FirebaseAuth.instance.currentUser;
+if (user == null) return [];
+
+final response = await http.get(Uri.parse('$baseUrl/${user.uid}'));
+
+  if (response.statusCode == 200) {
+    final List data = json.decode(response.body);
+    return data.map((note) => Note.fromJson(note)).toList();
+  } else {
+    throw Exception('Failed to load notes');
+  }
+}
+
+
+ Future<void> addNote(String text) async {
+  final user = FirebaseAuth.instance.currentUser;
+  if (user == null) {
+    print('User not logged in');
+    return;
   }
 
-  Future<void> addNote(String text) async {
-    await http.post(
-      Uri.parse(baseUrl),
-      headers: {'Content-Type': 'application/json'},
-      body: jsonEncode({'text': text}),
-    );
-  }
+  final response = await http.post(
+  Uri.parse('$baseUrl/${user.uid}'), 
+  headers: {'Content-Type': 'application/json'},
+  body: jsonEncode({
+    'text': text, 
+  }),
+);
+
+}
 
   Future<void> updateNote(String id, String newText) async {
     await http.put(
@@ -103,7 +118,7 @@ class _NotePageState extends State<NotePage> {
                 if (noteText.isEmpty) return;
 
                 if (noteToUpdate == null) {
-                  await addNote(noteText);
+                  await addNote(noteText); 
                 } else {
                   await updateNote(noteToUpdate.id, noteText);
                 }

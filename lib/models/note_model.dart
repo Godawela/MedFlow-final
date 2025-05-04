@@ -1,19 +1,18 @@
 class Note {
   final String id;
   final String text;
+  final String userId;
 
-  Note({required this.id, required this.text});
+  Note({
+    required this.id,
+    required this.text,
+    required this.userId,
+  });
 
-  factory Note.fromJson(Map<String, dynamic> json) {
-    return Note(
-      id: json['_id'] ?? '',
-      text: json['text'] ?? '',
-    );
-  }
-
-  Map<String, dynamic> toJson() {
-    return {
-      'text': text,
-    };
-  }
+  factory Note.fromJson(Map<String, dynamic> json) => Note(
+    id: json['_id'],
+    text: json['text'],
+    userId: json['userId'],
+  );
 }
+
