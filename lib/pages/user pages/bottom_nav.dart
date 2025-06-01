@@ -4,6 +4,7 @@ import 'package:curved_navigation_bar/curved_navigation_bar.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:med/data/providers.dart';
 import 'package:med/pages/admin%20pages/home_screen.dart';
+import 'package:med/pages/user%20pages/chat_bot.dart';
 import 'package:med/pages/user%20pages/home_screen.dart';
 import 'package:med/pages/user%20pages/note_page.dart';
 import 'package:med/pages/user%20pages/profile_page.dart';
@@ -37,6 +38,7 @@ class BottomNavigation extends ConsumerWidget {
       ),
        ProfilePage(),
       const NotePage(),
+     const ChatBotPage()
     ];
 
     return Scaffold(
@@ -52,6 +54,7 @@ class BottomNavigation extends ConsumerWidget {
           Icon(Icons.home_filled, color:  Colors.white),
           Icon(Icons.person, color: Colors.white),
           Icon(Icons.note, color: Colors.white),
+          Icon(Icons.chat, color: Colors.white),
         ],
 
         // Set the current index to the selected index

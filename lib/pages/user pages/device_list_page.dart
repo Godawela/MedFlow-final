@@ -8,6 +8,8 @@ import 'package:http/http.dart' as http;
 import 'package:med/pages/user%20pages/machine_details.dart';
 import 'dart:convert';
 
+import 'package:med/widgets/appbar.dart';
+
 
 class DeviceListPage extends StatefulWidget {
   final String category;
@@ -83,114 +85,124 @@ Future<void> fetchCategoryDescription() async {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(widget.category),
-backgroundColor: Colors.transparent,
-        elevation: 0,
-        centerTitle: true,
+   return Scaffold(
+  body: Column(
+    children: [
+      CurvedAppBar(
+        title: widget.category,
+        isProfileAvailable: false,
+        showIcon: true,
+        isBack: true,
       ),
-      body: isLoading
-    ? const Center(child: CircularProgressIndicator())
-    : error != null
-        ? Center(child: Text(error!))
-        : Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-           if (categoryDescription != null) ...[
-  Padding(
-    padding: const EdgeInsets.all(16.0),
-    child: ClipRRect(
-      borderRadius: BorderRadius.circular(20.0),
-      child: BackdropFilter(
-        filter: ImageFilter.blur(sigmaX: 10.0, sigmaY: 10.0),
-        child: Container(
-          width: double.infinity,
-          padding: const EdgeInsets.all(16.0),
-          decoration: BoxDecoration(
-            color: Colors.black.withOpacity(0.2),
-            borderRadius: BorderRadius.circular(20.0),
-            border: Border.all(
-              color: Colors.white.withOpacity(0.3),
-            ),
-          ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                'About This Category',
-                style: GoogleFonts.inter(
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.white,
-                ),
-              ),
-              const SizedBox(height: 8),
-              Text(
-                categoryDescription!,
-                style: GoogleFonts.inter(
-                  fontSize: 16,
-                  color: Colors.white,
-                  height: 1.5,
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
-    ),
-  ),
-],
-              Expanded(
-                child: devices.isEmpty
-                    ? Center(
-                        child: Text(
-                          'No devices found in ${widget.category}',
-                          style: GoogleFonts.inter(fontSize: 16),
-                        ),
-                      )
-                    : ListView.builder(
-                        itemCount: devices.length,
-                        itemBuilder: (context, index) {
-                          final device = devices[index];
-                          return Card(
-                            elevation: 4,
-                            margin: const EdgeInsets.all(10),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(12),
-                            ),
-                            child: ListTile(
-                              title: Text(
-                                device['name'],
-                                style: GoogleFonts.inter(
-                                  fontSize: 20,
-                                  fontWeight: FontWeight.bold,
+      Expanded(
+        child: isLoading
+            ? const Center(child: CircularProgressIndicator())
+            : error != null
+                ? Center(child: Text(error!))
+                : Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      if (categoryDescription != null) ...[
+                        Padding(
+                          padding: const EdgeInsets.all(16.0),
+                          child: ClipRRect(
+                            borderRadius: BorderRadius.circular(20.0),
+                            child: BackdropFilter(
+                              filter:
+                                  ImageFilter.blur(sigmaX: 10.0, sigmaY: 10.0),
+                              child: Container(
+                                width: double.infinity,
+                                padding: const EdgeInsets.all(16.0),
+                                decoration: BoxDecoration(
+                                  color: Colors.black.withOpacity(0.2),
+                                  borderRadius: BorderRadius.circular(20.0),
+                                  border: Border.all(
+                                    color: Colors.white.withOpacity(0.3),
+                                  ),
+                                ),
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      'About This Category',
+                                      style: GoogleFonts.inter(
+                                        fontSize: 18,
+                                        fontWeight: FontWeight.bold,
+                                        color: Colors.white,
+                                      ),
+                                    ),
+                                    const SizedBox(height: 8),
+                                    Text(
+                                      categoryDescription!,
+                                      style: GoogleFonts.inter(
+                                        fontSize: 16,
+                                        color: Colors.white,
+                                        height: 1.5,
+                                      ),
+                                    ),
+                                  ],
                                 ),
                               ),
-                              subtitle: Text(
-                                device['reference'] ?? '',
-                                style: GoogleFonts.inter(fontSize: 16),
-                              ),
-                              trailing: const Icon(Icons.arrow_forward_ios,
-                                  color: Colors.blueAccent),
-                              onTap: () {
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder: (context) => MachineDetailPage(
-                                      machineName: device['name'],
-                                    ),
-                                  ),
-                                );
-                              },
                             ),
-                          );
-                        },
+                          ),
+                        ),
+                      ],
+                      Expanded(
+                        child: devices.isEmpty
+                            ? Center(
+                                child: Text(
+                                  'No devices found in ${widget.category}',
+                                  style: GoogleFonts.inter(fontSize: 16),
+                                ),
+                              )
+                            : ListView.builder(
+                                itemCount: devices.length,
+                                itemBuilder: (context, index) {
+                                  final device = devices[index];
+                                  return Card(
+                                    elevation: 4,
+                                    margin: const EdgeInsets.all(10),
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(12),
+                                    ),
+                                    child: ListTile(
+                                      title: Text(
+                                        device['name'],
+                                        style: GoogleFonts.inter(
+                                          fontSize: 20,
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                      ),
+                                      subtitle: Text(
+                                        device['reference'] ?? '',
+                                        style:
+                                            GoogleFonts.inter(fontSize: 16),
+                                      ),
+                                      trailing: const Icon(
+                                        Icons.arrow_forward_ios,
+                                        color: Colors.blueAccent,
+                                      ),
+                                      onTap: () {
+                                        Navigator.push(
+                                          context,
+                                          MaterialPageRoute(
+                                            builder: (context) =>
+                                                MachineDetailPage(
+                                              machineName: device['name'],
+                                            ),
+                                          ),
+                                        );
+                                      },
+                                    ),
+                                  );
+                                },
+                              ),
                       ),
-              ),
-            ],
-          ),
-    );
+                    ],
+                  ),
+      ),
+    ],
+  ),
+);
   }
 }
-

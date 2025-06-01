@@ -1,165 +1,148 @@
-// import 'dart:io';
-// import 'dart:typed_data';
+import 'package:dialog_flowtter/dialog_flowtter.dart';
+import 'package:flutter/material.dart';
 
-// import 'package:dash_chat_2/dash_chat_2.dart';
-// import 'package:flutter/material.dart';
-// import 'package:flutter_gemini/flutter_gemini.dart';
-// import 'package:image_picker/image_picker.dart';
-// import 'package:speech_to_text/speech_to_text.dart' as stt;
+class ChatBotPage extends StatefulWidget {
+  const ChatBotPage({super.key});
 
+  @override
+  State<ChatBotPage> createState() => _ChatBotPageState();
+}
 
+class _ChatBotPageState extends State<ChatBotPage> {
+  late DialogFlowtter dialogFlowtter;
+  final TextEditingController _messageController = TextEditingController();
+  final ScrollController _scrollController = ScrollController();
 
-// class ChatBot extends StatefulWidget {
-//   const ChatBot({super.key});
+  List<Map<String, dynamic>> messages = [];
 
-//   @override
-//   State<ChatBot> createState() => _ChatBotState();
-// }
+  @override
+  void initState() {
+    super.initState();
+    initDialogFlow();
+  }
 
-// class _ChatBotState extends State<ChatBot> {
-//   final Gemini gemini = Gemini.instance;
-//   final stt.SpeechToText _speech = stt.SpeechToText();
+  Future<void> initDialogFlow() async {
+    dialogFlowtter = await DialogFlowtter.fromFile(
+      path: 'assets/dialogflow_auth.json',
+    );
+  }
 
+  void sendMessage(String text) async {
+    if (text.trim().isEmpty) return;
 
-//   List<ChatMessage> messages = [];
+    setState(() {
+      messages.add({'message': {'text': [text]}, 'isUser': true});
+    });
 
-//   ChatUser currentUser = ChatUser(id: "0", firstName: "User");
-//   ChatUser geminiUser = ChatUser(
-//     id: "1",
-//     firstName: "Med",
-//   );
-//   bool _isListening = false;
-//   String _voiceInput = "";
+    _messageController.clear();
 
-//   @override
-//   Widget build(BuildContext context) {
-//     return Scaffold(
-//       appBar: AppBar(
-//         centerTitle: true,
-//         title: const Text(
-//           "Med Flow ChatBot",
-//         ),
-//       ),
-//       body: _buildUI(),
-//     );
-//   }
+    final response = await dialogFlowtter.detectIntent(
+      queryInput: QueryInput(text: TextInput(text: text)),
+    );
 
-//   Widget _buildUI() {
-//     return DashChat(
-//       inputOptions: InputOptions(trailing: [
-//         IconButton(
-//           icon: const Icon(Icons.mic),
-//          onPressed: _isListening ? _stopListening : _startListening,
-//           ),
-//         IconButton(
-//           onPressed: _sendMediaMessage,
-//           icon: const Icon(
-//             Icons.image,
-//           ),
-//         )
-//       ]),
-//       currentUser: currentUser,
-//       onSend: _sendMessage,
-//       messages: messages,
-//     );
-//   }
+    if (response.message != null) {
+      setState(() {
+        messages.add({'message': response.message!.toJson(), 'isUser': false});
+      });
 
-//   void _sendMessage(ChatMessage chatMessage) {
-//     setState(() {
-//       messages = [chatMessage, ...messages];
-//     });
-//     try {
-//       String question = chatMessage.text;
-//       List<Uint8List>? images;
-//       if (chatMessage.medias?.isNotEmpty ?? false) {
-//         images = [
-//           File(chatMessage.medias!.first.url).readAsBytesSync(),
-//         ];
-//       }
-//       gemini
-//           .streamGenerateContent(
-//         question,
-//         images: images,
-//       )
-//           .listen((event) {
-//         ChatMessage? lastMessage = messages.firstOrNull;
-//         if (lastMessage != null && lastMessage.user == geminiUser) {
-//           lastMessage = messages.removeAt(0);
-//           String response = event.content?.parts?.fold(
-//                   "", (previous, current) => "$previous ${current.text}") ??
-//               "";
-//           lastMessage.text += response;
-//           setState(
-//             () {
-//               messages = [lastMessage!, ...messages];
-//             },
-//           );
-//         } else {
-//           String response = event.content?.parts?.fold(
-//                   "", (previous, current) => "$previous ${current.text}") ??
-//               "";
-//           ChatMessage message = ChatMessage(
-//             user: geminiUser,
-//             createdAt: DateTime.now(),
-//             text: response,
-//           );
-//           setState(() {
-//             messages = [message, ...messages];
-//           });
-//         }
-//       });
-//     } catch (e) {
-//       print(e);
-//     }
-//   }
+      // Scroll to bottom after new message
+      Future.delayed(Duration(milliseconds: 300), () {
+        _scrollController.animateTo(
+          _scrollController.position.maxScrollExtent,
+          duration: Duration(milliseconds: 300),
+          curve: Curves.easeOut,
+        );
+      });
+    }
+  }
 
-//   void _sendMediaMessage() async {
-//     ImagePicker picker = ImagePicker();
-//     XFile? file = await picker.pickImage(
-//       source: ImageSource.gallery,
-//     );
-//     if (file != null) {
-//       print("Picked image: ${file.path}");
-//       ChatMessage chatMessage = ChatMessage(
-//         user: currentUser,
-//         createdAt: DateTime.now(),
-//         text: "Describe this picture?",
-//         medias: [
-//           ChatMedia(
-//             url: file.path,
-//             fileName: "",
-//             type: MediaType.image,
-//           )
-//         ],
-//       );
-//       _sendMessage(chatMessage);
-//     }
-//   }
-  
-//    void _startListening() async {
-//     bool available = await _speech.initialize();
-//     if (available) {
-//       setState(() => _isListening = true);
-//       _speech.listen(
-//         onResult: (result) {
-//           setState(() => _voiceInput = result.recognizedWords);
-//           if (!_speech.isListening) {
-//             // Send the recognized words as a chat message
-//             ChatMessage voiceMessage = ChatMessage(
-//               user: currentUser,
-//               createdAt: DateTime.now(),
-//               text: _voiceInput,
-//             );
-//             _sendMessage(voiceMessage);
-//           }
-//         },
-//       );
-//     }
-//   }
+  @override
+  void dispose() {
+    dialogFlowtter.dispose();
+    _messageController.dispose();
+    _scrollController.dispose();
+    super.dispose();
+  }
 
-//   void _stopListening() {
-//     _speech.stop();
-//     setState(() => _isListening = false);
-//   }
+  Widget _buildMessage(Map<String, dynamic> message) {
+    final isUser = message['isUser'] as bool;
+    final text = message['message']['text'][0];
 
-// }
+    return Align(
+      alignment: isUser ? Alignment.centerRight : Alignment.centerLeft,
+      child: Container(
+        margin: const EdgeInsets.symmetric(vertical: 6, horizontal: 12),
+        padding: const EdgeInsets.all(14),
+        decoration: BoxDecoration(
+          color: isUser ? Colors.teal[400] : Colors.grey[300],
+          borderRadius: BorderRadius.only(
+            topLeft: const Radius.circular(12),
+            topRight: const Radius.circular(12),
+            bottomLeft: Radius.circular(isUser ? 12 : 0),
+            bottomRight: Radius.circular(isUser ? 0 : 12),
+          ),
+        ),
+        child: Text(
+          text,
+          style: TextStyle(color: isUser ? Colors.white : Colors.black87),
+        ),
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return SafeArea(
+      child: Scaffold(
+        backgroundColor: Colors.grey[100],
+        appBar: AppBar(
+          title: const Text('ChatBot'),
+          backgroundColor: Colors.teal,
+        ),
+        body: Column(
+          children: [
+            Expanded(
+              child: ListView.builder(
+                controller: _scrollController,
+                padding: const EdgeInsets.only(bottom: 10),
+                itemCount: messages.length,
+                itemBuilder: (context, index) => _buildMessage(messages[index]),
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.fromLTRB(10, 0, 10, 10),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: TextField(
+                      controller: _messageController,
+                      textInputAction: TextInputAction.send,
+                      onSubmitted: sendMessage,
+                      decoration: InputDecoration(
+                        hintText: 'Type your message...',
+                        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                        filled: true,
+                        fillColor: Colors.white,
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(30),
+                        ),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  CircleAvatar(
+                    backgroundColor: Colors.teal,
+                    child: IconButton(
+                      icon: const Icon(Icons.send, color: Colors.white),
+                      onPressed: () => sendMessage(_messageController.text),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}

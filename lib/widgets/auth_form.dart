@@ -19,7 +19,7 @@ class _AuthFormState extends State<AuthForm> {
   final TextEditingController _nameController = TextEditingController();
   bool isLoading = false;
   bool isPasswordVisible = false;
-  String _selectedRole = 'student'; // default role
+  String _selectedRole = 'student'; // default role (you can hard-code the role if needed)
 
   // Function to handle user sign-up with Firebase Authentication
   Future<void> signUpUser(String email, String password, String name, String role) async {
@@ -103,75 +103,58 @@ class _AuthFormState extends State<AuthForm> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             TextField(
-  controller: _emailController,
-  keyboardType: TextInputType.emailAddress,
-  decoration: InputDecoration(
-    labelText: 'Email',
-    hintText: 'Enter your email',
-    prefixIcon: const Icon(Icons.email),
-    border: OutlineInputBorder(
-      borderRadius: BorderRadius.circular(12),
-    ),
-  ),
-),
-const SizedBox(height: 15),
-
-TextField(
-  controller: _passwordController,
-  obscureText: !isPasswordVisible,
-  decoration: InputDecoration(
-    labelText: 'Password',
-    hintText: 'Enter your password',
-    prefixIcon: const Icon(Icons.lock),
-    suffixIcon: IconButton(
-      icon: Icon(
-        isPasswordVisible ? Icons.visibility : Icons.visibility_off,
-      ),
-      onPressed: () {
-        setState(() {
-          isPasswordVisible = !isPasswordVisible;
-        });
-      },
-    ),
-    border: OutlineInputBorder(
-      borderRadius: BorderRadius.circular(12),
-    ),
-  ),
-),
-const SizedBox(height: 15),
-
- TextField(
-  controller: _nameController,
-  keyboardType: TextInputType.text,
-  decoration: InputDecoration(
-    labelText: 'Name',
-    hintText: 'Enter your Name',
-    prefixIcon: const Icon(Icons.person),
-    border: OutlineInputBorder(
-      borderRadius: BorderRadius.circular(12),
-    ),
-  ),
-),
-const SizedBox(height: 15),
-            // Dropdown for role
-            DropdownButtonFormField<String>(
-              value: _selectedRole,
-              decoration: const InputDecoration(
-                labelText: 'Role',
-                border: OutlineInputBorder(),
+              controller: _emailController,
+              keyboardType: TextInputType.emailAddress,
+              decoration: InputDecoration(
+                labelText: 'Email',
+                hintText: 'Enter your email',
+                prefixIcon: const Icon(Icons.email),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
               ),
-              items: <String>['admin', 'student']
-                  .map((role) => DropdownMenuItem(
-                        value: role,
-                        child: Text(role[0].toUpperCase() + role.substring(1)),
-                      ))
-                  .toList(),
-              onChanged: (value) {
-                setState(() {
-                  _selectedRole = value!;
-                });
-              },
             ),
+            const SizedBox(height: 15),
+
+            TextField(
+              controller: _passwordController,
+              obscureText: !isPasswordVisible,
+              decoration: InputDecoration(
+                labelText: 'Password',
+                hintText: 'Enter your password',
+                prefixIcon: const Icon(Icons.lock),
+                suffixIcon: IconButton(
+                  icon: Icon(
+                    isPasswordVisible ? Icons.visibility : Icons.visibility_off,
+                  ),
+                  onPressed: () {
+                    setState(() {
+                      isPasswordVisible = !isPasswordVisible;
+                    });
+                  },
+                ),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+              ),
+            ),
+            const SizedBox(height: 15),
+
+            TextField(
+              controller: _nameController,
+              keyboardType: TextInputType.text,
+              decoration: InputDecoration(
+                labelText: 'Name',
+                hintText: 'Enter your Name',
+                prefixIcon: const Icon(Icons.person),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+              ),
+            ),
+            const SizedBox(height: 15),
+
+            // Removed the role selection dropdown
 
             const SizedBox(height: 15),
             SizedBox(
