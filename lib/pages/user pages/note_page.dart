@@ -189,38 +189,75 @@ class _NotePageState extends State<NotePage> {
     return Scaffold(
       body: Column(
         children: [
-          // Custom Curved AppBar with integrated delete button
-          Stack(
-            children: [
-              CurvedAppBar(
-                title: 'My Notes',
-                subtitle: '${currentNotes.length} notes',
-                isProfileAvailable: false,
-                showIcon: false, // Hide the logo to make space for delete button
-              ),
-              // Delete button positioned on the curved app bar
-              Positioned(
-                top: 45,
-                right: 20,
-                child: IconButton(
-                  icon: const Icon(
-                    Icons.delete_forever,
-                    color: Colors.white,
-                    size: 28,
-                  ),
-                  onPressed: confirmDeleteAll,
-                ),
-              ),
-            ],
+          // Clean AppBar without delete button
+          CurvedAppBar(
+            title: 'My Notes',
+            subtitle: '${currentNotes.length} notes',
+            isProfileAvailable: false,
+            showIcon: true, // Show the logo again
           ),
+          
+          // Notes list header with delete all option (only shows when there are notes)
+          if (currentNotes.isNotEmpty)
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    'Your Notes',
+                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                  TextButton.icon(
+                    onPressed: confirmDeleteAll,
+                    icon: const Icon(Icons.delete_sweep, color: Colors.red, size: 20),
+                    label: const Text(
+                      'Delete All',
+                      style: TextStyle(color: Colors.red),
+                    ),
+                    style: TextButton.styleFrom(
+                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+                    ),
+                  ),
+                ],
+              ),
+            ),
           
           // Main content area
           Expanded(
             child: Padding(
-              padding: const EdgeInsets.all(12.0),
+              padding: const EdgeInsets.symmetric(horizontal: 12.0),
               child: currentNotes.isEmpty
-                  ? const Center(child: Text('No notes yet. Tap + to add one!'))
+                  ? const Center(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(
+                            Icons.note_add,
+                            size: 64,
+                            color: Colors.grey,
+                          ),
+                          SizedBox(height: 16),
+                          Text(
+                            'No notes yet',
+                            style: TextStyle(
+                              fontSize: 18,
+                              fontWeight: FontWeight.w500,
+                              color: Colors.grey,
+                            ),
+                          ),
+                          SizedBox(height: 8),
+                          Text(
+                            'Tap the + button to create your first note!',
+                            style: TextStyle(color: Colors.grey),
+                          ),
+                        ],
+                      ),
+                    )
                   : ListView.builder(
+                      padding: const EdgeInsets.only(bottom: 80),
                       itemCount: currentNotes.length,
                       itemBuilder: (context, index) {
                         final note = currentNotes[index];

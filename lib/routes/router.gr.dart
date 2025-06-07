@@ -51,12 +51,7 @@ abstract class _$AppRouter extends RootStackRouter {
         child: const HomeScreen(),
       );
     },
-    HomeRouteAdmin.name: (routeData) {
-      return AutoRoutePage<dynamic>(
-        routeData: routeData,
-        child: const HomeScreenAdmin(),
-      );
-    },
+ 
     LoginRoute.name: (routeData) {
       return AutoRoutePage<dynamic>(
         routeData: routeData,
@@ -168,19 +163,7 @@ class HomeRoute extends PageRouteInfo<void> {
   static const PageInfo<void> page = PageInfo<void>(name);
 }
 
-/// generated route for
-/// [HomeScreenAdmin]
-class HomeRouteAdmin extends PageRouteInfo<void> {
-  const HomeRouteAdmin({List<PageRouteInfo>? children})
-      : super(
-          HomeRouteAdmin.name,
-          initialChildren: children,
-        );
 
-  static const String name = 'HomeRouteAdmin';
-
-  static const PageInfo<void> page = PageInfo<void>(name);
-}
 
 /// generated route for
 /// [LoginScreen]
