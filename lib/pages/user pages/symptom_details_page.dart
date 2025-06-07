@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:med/widgets/appbar.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class SymptomDetailPage extends StatefulWidget {
@@ -54,11 +55,19 @@ class _SymptomDetailPageState extends State<SymptomDetailPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text(widget.symptomName),
-        backgroundColor: Colors.transparent,
-      ),
-      body: isLoading
+     body: Column(
+        children: [
+          // CurvedAppBar at the top
+           CurvedAppBar(
+            title: widget.symptomName,
+            isProfileAvailable: false,
+            showIcon: true,
+            isBack: true,
+          ),
+          
+          // Main content below the app bar with negative margin to overlap
+          Expanded(
+            child: isLoading
           ? const Center(child: CircularProgressIndicator())
           : symptomDetails != null
               ? SingleChildScrollView(
@@ -119,6 +128,9 @@ class _SymptomDetailPageState extends State<SymptomDetailPage> {
                   ),
                 )
               : const Center(child: Text('Symptom not found')),
+    ),
+        ],
+      ),
     );
   }
 }

@@ -4,6 +4,7 @@ import 'package:http/http.dart' as http;
 import 'dart:convert';
 
 import 'package:med/pages/user%20pages/symptom_details_page.dart';
+import 'package:med/widgets/appbar.dart';
 import 'package:med/widgets/symptom_button.dart';
 import 'package:med/widgets/user_greetings.dart';
 
@@ -54,15 +55,19 @@ class _SymptomPageState extends State<SymptomPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
-      appBar: AppBar(
-        title: const Text('Symptoms'),
-        backgroundColor: Colors.transparent,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
-          onPressed: () => Navigator.pop(context),
-        ),
-      ),
-      body: SafeArea(
+      body: Column(
+        children: [
+          // CurvedAppBar at the top
+          const CurvedAppBar(
+            title: 'Symptoms',
+            isProfileAvailable: false,
+            showIcon: true,
+            isBack: true,
+          ),
+          
+          // Main content below the app bar with negative margin to overlap
+          Expanded(
+            child: SafeArea(
         child: Center(
           child: Padding(
             padding: const EdgeInsets.all(16.0),
@@ -130,6 +135,9 @@ class _SymptomPageState extends State<SymptomPage> {
           ),
         ),
       ),
+    )
+      ],
+    )
     );
   }
 }
