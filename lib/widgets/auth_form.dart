@@ -87,105 +87,127 @@ class _AuthFormState extends State<AuthForm> {
     );
   }
 
-  @override
+   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
     return Form(
-      child: Container(
-        padding: const EdgeInsets.all(24),
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(8),
-          border: Border.all(
-            color: const Color.fromRGBO(217, 217, 217, 1),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          _buildTextField(
+            controller: _nameController,
+            label: 'Full Name',
+            icon: Icons.person_outline,
           ),
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            TextField(
-              controller: _emailController,
-              keyboardType: TextInputType.emailAddress,
-              decoration: InputDecoration(
-                labelText: 'Email',
-                hintText: 'Enter your email',
-                prefixIcon: const Icon(Icons.email),
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12),
-                ),
-              ),
-            ),
-            const SizedBox(height: 15),
-
-            TextField(
-              controller: _passwordController,
-              obscureText: !isPasswordVisible,
-              decoration: InputDecoration(
-                labelText: 'Password',
-                hintText: 'Enter your password',
-                prefixIcon: const Icon(Icons.lock),
-                suffixIcon: IconButton(
-                  icon: Icon(
-                    isPasswordVisible ? Icons.visibility : Icons.visibility_off,
-                  ),
-                  onPressed: () {
-                    setState(() {
-                      isPasswordVisible = !isPasswordVisible;
-                    });
-                  },
-                ),
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12),
-                ),
-              ),
-            ),
-            const SizedBox(height: 15),
-
-            TextField(
-              controller: _nameController,
-              keyboardType: TextInputType.text,
-              decoration: InputDecoration(
-                labelText: 'Name',
-                hintText: 'Enter your Name',
-                prefixIcon: const Icon(Icons.person),
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12),
-                ),
-              ),
-            ),
-            const SizedBox(height: 15),
-
-            // Removed the role selection dropdown
-
-            const SizedBox(height: 15),
-            SizedBox(
-              width: double.infinity,
-              child: ElevatedButton(
-                onPressed: isLoading
-                    ? null
-                    : () {
-                        String email = _emailController.text.trim();
-                        String password = _passwordController.text.trim();
-                        String name = _nameController.text.trim();
-                        signUpUser(email, password, name, _selectedRole);
-                      },
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color.fromRGBO(15, 121, 134, 1),
-                  padding: const EdgeInsets.symmetric(vertical: 12),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                ),
-                child: isLoading
-                    ? const CircularProgressIndicator(color: Colors.white)
-                    : const Text(
-                        'Sign Up',
-                        style: TextStyle(color: Colors.white),
-                      ),
-              ),
-            ),
-          ],
-        ),
+          const SizedBox(height: 16),
+          _buildTextField(
+            controller: _emailController,
+            label: 'Email',
+            icon: Icons.email_outlined,
+            keyboardType: TextInputType.emailAddress,
+          ),
+          const SizedBox(height: 16),
+          _buildPasswordField(),
+          const SizedBox(height: 24),
+          _buildSignUpButton(theme),
+        ],
       ),
     );
+  }
+
+  Widget _buildTextField({
+    required TextEditingController controller,
+    required String label,
+    required IconData icon,
+    TextInputType keyboardType = TextInputType.text,
+  }) {
+    return TextField(
+      controller: controller,
+      keyboardType: keyboardType,
+      decoration: InputDecoration(
+        labelText: label,
+        prefixIcon: Icon(icon),
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: BorderSide(color: Colors.grey.shade300),
+        ),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: BorderSide(color: Colors.grey.shade300),
+        ),
+        filled: true,
+        fillColor: Colors.grey.shade50,
+      ),
+    );
+  }
+
+  Widget _buildPasswordField() {
+    return TextField(
+      controller: _passwordController,
+      obscureText: !isPasswordVisible,
+      decoration: InputDecoration(
+        labelText: 'Password',
+        prefixIcon: const Icon(Icons.lock_outline),
+        suffixIcon: IconButton(
+          icon: Icon(
+            isPasswordVisible ? Icons.visibility : Icons.visibility_off,
+            color: Colors.grey.shade600,
+          ),
+          onPressed: () => setState(() => isPasswordVisible = !isPasswordVisible),
+        ),
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: BorderSide(color: Colors.grey.shade300),
+        ),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: BorderSide(color: Colors.grey.shade300),
+        ),
+        filled: true,
+        fillColor: Colors.grey.shade50,
+      ),
+    );
+  }
+
+ Widget _buildSignUpButton(ThemeData theme) {
+  return SizedBox(
+    width: double.infinity,
+    height: 50,
+    child: ElevatedButton(
+      onPressed: isLoading ? null : _handleSignUp,
+      style: ElevatedButton.styleFrom(
+        backgroundColor: theme.primaryColor,
+        foregroundColor: Colors.white, // Add this line for text color
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(12),
+        ),
+        elevation: 0,
+      ),
+      child: isLoading
+          ? const CircularProgressIndicator(color: Colors.white)
+          : const Text(
+              'Create Account',
+              style: TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.w600,
+                color: Colors.white, // Explicit white color as fallback
+              ),
+            ),
+    ),
+  );
+}
+
+  void _handleSignUp() {
+    final email = _emailController.text.trim();
+    final password = _passwordController.text.trim();
+    final name = _nameController.text.trim();
+    
+    if (email.isEmpty || password.isEmpty || name.isEmpty) {
+      showErrorSnackBar('Please fill all fields');
+      return;
+    }
+    
+    signUpUser(email, password, name, _selectedRole);
   }
 }

@@ -8,29 +8,25 @@ class SignUpPrompt extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final TapGestureRecognizer tapGestureRecognizer = TapGestureRecognizer()
-      ..onTap = () {
-        AutoRouter.of(context).replace(const LoginRoute());
-      };
-
     return RichText(
       text: TextSpan(
-        text: "Already have an account? ",
-        style: const TextStyle(
-          color: Color.fromRGBO(0, 0, 0, 0.5),
+        style: TextStyle(
+          color: Colors.grey.shade600,
           fontSize: 16,
         ),
         children: [
+          const TextSpan(text: "Already have an account? "),
           TextSpan(
             text: 'Sign In',
-            style: const TextStyle(
+            style: TextStyle(
               fontWeight: FontWeight.bold,
-              color: Colors.black,
+              color: Theme.of(context).primaryColor,
             ),
-            recognizer: tapGestureRecognizer,
+            recognizer: TapGestureRecognizer()
+              ..onTap = () => AutoRouter.of(context).replace(const LoginRoute()),
           ),
         ],
-      )
+      ),
     );
   }
 }

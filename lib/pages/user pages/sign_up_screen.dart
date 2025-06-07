@@ -82,42 +82,61 @@ class _SignUpScreenState extends State<SignUpScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: Colors.grey.shade50,
       body: SingleChildScrollView(
         child: SafeArea(
           child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 17),
+            padding: const EdgeInsets.symmetric(horizontal: 24),
             child: Column(
               children: [
-                const Center(
-                  child: AuthHeader(),
-                ),
-                const SizedBox(height: 26),
+                const SizedBox(height: 40),
+                const AuthHeader(),
+                const SizedBox(height: 32),
                 const AuthForm(),
-                const SizedBox(height: 20),
-                const Text(
-                  'Or continue with social account',
-                  style: TextStyle(
-                    color: Color.fromRGBO(0, 0, 0, 0.5),
-                    fontSize: 16,
-                  ),
-                ),
-                const SizedBox(height: 15),
-                GestureDetector(
-                  onTap: signInWithGoogle,
-                  child: const SocialLoginButton(
-                    icon: FontAwesomeIcons.google,
-                    text: 'Google',
-                    iconColor: Colors.red,
-                  ),
-                ),
-                const SizedBox(height: 15),
+                const SizedBox(height: 24),
+                _buildDividerWithText('Or continue with'),
+                const SizedBox(height: 16),
+                _buildSocialButtons(),
+                const SizedBox(height: 24),
                 const SignUpPrompt(),
+                const SizedBox(height: 20),
               ],
             ),
           ),
         ),
       ),
+    );
+  }
+
+  Widget _buildDividerWithText(String text) {
+    return Row(
+      children: [
+        const Expanded(child: Divider()),
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 8),
+          child: Text(
+            text,
+            style: TextStyle(
+              color: Colors.grey.shade600,
+              fontSize: 14,
+            ),
+          ),
+        ),
+        const Expanded(child: Divider()),
+      ],
+    );
+  }
+
+  Widget _buildSocialButtons() {
+    return Column(
+      children: [
+        SocialLoginButton(
+          icon: FontAwesomeIcons.google,
+          text: 'Continue with Google',
+          iconColor: Colors.red,
+          onPressed: signInWithGoogle,
+        ),
+      ],
     );
   }
 }

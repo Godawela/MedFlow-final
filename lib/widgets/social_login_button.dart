@@ -4,20 +4,20 @@ class SocialLoginButton extends StatelessWidget {
   final IconData icon;
   final String text;
   final Color iconColor;
-  final VoidCallback? onPressed; // 👈 New parameter
+  final VoidCallback? onPressed; 
 
   const SocialLoginButton({
     super.key,
     required this.icon,
     required this.text,
     this.iconColor = Colors.black,
-    this.onPressed, // 👈 Assign it here
+    this.onPressed, 
   });
 
   @override
   Widget build(BuildContext context) {
     return InkWell(
-      onTap: onPressed, // 👈 Make button tappable
+      onTap: onPressed, // Make button tappable
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 21, vertical: 16),
         decoration: BoxDecoration(
