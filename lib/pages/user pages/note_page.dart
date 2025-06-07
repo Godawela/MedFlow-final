@@ -1,4 +1,3 @@
-
 import 'package:auto_route/auto_route.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
@@ -6,8 +5,7 @@ import 'package:http/http.dart' as http;
 import 'dart:convert';
 
 import 'package:med/models/note_model.dart';
-
-
+import 'package:med/widgets/appbar.dart';
 
 @RoutePage()
 class NotePage extends StatefulWidget {
@@ -23,37 +21,35 @@ class _NotePageState extends State<NotePage> {
   List<Note> currentNotes = [];
   final String baseUrl = 'http://10.0.2.2:8000/api/notes';
 
-Future<List<Note>> fetchNotes() async {
- final user = FirebaseAuth.instance.currentUser;
-if (user == null) return [];
+  Future<List<Note>> fetchNotes() async {
+    final user = FirebaseAuth.instance.currentUser;
+    if (user == null) return [];
 
-final response = await http.get(Uri.parse('$baseUrl/${user.uid}'));
+    final response = await http.get(Uri.parse('$baseUrl/${user.uid}'));
 
-  if (response.statusCode == 200) {
-    final List data = json.decode(response.body);
-    return data.map((note) => Note.fromJson(note)).toList();
-  } else {
-    throw Exception('Failed to load notes');
-  }
-}
-
-
- Future<void> addNote(String text) async {
-  final user = FirebaseAuth.instance.currentUser;
-  if (user == null) {
-    print('User not logged in');
-    return;
+    if (response.statusCode == 200) {
+      final List data = json.decode(response.body);
+      return data.map((note) => Note.fromJson(note)).toList();
+    } else {
+      throw Exception('Failed to load notes');
+    }
   }
 
-  final response = await http.post(
-  Uri.parse('$baseUrl/${user.uid}'), 
-  headers: {'Content-Type': 'application/json'},
-  body: jsonEncode({
-    'text': text, 
-  }),
-);
+  Future<void> addNote(String text) async {
+    final user = FirebaseAuth.instance.currentUser;
+    if (user == null) {
+      print('User not logged in');
+      return;
+    }
 
-}
+    final response = await http.post(
+      Uri.parse('$baseUrl/${user.uid}'),
+      headers: {'Content-Type': 'application/json'},
+      body: jsonEncode({
+        'text': text,
+      }),
+    );
+  }
 
   Future<void> updateNote(String id, String newText) async {
     await http.put(
@@ -68,7 +64,7 @@ final response = await http.get(Uri.parse('$baseUrl/${user.uid}'));
   }
 
   Future<void> deleteAllNotes() async {
-     await http.delete(Uri.parse(baseUrl));
+    await http.delete(Uri.parse(baseUrl));
   }
 
   @override
@@ -118,7 +114,7 @@ final response = await http.get(Uri.parse('$baseUrl/${user.uid}'));
                 if (noteText.isEmpty) return;
 
                 if (noteToUpdate == null) {
-                  await addNote(noteText); 
+                  await addNote(noteText);
                 } else {
                   await updateNote(noteToUpdate.id, noteText);
                 }
@@ -161,90 +157,104 @@ final response = await http.get(Uri.parse('$baseUrl/${user.uid}'));
     );
   }
 
+  void confirmDeleteAll() {
+    if (currentNotes.isNotEmpty) {
+      showDialog(
+        context: context,
+        builder: (context) => AlertDialog(
+          title: const Text("Delete All Notes"),
+          content: const Text("Are you sure you want to delete ALL notes?"),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text("Cancel"),
+            ),
+            ElevatedButton(
+              onPressed: () async {
+                await deleteAllNotes();
+                currentNotes = await fetchNotes();
+                setState(() {});
+                Navigator.pop(context);
+              },
+              child: const Text("Delete All"),
+            ),
+          ],
+        ),
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        leading: IconButton(
-    icon: const Icon(Icons.note), 
-    onPressed: () {
-  
-    },
-  ),
-        title: const Text('My Notes'),
-        centerTitle: true,
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-         automaticallyImplyLeading: false,
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.delete_forever),
-            onPressed: () {
-              if (currentNotes.isNotEmpty) {
-                showDialog(
-                  context: context,
-                  builder: (context) => AlertDialog(
-                    title: const Text("Delete All Notes"),
-                    content: const Text("Are you sure you want to delete ALL notes?"),
-                    actions: [
-                      TextButton(
-                        onPressed: () => Navigator.pop(context),
-                        child: const Text("Cancel"),
-                      ),
-                      ElevatedButton(
-                        onPressed: () async {
-                          await deleteAllNotes();
-                          currentNotes = await fetchNotes();
-                          setState(() {});
-                          Navigator.pop(context);
-                        },
-                        child: const Text("Delete All"),
-                      ),
-                    ],
+      body: Column(
+        children: [
+          // Custom Curved AppBar with integrated delete button
+          Stack(
+            children: [
+              CurvedAppBar(
+                title: 'My Notes',
+                subtitle: '${currentNotes.length} notes',
+                isProfileAvailable: false,
+                showIcon: false, // Hide the logo to make space for delete button
+              ),
+              // Delete button positioned on the curved app bar
+              Positioned(
+                top: 45,
+                right: 20,
+                child: IconButton(
+                  icon: const Icon(
+                    Icons.delete_forever,
+                    color: Colors.white,
+                    size: 28,
                   ),
-                );
-              }
-            },
+                  onPressed: confirmDeleteAll,
+                ),
+              ),
+            ],
+          ),
+          
+          // Main content area
+          Expanded(
+            child: Padding(
+              padding: const EdgeInsets.all(12.0),
+              child: currentNotes.isEmpty
+                  ? const Center(child: Text('No notes yet. Tap + to add one!'))
+                  : ListView.builder(
+                      itemCount: currentNotes.length,
+                      itemBuilder: (context, index) {
+                        final note = currentNotes[index];
+                        return Card(
+                          elevation: 4,
+                          margin: const EdgeInsets.symmetric(vertical: 8),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          child: ListTile(
+                            contentPadding: const EdgeInsets.all(16),
+                            title: Text(
+                              note.text,
+                              style: const TextStyle(fontSize: 16),
+                            ),
+                            onTap: () => openNoteDialog(noteToUpdate: note),
+                            trailing: IconButton(
+                              icon: const Icon(Icons.delete, color: Colors.red),
+                              onPressed: () => confirmDelete(note),
+                            ),
+                          ),
+                        );
+                      },
+                    ),
+            ),
           ),
         ],
       ),
       floatingActionButton: Padding(
-  padding: const EdgeInsets.only(bottom: 70.0), // Adjust the position of the button
-  child: FloatingActionButton(
-    onPressed: () => openNoteDialog(),
-    child: const Icon(Icons.add),
-  ),
-),
-
-      body: Padding(
-        padding: const EdgeInsets.all(12.0),
-        child: currentNotes.isEmpty
-            ? const Center(child: Text('No notes yet. Tap + to add one!'))
-            : ListView.builder(
-                itemCount: currentNotes.length,
-                itemBuilder: (context, index) {
-                  final note = currentNotes[index];
-                  return Card(
-                    elevation: 4,
-                    margin: const EdgeInsets.symmetric(vertical: 8),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    child: ListTile(
-                      contentPadding: const EdgeInsets.all(16),
-                      title: Text(
-                        note.text,
-                        style: const TextStyle(fontSize: 16),
-                      ),
-                      onTap: () => openNoteDialog(noteToUpdate: note),
-                      trailing: IconButton(
-                        icon: const Icon(Icons.delete, color: Colors.red),
-                        onPressed: () => confirmDelete(note),
-                      ),
-                    ),
-                  );
-                },
-              ),
+        padding: const EdgeInsets.only(bottom: 70.0),
+        child: FloatingActionButton(
+          onPressed: () => openNoteDialog(),
+          child: const Icon(Icons.add),
+        ),
       ),
     );
   }
