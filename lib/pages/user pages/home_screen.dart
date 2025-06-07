@@ -1,6 +1,7 @@
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:med/widgets/actions_buttons.dart';
+import 'package:med/widgets/appbar.dart';
 import 'package:med/widgets/user_greetings.dart';
 // import 'package:medflownew/pages/machine.dart';
 // import 'package:medflownew/pages/symptom.dart';
@@ -13,7 +14,16 @@ class HomeScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
-      body: SafeArea(
+      body: Column(
+    children: [
+    const  CurvedAppBar(
+        title: 'Device Categories',
+        isProfileAvailable: false,
+        showIcon: true,
+        isBack: true,
+      ),
+      Expanded(
+      child: SafeArea(
         child: Center(
           child: Container(
             constraints: const BoxConstraints(maxWidth: 360),
@@ -67,6 +77,9 @@ class HomeScreen extends StatelessWidget {
           ),
         ),
       ),
+    ),
+    ],
+    ),
     );
   }
 }

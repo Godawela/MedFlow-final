@@ -6,6 +6,7 @@ import 'package:http/http.dart' as http;
 import 'dart:convert';
 
 import 'package:med/pages/user%20pages/device_list_page.dart';
+import 'package:med/widgets/appbar.dart';
 import 'package:med/widgets/device_button.dart';
 import 'package:med/widgets/user_greetings.dart';
 
@@ -60,19 +61,16 @@ class _MachinePageState extends State<MachinePage> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
-      appBar: AppBar(
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        title: const Text('Machine Page'),
-        centerTitle: true,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
-          onPressed: () {
-            Navigator.pop(context); // Navigate back to the previous page
-          },
-        ),
+     body: Column(
+    children: [
+    const  CurvedAppBar(
+        title: 'Device Categories',
+        isProfileAvailable: false,
+        showIcon: true,
+        isBack: true,
       ),
-      body: SafeArea(
+      Expanded(
+      child: SafeArea(
         child: Center(
           child: Padding(
             padding: const EdgeInsets.all(16.0),
@@ -138,7 +136,12 @@ class _MachinePageState extends State<MachinePage> {
           ),
         ),
       ),
+    ),
+      ],
+      ),
+    
     );
+    
   }
 }
 

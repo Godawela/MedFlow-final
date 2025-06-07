@@ -1,5 +1,6 @@
 import 'package:dialog_flowtter/dialog_flowtter.dart';
 import 'package:flutter/material.dart';
+import 'package:med/widgets/appbar.dart';
 
 class ChatBotPage extends StatefulWidget {
   const ChatBotPage({super.key});
@@ -92,52 +93,67 @@ class _ChatBotPageState extends State<ChatBotPage> {
 
   @override
   Widget build(BuildContext context) {
-    return SafeArea(
-      child: Scaffold(
-        backgroundColor: Colors.grey[100],
-        appBar: AppBar(
-          title: const Text('ChatBot'),
-          backgroundColor: Colors.teal,
+    return Scaffold(
+      backgroundColor: Colors.grey[100],
+      body: Column(
+        children: [
+          const CurvedAppBar(
+            title: 'Chat Bot',
+            isProfileAvailable: false,
+            showIcon: true,
+            isBack: false,
+          ),
+          Expanded(
+            child: ListView.builder(
+              controller: _scrollController,
+              padding: const EdgeInsets.only(bottom: 10),
+              itemCount: messages.length,
+              itemBuilder: (context, index) => _buildMessage(messages[index]),
+            ),
+          ),
+        ],
+      ),
+      bottomNavigationBar: Container(
+        color: Colors.grey[100],
+        padding: EdgeInsets.only(
+          left: 10,
+          right: 10,
+          top: 10,
+          bottom: MediaQuery.of(context).padding.bottom + 10, // Account for safe area
         ),
-        body: Column(
+        child: Row(
           children: [
             Expanded(
-              child: ListView.builder(
-                controller: _scrollController,
-                padding: const EdgeInsets.only(bottom: 10),
-                itemCount: messages.length,
-                itemBuilder: (context, index) => _buildMessage(messages[index]),
+              child: TextField(
+                controller: _messageController,
+                textInputAction: TextInputAction.send,
+                onSubmitted: sendMessage,
+                decoration: InputDecoration(
+                  hintText: 'Type your message...',
+                  contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                  filled: true,
+                  fillColor: Colors.white,
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(30),
+                    borderSide: BorderSide.none,
+                  ),
+                  enabledBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(30),
+                    borderSide: BorderSide.none,
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(30),
+                    borderSide: BorderSide(color: Colors.teal, width: 1),
+                  ),
+                ),
               ),
             ),
-            Padding(
-              padding: const EdgeInsets.fromLTRB(10, 0, 10, 10),
-              child: Row(
-                children: [
-                  Expanded(
-                    child: TextField(
-                      controller: _messageController,
-                      textInputAction: TextInputAction.send,
-                      onSubmitted: sendMessage,
-                      decoration: InputDecoration(
-                        hintText: 'Type your message...',
-                        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                        filled: true,
-                        fillColor: Colors.white,
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(30),
-                        ),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(width: 8),
-                  CircleAvatar(
-                    backgroundColor: Colors.teal,
-                    child: IconButton(
-                      icon: const Icon(Icons.send, color: Colors.white),
-                      onPressed: () => sendMessage(_messageController.text),
-                    ),
-                  ),
-                ],
+            const SizedBox(width: 8),
+            CircleAvatar(
+              backgroundColor: Colors.teal,
+              child: IconButton(
+                icon: const Icon(Icons.send, color: Colors.white),
+                onPressed: () => sendMessage(_messageController.text),
               ),
             ),
           ],

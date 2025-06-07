@@ -5,6 +5,7 @@ import 'package:http/http.dart' as http;
 import 'dart:convert';
 
 import 'package:med/routes/router.dart';
+import 'package:med/widgets/appbar.dart';
 import 'package:med/widgets/user_greetings.dart';
 
 @RoutePage()
@@ -113,22 +114,18 @@ class _ProfilePageState extends State<ProfilePage> {
 
   @override
   Widget build(BuildContext context) {
-    return SafeArea(
-        child: Scaffold(
+    return Scaffold(
           backgroundColor: Colors.transparent,
-          appBar: AppBar(
-            backgroundColor: Colors.transparent,
-            leading: IconButton(
-        icon: const Icon(Icons.person), 
-        onPressed: () {},
+          body: Column(
+    children: [
+    const  CurvedAppBar(
+        title: 'Profile',
+        isProfileAvailable: false,
+        showIcon: true,
+        isBack: false,
       ),
-       automaticallyImplyLeading: false,
-            elevation: 0,
-            title: const Text('Profile Page', style: TextStyle(color: Colors.black)),
-            centerTitle: true,
-            iconTheme: const IconThemeData(color: Colors.black),
-          ),
-          body: isLoading
+      Expanded(
+      child: isLoading
     ? const Center(child: CircularProgressIndicator())
     : SingleChildScrollView(
         padding: const EdgeInsets.all(16),
@@ -205,6 +202,7 @@ class _ProfilePageState extends State<ProfilePage> {
       ),
 
         ),
-      );
+    ],
+      ),);
   }
 }

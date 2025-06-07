@@ -209,7 +209,7 @@ final response = await http.get(Uri.parse('$baseUrl/${user.uid}'));
         ],
       ),
       floatingActionButton: Padding(
-  padding: const EdgeInsets.only(bottom: 50.0), // Adjust the position of the button
+  padding: const EdgeInsets.only(bottom: 70.0), // Adjust the position of the button
   child: FloatingActionButton(
     onPressed: () => openNoteDialog(),
     child: const Icon(Icons.add),

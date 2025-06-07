@@ -109,9 +109,9 @@ class CurvedAppBar extends StatelessWidget {
                 if (showIcon)
                   ClipOval(
                   child: Image.asset(
-                    'assets/images/logo.png', // default logo
-                    width: 150,
-                    height: 150,
+                    'assets/images/logo.png', 
+                    width: 70,
+                    height:70,
                     fit: BoxFit.cover,
                   ),
                   ),

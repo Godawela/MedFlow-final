@@ -23,16 +23,25 @@ class _LoginScreenState extends State<LoginScreen> {
   bool isLoading = false;
   bool isPasswordVisible = false;
 
-  Future<void> handleAuth() async {
-    if (_emailController.text.isEmpty || _passwordController.text.isEmpty) {
+  // Helper method to safely show SnackBar
+  void _showSnackBar(String message, Color backgroundColor) {
+    if (mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Please fill in all fields'),
-          backgroundColor: Colors.red,
+        SnackBar(
+          content: Text(message),
+          backgroundColor: backgroundColor,
         ),
       );
+    }
+  }
+
+  Future<void> handleAuth() async {
+    if (_emailController.text.isEmpty || _passwordController.text.isEmpty) {
+      _showSnackBar('Please fill in all fields', Colors.red);
       return;
     }
+
+    if (!mounted) return;
 
     setState(() {
       isLoading = true;
@@ -44,7 +53,7 @@ class _LoginScreenState extends State<LoginScreen> {
         password: _passwordController.text.trim(),
       );
 
-      if (userCredential.user != null) {
+      if (userCredential.user != null && mounted) {
         String? token = await userCredential.user!.getIdToken();
         String uid = userCredential.user!.uid;
 
@@ -53,29 +62,26 @@ class _LoginScreenState extends State<LoginScreen> {
         await prefs.setString('authToken', token ?? '');
         await prefs.setString('uid', uid);
 
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Sign-in successful! Token and UID saved.'),
-            backgroundColor: Colors.green,
-          ),
-        );
-        AutoRouter.of(context).push(const BottomNavigationRoute());
+        _showSnackBar('Sign-in successful! Token and UID saved.', Colors.green);
+        
+        if (mounted) {
+          AutoRouter.of(context).push(const BottomNavigationRoute());
+        }
       }
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Error: ${e.toString()}'),
-          backgroundColor: Colors.red,
-        ),
-      );
+      _showSnackBar('Error: ${e.toString()}', Colors.red);
     } finally {
-      setState(() {
-        isLoading = false;
-      });
+      if (mounted) {
+        setState(() {
+          isLoading = false;
+        });
+      }
     }
   }
 
   Future<void> handleGoogleSignIn() async {
+    if (!mounted) return;
+
     try {
       setState(() {
         isLoading = true;
@@ -89,9 +95,11 @@ class _LoginScreenState extends State<LoginScreen> {
 
       if (googleUser == null) {
         // User canceled the sign-in flow
-        setState(() {
-          isLoading = false;
-        });
+        if (mounted) {
+          setState(() {
+            isLoading = false;
+          });
+        }
         return;
       }
 
@@ -108,7 +116,7 @@ class _LoginScreenState extends State<LoginScreen> {
       UserCredential userCredential =
           await _auth.signInWithCredential(credential);
 
-      if (userCredential.user != null) {
+      if (userCredential.user != null && mounted) {
         String? token = await userCredential.user!.getIdToken();
         String uid = userCredential.user!.uid;
 
@@ -117,26 +125,28 @@ class _LoginScreenState extends State<LoginScreen> {
         await prefs.setString('authToken', token ?? '');
         await prefs.setString('uid', uid);
 
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Google Sign-In successful! Token and UID saved.'),
-            backgroundColor: Colors.green,
-          ),
-        );
-        AutoRouter.of(context).push(const HomeRoute());
+        _showSnackBar('Google Sign-In successful! Token and UID saved.', Colors.green);
+        
+        if (mounted) {
+          AutoRouter.of(context).push(const HomeRoute());
+        }
       }
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Error: ${e.toString()}'),
-          backgroundColor: Colors.red,
-        ),
-      );
+      _showSnackBar('Error: ${e.toString()}', Colors.red);
     } finally {
-      setState(() {
-        isLoading = false;
-      });
+      if (mounted) {
+        setState(() {
+          isLoading = false;
+        });
+      }
     }
+  }
+
+  @override
+  void dispose() {
+    _emailController.dispose();
+    _passwordController.dispose();
+    super.dispose();
   }
 
   @override
@@ -150,7 +160,7 @@ class _LoginScreenState extends State<LoginScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const SizedBox(height: 11),
+                const SizedBox(height: 50), // Increased space from top
                 const Center(
                   child: CircleAvatar(
                   radius: 33.5,

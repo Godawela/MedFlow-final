@@ -4,6 +4,7 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:med/widgets/appbar.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:http/http.dart' as http;
 
@@ -70,13 +71,16 @@ class _MachineDetailPageState extends State<MachineDetailPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text(widget.machineName),
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        centerTitle: true,
+    body: Column(
+    children: [
+      CurvedAppBar(
+        title: widget.machineName,
+        isProfileAvailable: false,
+        showIcon: true,
+        isBack: true,
       ),
-      body: isLoading
+      Expanded(
+      child: isLoading
           ? const Center(child: CircularProgressIndicator())
           : machineDetails != null
               ? SingleChildScrollView(
@@ -151,6 +155,10 @@ class _MachineDetailPageState extends State<MachineDetailPage> {
                   ),
                 )
               : const Center(child: Text('Machine not found')),
+    ),
+    ],
+    ),
     );
+    
   }
 }
