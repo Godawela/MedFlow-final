@@ -14,9 +14,10 @@ class SymptomDetailPage extends StatefulWidget {
   State<SymptomDetailPage> createState() => _SymptomDetailPageState();
 }
 
-class _SymptomDetailPageState extends State<SymptomDetailPage> with SingleTickerProviderStateMixin {
+class _SymptomDetailPageState extends State<SymptomDetailPage> with TickerProviderStateMixin {
   Map<String, dynamic>? symptomDetails;
   bool isLoading = true;
+  String? error;
   late AnimationController _animationController;
   late Animation<double> _fadeAnimation;
 
@@ -24,12 +25,13 @@ class _SymptomDetailPageState extends State<SymptomDetailPage> with SingleTicker
   void initState() {
     super.initState();
     _animationController = AnimationController(
-      duration: const Duration(milliseconds: 500),
+      duration: const Duration(milliseconds: 800),
       vsync: this,
     );
-    _fadeAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
-      CurvedAnimation(parent: _animationController, curve: Curves.easeInOut),
+    _fadeAnimation = Tween<double>(begin: 0, end: 1).animate(
+      CurvedAnimation(parent: _animationController, curve: Curves.easeOut),
     );
+    
     fetchSymptomDetails();
   }
 
@@ -47,57 +49,94 @@ class _SymptomDetailPageState extends State<SymptomDetailPage> with SingleTicker
 
       if (response.statusCode == 200) {
         final Map<String, dynamic> detail = json.decode(response.body);
-        setState(() {
-          symptomDetails = detail;
-          isLoading = false;
-        });
-        _animationController.forward();
+        
+        if (detail.isNotEmpty) {
+          setState(() {
+            symptomDetails = detail;
+            isLoading = false;
+          });
+          _animationController.forward();
+        } else {
+          setState(() {
+            isLoading = false;
+            error = 'No symptom details found';
+          });
+        }
       } else {
         setState(() {
           isLoading = false;
+          error = 'Failed to load details: ${response.statusCode}';
         });
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Failed to load details', style: GoogleFonts.inter()),
-            behavior: SnackBarBehavior.floating,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(10),
-            ),
-          ),
-        );
       }
     } catch (e) {
       setState(() {
         isLoading = false;
+        error = 'Error: $e';
       });
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Error: $e', style: GoogleFonts.inter()),
-          backgroundColor: Colors.red.shade400,
-          behavior: SnackBarBehavior.floating,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(10),
-          ),
-        ),
-      );
     }
   }
 
   Future<void> _launchURL(String url) async {
     final Uri uri = Uri.parse(url);
     if (await canLaunchUrl(uri)) {
-      await launchUrl(
-        uri,
-        mode: LaunchMode.externalApplication,
-      );
+      await launchUrl(uri);
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Could not launch the URL', style: GoogleFonts.inter()),
-          backgroundColor: Colors.red.shade400,
-        ),
+        SnackBar(content: Text('Could not launch $url')),
       );
     }
+  }
+
+  Widget _buildDetailCard(String title, String content, IconData icon) {
+    return Card(
+      elevation: 4,
+      margin: const EdgeInsets.symmetric(vertical: 8),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(15),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    color: Colors.deepPurple.shade100,
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  child: Icon(
+                    icon,
+                    color: Colors.deepPurple.shade700,
+                    size: 24,
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Text(
+                  title,
+                  style: GoogleFonts.inter(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.deepPurple.shade800,
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 12),
+            Text(
+              content,
+              style: GoogleFonts.inter(
+                fontSize: 16,
+                color: Colors.grey.shade800,
+                height: 1.5,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
   }
 
   @override
@@ -112,7 +151,6 @@ class _SymptomDetailPageState extends State<SymptomDetailPage> with SingleTicker
             showIcon: true,
             isBack: true,
           ),
-          
           Expanded(
             child: isLoading
                 ? Center(
@@ -129,7 +167,7 @@ class _SymptomDetailPageState extends State<SymptomDetailPage> with SingleTicker
                                 color: Colors.black.withOpacity(0.1),
                                 blurRadius: 20,
                                 offset: const Offset(0, 10),
-                           ) ],
+                          )],
                           ),
                           child: CircularProgressIndicator(
                             strokeWidth: 3,
@@ -150,189 +188,54 @@ class _SymptomDetailPageState extends State<SymptomDetailPage> with SingleTicker
                       ],
                     ),
                   )
-                : symptomDetails != null
-                    ? FadeTransition(
-                        opacity: _fadeAnimation,
-                        child: SingleChildScrollView(
-                          padding: const EdgeInsets.all(20),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              // Header Card
-                              Container(
-                                width: double.infinity,
-                                padding: const EdgeInsets.all(20),
-                                decoration: BoxDecoration(
-                                  gradient: LinearGradient(
-                                    begin: Alignment.topLeft,
-                                    end: Alignment.bottomRight,
-                                    colors: [
-                                      Colors.deepPurple.shade400,
-                                      Colors.deepPurple.shade600,
-                                    ],
-                                  ),
-                                  borderRadius: BorderRadius.circular(15),
-                                  boxShadow: [
-                                    BoxShadow(
-                                      color: Colors.deepPurple.withOpacity(0.2),
-                                      blurRadius: 10,
-                                      offset: const Offset(0, 5),
-                                )],
-                                ),
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text(
-                                      symptomDetails!['name'],
-                                      style: GoogleFonts.inter(
-                                        fontSize: 24,
-                                        fontWeight: FontWeight.bold,
-                                        color: Colors.white,
-                                      ),
-                                    ),
-                                    const SizedBox(height: 8),
-                                    Text(
-                                      'Symptom Details',
-                                      style: GoogleFonts.inter(
-                                        fontSize: 16,
-                                        color: Colors.white.withOpacity(0.9),
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                              
-                              const SizedBox(height: 24),
-                              
-                              // Description Section
-                              Text(
-                                'Description',
-                                style: GoogleFonts.inter(
-                                  fontSize: 20,
-                                  fontWeight: FontWeight.bold,
-                                  color: Colors.grey.shade800,
-                                ),
-                              ),
-                              const SizedBox(height: 8),
-                              Container(
-                                width: double.infinity,
-                                padding: const EdgeInsets.all(16),
-                                decoration: BoxDecoration(
-                                  color: Colors.white,
-                                  borderRadius: BorderRadius.circular(12),
-                                  boxShadow: [
-                                    BoxShadow(
-                                      color: Colors.black.withOpacity(0.05),
-                                      blurRadius: 10,
-                                      offset: const Offset(0, 5),
-                                    ),
-                                  ],
-                                ),
-                                child: Text(
-                                  symptomDetails!['description'],
-                                  style: GoogleFonts.inter(
-                                    fontSize: 16,
-                                    height: 1.6,
-                                    color: Colors.grey.shade700,
-                                  ),
-                                ),
-                              ),
-                              
-                              const SizedBox(height: 30),
-                              
-                              // Resource Link Section (if available)
-                              if (symptomDetails!['resourceLink'] != null &&
-                                  symptomDetails!['resourceLink'].toString().isNotEmpty)
-                                Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text(
-                                      'Additional Resources',
-                                      style: GoogleFonts.inter(
-                                        fontSize: 20,
-                                        fontWeight: FontWeight.bold,
-                                        color: Colors.grey.shade800,
-                                      ),
-                                    ),
-                                    const SizedBox(height: 16),
-                                    Center(
-                                      child: InkWell(
-                                        onTap: () => _launchURL(symptomDetails!['resourceLink']),
-                                        borderRadius: BorderRadius.circular(12),
-                                        child: Container(
-                                          padding: const EdgeInsets.symmetric(
-                                            horizontal: 24,
-                                            vertical: 16,
-                                          ),
-                                          decoration: BoxDecoration(
-                                            gradient: LinearGradient(
-                                              colors: [
-                                                Colors.blue.shade400,
-                                                Colors.blue.shade600,
-                                              ],
-                                              begin: Alignment.topLeft,
-                                              end: Alignment.bottomRight,
-                                            ),
-                                            borderRadius: BorderRadius.circular(12),
-                                            boxShadow: [
-                                              BoxShadow(
-                                                color: Colors.blue.withOpacity(0.3),
-                                                blurRadius: 8,
-                                                offset: const Offset(0, 4),
-                                          )],
-                                          ),
-                                          child: Row(
-                                            mainAxisSize: MainAxisSize.min,
-                                            children: [
-                                              const Icon(
-                                                Icons.launch_rounded,
-                                                color: Colors.white,
-                                                size: 24,
-                                              ),
-                                              const SizedBox(width: 12),
-                                              Text(
-                                                'View External Resource',
-                                                style: GoogleFonts.inter(
-                                                  fontSize: 16,
-                                                  fontWeight: FontWeight.w600,
-                                                  color: Colors.white,
-                                                ),
-                                              ),
-                                            ],
-                                          ),
-                                        ),
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              const SizedBox(height: 20),
-                            ],
-                          ),
-                        ),
-                      )
-                    : Center(
+                : error != null
+                    ? Center(
                         child: Column(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            Icon(
-                              Icons.error_outline_rounded,
-                              size: 48,
-                              color: Colors.red.shade400,
+                            Container(
+                              padding: const EdgeInsets.all(20),
+                              decoration: BoxDecoration(
+                                color: Colors.red.shade50,
+                                shape: BoxShape.circle,
+                              ),
+                              child: Icon(
+                                Icons.error_outline_rounded,
+                                size: 48,
+                                color: Colors.red.shade400,
+                              ),
                             ),
                             const SizedBox(height: 16),
                             Text(
-                              'Symptom details not found',
+                              'Oops! Something went wrong',
                               style: GoogleFonts.inter(
                                 fontSize: 18,
                                 fontWeight: FontWeight.bold,
-                                color: Colors.grey.shade700,
+                                color: Colors.red.shade700,
                               ),
                             ),
+                            const SizedBox(height: 8),
+                            Text(
+                              error!,
+                              style: GoogleFonts.inter(
+                                fontSize: 14,
+                                color: Colors.red.shade600,
+                              ),
+                              textAlign: TextAlign.center,
+                            ),
                             const SizedBox(height: 24),
-                            ElevatedButton(
-                              onPressed: fetchSymptomDetails,
+                            ElevatedButton.icon(
+                              onPressed: () {
+                                setState(() {
+                                  isLoading = true;
+                                  error = null;
+                                });
+                                fetchSymptomDetails();
+                              },
+                              icon: const Icon(Icons.refresh_rounded),
+                              label: const Text('Try Again'),
                               style: ElevatedButton.styleFrom(
-                                backgroundColor: Colors.deepPurple.shade400,
+                                backgroundColor: Colors.red.shade500,
                                 foregroundColor: Colors.white,
                                 padding: const EdgeInsets.symmetric(
                                   horizontal: 24,
@@ -342,16 +245,113 @@ class _SymptomDetailPageState extends State<SymptomDetailPage> with SingleTicker
                                   borderRadius: BorderRadius.circular(12),
                                 ),
                               ),
-                              child: Text(
-                                'Try Again',
-                                style: GoogleFonts.inter(
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.w500,
-                                ),
-                              ),
                             ),
                           ],
                         ),
+                      )
+                    : AnimatedBuilder(
+                        animation: _animationController,
+                        builder: (context, child) {
+                          return FadeTransition(
+                            opacity: _fadeAnimation,
+                            child: SingleChildScrollView(
+                              padding: const EdgeInsets.all(20),
+                              child: Column(
+                                children: [
+                                  // Symptom header
+                                  Container(
+                                    width: double.infinity,
+                                    padding: const EdgeInsets.all(20),
+                                    decoration: BoxDecoration(
+                                      gradient: LinearGradient(
+                                        begin: Alignment.topLeft,
+                                        end: Alignment.bottomRight,
+                                        colors: [
+                                          Colors.deepPurple.shade400,
+                                          Colors.deepPurple.shade600,
+                                        ],
+                                      ),
+                                      borderRadius: BorderRadius.circular(20),
+                                      boxShadow: [
+                                        BoxShadow(
+                                          color: Colors.deepPurple.withOpacity(0.3),
+                                          blurRadius: 12,
+                                          offset: const Offset(0, 6),
+                                        ),
+                                      ],
+                                    ),
+                                    child: Column(
+                                      children: [
+                                        Container(
+                                          padding: const EdgeInsets.all(16),
+                                          decoration: BoxDecoration(
+                                            color: Colors.white.withOpacity(0.2),
+                                            borderRadius: BorderRadius.circular(16),
+                                          ),
+                                          child: Icon(
+                                            Icons.health_and_safety_rounded,
+                                            size: 40,
+                                            color: Colors.white,
+                                          ),
+                                        ),
+                                        const SizedBox(height: 16),
+                                        Text(
+                                          widget.symptomName,
+                                          style: GoogleFonts.inter(
+                                            fontSize: 24,
+                                            fontWeight: FontWeight.bold,
+                                            color: Colors.white,
+                                          ),
+                                          textAlign: TextAlign.center,
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                  
+                                  const SizedBox(height: 24),
+                                  
+                                  // Symptom details
+                                
+                                  
+                                  if (symptomDetails!['description'] != null)
+                                    _buildDetailCard(
+                                      'Description',
+                                      symptomDetails!['description'],
+                                      Icons.description_rounded,
+                                    ),
+                                  
+                                  if (symptomDetails!['resourceLink'] != null && 
+                                      symptomDetails!['resourceLink'].toString().isNotEmpty) ...[
+                                    const SizedBox(height: 16),
+                                    Center(
+                                      child: ElevatedButton.icon(
+                                        onPressed: () {
+                                          _launchURL(symptomDetails!['resourceLink']);
+                                        },
+                                        icon: const Icon(Icons.link_rounded),
+                                        label: const Text('View Resource'),
+                                        style: ElevatedButton.styleFrom(
+                                          backgroundColor: Colors.deepPurple.shade500,
+                                          foregroundColor: Colors.white,
+                                          padding: const EdgeInsets.symmetric(
+                                            horizontal: 24,
+                                            vertical: 16,
+                                          ),
+                                          shape: RoundedRectangleBorder(
+                                            borderRadius: BorderRadius.circular(15),
+                                          ),
+                                          elevation: 5,
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                  
+                                  const SizedBox(height: 20),
+                                ],
+                              ),
+                            ),
+                          );
+                        },
                       ),
           ),
         ],
