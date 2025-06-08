@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:med/services/ollma_service.dart';
+import 'package:med/widgets/appbar.dart';
 
 class ChatBotPage extends StatefulWidget {
   const ChatBotPage({super.key});
@@ -16,55 +17,55 @@ class _ChatBotPageState extends State<ChatBotPage> with TickerProviderStateMixin
 
   List<Map<String, dynamic>> messages = [];
   bool isTyping = false;
- bool isInitialized = false;
+  bool isInitialized = false;
 
   // Medical knowledge base
-final OllamaService _ollamaService = OllamaService();
+  final OllamaService _ollamaService = OllamaService();
 
-void _checkOllamaConnection() async {
-  try {
-    bool isConnected = await _ollamaService.checkConnection();
-    setState(() {
-      isInitialized = isConnected;
-    });
-    
-    if (isConnected) {
-      _showWelcomeMessage();
-    } else {
+  void _checkOllamaConnection() async {
+    try {
+      bool isConnected = await _ollamaService.checkConnection();
+      setState(() {
+        isInitialized = isConnected;
+      });
+      
+      if (isConnected) {
+        _showWelcomeMessage();
+      } else {
+        _showConnectionError();
+      }
+    } catch (e) {
+      setState(() {
+        isInitialized = false;
+      });
       _showConnectionError();
     }
-  } catch (e) {
-    setState(() {
-      isInitialized = false;
-    });
-    _showConnectionError();
   }
-}
 
-void _showConnectionError() {
-  setState(() {
-    messages.add({
-      'message': {'text': ['⚠️ Unable to connect to Ollama service. Please ensure:\n\n1. Ollama is installed and running\n2. Your computer IP is correctly configured\n3. Both devices are on the same network\n\nTap the retry button to try again.']}, 
-      'isUser': false,
-      'isError': true
+  void _showConnectionError() {
+    setState(() {
+      messages.add({
+        'message': {'text': ['⚠️ Unable to connect to Ollama service. Please ensure:\n\n1. Ollama is installed and running\n2. Your computer IP is correctly configured\n3. Both devices are on the same network\n\nTap the retry button to try again.']}, 
+        'isUser': false,
+        'isError': true
+      });
     });
-  });
-}
+  }
 
-@override
-void initState() {
-  super.initState();
-  _animationController = AnimationController(
-    duration: const Duration(milliseconds: 300),
-    vsync: this,
-  );
-  _fadeAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
-    CurvedAnimation(parent: _animationController, curve: Curves.easeInOut),
-  );
-  
-  // Check Ollama connection instead of showing welcome immediately
-  _checkOllamaConnection();
-}
+  @override
+  void initState() {
+    super.initState();
+    _animationController = AnimationController(
+      duration: const Duration(milliseconds: 300),
+      vsync: this,
+    );
+    _fadeAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
+      CurvedAnimation(parent: _animationController, curve: Curves.easeInOut),
+    );
+    
+    // Check Ollama connection instead of showing welcome immediately
+    _checkOllamaConnection();
+  }
 
   void _showWelcomeMessage() {
     Future.delayed(const Duration(milliseconds: 500), () {
@@ -80,43 +81,43 @@ void initState() {
   }
 
   void sendMessage(String text) async {
-  if (text.trim().isEmpty) return;
+    if (text.trim().isEmpty) return;
 
-  setState(() {
-    messages.add({'message': {'text': [text]}, 'isUser': true});
-    isTyping = true;
-  });
-
-  _messageController.clear();
-  _scrollToBottom();
-
-  try {
-    // Check connection first
-    bool isConnected = await _ollamaService.checkConnection();
-    
-    if (!isConnected) {
-      throw Exception('Unable to connect to Ollama service');
-    }
-
-    final response = await _ollamaService.generateResponse(text);
-    
     setState(() {
-      isTyping = false;
-      messages.add({'message': {'text': [response]}, 'isUser': false});
+      messages.add({'message': {'text': [text]}, 'isUser': true});
+      isTyping = true;
     });
+
+    _messageController.clear();
     _scrollToBottom();
-  } catch (e) {
-    setState(() {
-      isTyping = false;
-      messages.add({
-        'message': {'text': ['Sorry, I\'m having trouble connecting to the medical assistant. Please make sure Ollama is running on your computer and try again.\n\nTroubleshooting:\n1. Check if Ollama service is running\n2. Verify your computer\'s IP address\n3. Ensure both devices are on the same network\n\nError: ${e.toString()}']}, 
-        'isUser': false,
-        'isError': true
+
+    try {
+      // Check connection first
+      bool isConnected = await _ollamaService.checkConnection();
+      
+      if (!isConnected) {
+        throw Exception('Unable to connect to Ollama service');
+      }
+
+      final response = await _ollamaService.generateResponse(text);
+      
+      setState(() {
+        isTyping = false;
+        messages.add({'message': {'text': [response]}, 'isUser': false});
       });
-    });
-    _scrollToBottom();
+      _scrollToBottom();
+    } catch (e) {
+      setState(() {
+        isTyping = false;
+        messages.add({
+          'message': {'text': ['Sorry, I\'m having trouble connecting to the medical assistant. Please make sure Ollama is running on your computer and try again.\n\nTroubleshooting:\n1. Check if Ollama service is running\n2. Verify your computer\'s IP address\n3. Ensure both devices are on the same network\n\nError: ${e.toString()}']}, 
+          'isUser': false,
+          'isError': true
+        });
+      });
+      _scrollToBottom();
+    }
   }
-}
 
   void _scrollToBottom() {
     Future.delayed(const Duration(milliseconds: 100), () {
@@ -170,7 +171,7 @@ void initState() {
                         radius: 12,
                         backgroundColor: Colors.deepPurple.shade100,
                         child: Icon(
-                          Icons.healing,
+                          Icons.smart_toy,
                           size: 16,
                           color: Colors.deepPurple.shade600,
                         ),
@@ -342,71 +343,12 @@ void initState() {
       backgroundColor: Colors.grey.shade50,
       body: Column(
         children: [
-          // Custom Header
-          Container(
-            decoration: BoxDecoration(
-              gradient: LinearGradient(
-                colors: [Colors.deepPurple.shade400, Colors.deepPurple.shade600],
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-              ),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.deepPurple.withOpacity(0.3),
-                  blurRadius: 10,
-                  offset: const Offset(0, 2),
-                ),
-              ],
-            ),
-            child: SafeArea(
-              child: Padding(
-                padding: const EdgeInsets.all(16.0),
-                child: Row(
-                  children: [
-                    CircleAvatar(
-                      radius: 20,
-                      backgroundColor: Colors.white.withOpacity(0.2),
-                      child: Icon(
-                        Icons.healing,
-                        color: Colors.white,
-                        size: 24,
-                      ),
-                    ),
-                    const SizedBox(width: 16),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          const Text(
-                            'Medical Assistant',
-                            style: TextStyle(
-                              color: Colors.white,
-                              fontSize: 18,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                          Text(
-                            'Ready to help',
-                            style: TextStyle(
-                              color: Colors.white.withOpacity(0.8),
-                              fontSize: 12,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                    Container(
-                      width: 10,
-                      height: 10,
-                      decoration: const BoxDecoration(
-                        color: Colors.green,
-                        shape: BoxShape.circle,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
+          // Header
+          CurvedAppBar(
+            title: 'Medical Assistant',
+            subtitle: isInitialized ? 'Ready to help' : 'Connecting...',
+            isProfileAvailable: false,
+            showIcon: true,
           ),
           
           // Chat Messages
