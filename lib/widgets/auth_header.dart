@@ -25,6 +25,7 @@ class AuthHeader extends StatelessWidget {
           fontSize: 30,
           fontFamily: 'Goblin One',
           color: Colors.black,
+          fontWeight: FontWeight.bold,
         ),
           ),
         ),

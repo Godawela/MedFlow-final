@@ -174,8 +174,8 @@ class _AddDevicePageState extends State<AddDevicePage> {
                 decoration: BoxDecoration(
                   gradient: LinearGradient(
                     colors: [
-                      Theme.of(context).primaryColor.withOpacity(0.1),
-                      Theme.of(context).primaryColor.withOpacity(0.05),
+              Colors.deepPurple.shade400,
+                                            Colors.deepPurple.shade600,
                     ],
                     begin: Alignment.topLeft,
                     end: Alignment.bottomRight,
@@ -183,29 +183,29 @@ class _AddDevicePageState extends State<AddDevicePage> {
                   borderRadius: BorderRadius.circular(16),
                   border: Border.all(color: Theme.of(context).primaryColor.withOpacity(0.2)),
                 ),
-                child: Column(
+                child:const Column(
                   children: [
                     Icon(
                       Icons.add_circle_outline,
                       size: 48,
-                      color: Theme.of(context).primaryColor,
+                      color: Colors.white,
                     ),
-                    const SizedBox(height: 12),
-                    Text(
+                     SizedBox(height: 12),
+                   Text(
                       'Create New Device',
                       style: TextStyle(
                         fontSize: 24,
                         fontWeight: FontWeight.bold,
-                        color: Theme.of(context).primaryColor,
+                        color: Colors.white,
                       ),
                     ),
-                    const SizedBox(height: 8),
+                     SizedBox(height: 8),
                     Text(
                       'Fill in the details below to add a new device to your inventory',
                       textAlign: TextAlign.center,
                       style: TextStyle(
                         fontSize: 14,
-                        color: Colors.grey.shade600,
+                        color: Colors.white,
                       ),
                     ),
                   ],
