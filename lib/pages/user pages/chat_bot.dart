@@ -1,6 +1,5 @@
-import 'package:dialog_flowtter/dialog_flowtter.dart';
 import 'package:flutter/material.dart';
-import 'package:med/widgets/appbar.dart';
+import 'package:med/services/ollma_service.dart';
 
 class ChatBotPage extends StatefulWidget {
   const ChatBotPage({super.key});
@@ -10,7 +9,6 @@ class ChatBotPage extends StatefulWidget {
 }
 
 class _ChatBotPageState extends State<ChatBotPage> with TickerProviderStateMixin {
-  late DialogFlowtter dialogFlowtter;
   final TextEditingController _messageController = TextEditingController();
   final ScrollController _scrollController = ScrollController();
   late AnimationController _animationController;
@@ -18,46 +16,61 @@ class _ChatBotPageState extends State<ChatBotPage> with TickerProviderStateMixin
 
   List<Map<String, dynamic>> messages = [];
   bool isTyping = false;
-  bool isInitialized = false;
+ bool isInitialized = false;
 
-  @override
-  void initState() {
-    super.initState();
-    _animationController = AnimationController(
-      duration: const Duration(milliseconds: 300),
-      vsync: this,
-    );
-    _fadeAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
-      CurvedAnimation(parent: _animationController, curve: Curves.easeInOut),
-    );
-    initDialogFlow();
-    _showWelcomeMessage();
-  }
+  // Medical knowledge base
+final OllamaService _ollamaService = OllamaService();
 
-  Future<void> initDialogFlow() async {
-    try {
-      dialogFlowtter = await DialogFlowtter.fromFile(
-        path: 'assets/dialogflow_auth.json',
-      );
-      setState(() {
-        isInitialized = true;
-      });
-    } catch (e) {
-      setState(() {
-        messages.add({
-          'message': {'text': ['Sorry, I\'m having trouble connecting. Please try again later.']}, 
-          'isUser': false,
-          'isError': true
-        });
-      });
+void _checkOllamaConnection() async {
+  try {
+    bool isConnected = await _ollamaService.checkConnection();
+    setState(() {
+      isInitialized = isConnected;
+    });
+    
+    if (isConnected) {
+      _showWelcomeMessage();
+    } else {
+      _showConnectionError();
     }
+  } catch (e) {
+    setState(() {
+      isInitialized = false;
+    });
+    _showConnectionError();
   }
+}
+
+void _showConnectionError() {
+  setState(() {
+    messages.add({
+      'message': {'text': ['⚠️ Unable to connect to Ollama service. Please ensure:\n\n1. Ollama is installed and running\n2. Your computer IP is correctly configured\n3. Both devices are on the same network\n\nTap the retry button to try again.']}, 
+      'isUser': false,
+      'isError': true
+    });
+  });
+}
+
+@override
+void initState() {
+  super.initState();
+  _animationController = AnimationController(
+    duration: const Duration(milliseconds: 300),
+    vsync: this,
+  );
+  _fadeAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
+    CurvedAnimation(parent: _animationController, curve: Curves.easeInOut),
+  );
+  
+  // Check Ollama connection instead of showing welcome immediately
+  _checkOllamaConnection();
+}
 
   void _showWelcomeMessage() {
     Future.delayed(const Duration(milliseconds: 500), () {
       setState(() {
         messages.add({
-          'message': {'text': ['Hello! I\'m your medical assistant. How can I help you today?']}, 
+          'message': {'text': ['Hello! I\'m your medical assistant. I can help you with symptoms, general health advice, and medical information. How can I assist you today?']}, 
           'isUser': false,
           'isWelcome': true
         });
@@ -67,43 +80,43 @@ class _ChatBotPageState extends State<ChatBotPage> with TickerProviderStateMixin
   }
 
   void sendMessage(String text) async {
-    if (text.trim().isEmpty || !isInitialized) return;
+  if (text.trim().isEmpty) return;
 
-    setState(() {
-      messages.add({'message': {'text': [text]}, 'isUser': true});
-      isTyping = true;
-    });
+  setState(() {
+    messages.add({'message': {'text': [text]}, 'isUser': true});
+    isTyping = true;
+  });
 
-    _messageController.clear();
-    _scrollToBottom();
+  _messageController.clear();
+  _scrollToBottom();
 
-    try {
-      final response = await dialogFlowtter.detectIntent(
-        queryInput: QueryInput(text: TextInput(text: text)),
-      );
-
-      setState(() {
-        isTyping = false;
-      });
-
-      if (response.message != null) {
-        setState(() {
-          messages.add({'message': response.message!.toJson(), 'isUser': false});
-        });
-        _scrollToBottom();
-      }
-    } catch (e) {
-      setState(() {
-        isTyping = false;
-        messages.add({
-          'message': {'text': ['Sorry, I encountered an error. Please try again.']}, 
-          'isUser': false,
-          'isError': true
-        });
-      });
-      _scrollToBottom();
+  try {
+    // Check connection first
+    bool isConnected = await _ollamaService.checkConnection();
+    
+    if (!isConnected) {
+      throw Exception('Unable to connect to Ollama service');
     }
+
+    final response = await _ollamaService.generateResponse(text);
+    
+    setState(() {
+      isTyping = false;
+      messages.add({'message': {'text': [response]}, 'isUser': false});
+    });
+    _scrollToBottom();
+  } catch (e) {
+    setState(() {
+      isTyping = false;
+      messages.add({
+        'message': {'text': ['Sorry, I\'m having trouble connecting to the medical assistant. Please make sure Ollama is running on your computer and try again.\n\nTroubleshooting:\n1. Check if Ollama service is running\n2. Verify your computer\'s IP address\n3. Ensure both devices are on the same network\n\nError: ${e.toString()}']}, 
+        'isUser': false,
+        'isError': true
+      });
+    });
+    _scrollToBottom();
   }
+}
 
   void _scrollToBottom() {
     Future.delayed(const Duration(milliseconds: 100), () {
@@ -119,7 +132,6 @@ class _ChatBotPageState extends State<ChatBotPage> with TickerProviderStateMixin
 
   @override
   void dispose() {
-    dialogFlowtter.dispose();
     _messageController.dispose();
     _scrollController.dispose();
     _animationController.dispose();
@@ -158,7 +170,7 @@ class _ChatBotPageState extends State<ChatBotPage> with TickerProviderStateMixin
                         radius: 12,
                         backgroundColor: Colors.deepPurple.shade100,
                         child: Icon(
-                          Icons.smart_toy,
+                          Icons.healing,
                           size: 16,
                           color: Colors.deepPurple.shade600,
                         ),
@@ -312,7 +324,7 @@ class _ChatBotPageState extends State<ChatBotPage> with TickerProviderStateMixin
             ),
             const SizedBox(width: 12),
             Text(
-              'Thinking...',
+              'Analyzing...',
               style: TextStyle(
                 color: Colors.grey.shade600,
                 fontStyle: FontStyle.italic,
@@ -351,16 +363,11 @@ class _ChatBotPageState extends State<ChatBotPage> with TickerProviderStateMixin
                 padding: const EdgeInsets.all(16.0),
                 child: Row(
                   children: [
-                    IconButton(
-                      icon: const Icon(Icons.arrow_back_ios, color: Colors.white),
-                      onPressed: () => Navigator.pop(context),
-                    ),
-                    const SizedBox(width: 8),
                     CircleAvatar(
                       radius: 20,
                       backgroundColor: Colors.white.withOpacity(0.2),
                       child: Icon(
-                        Icons.smart_toy,
+                        Icons.healing,
                         color: Colors.white,
                         size: 24,
                       ),
@@ -379,7 +386,7 @@ class _ChatBotPageState extends State<ChatBotPage> with TickerProviderStateMixin
                             ),
                           ),
                           Text(
-                            isInitialized ? 'Online' : 'Connecting...',
+                            'Ready to help',
                             style: TextStyle(
                               color: Colors.white.withOpacity(0.8),
                               fontSize: 12,
@@ -391,8 +398,8 @@ class _ChatBotPageState extends State<ChatBotPage> with TickerProviderStateMixin
                     Container(
                       width: 10,
                       height: 10,
-                      decoration: BoxDecoration(
-                        color: isInitialized ? Colors.green : Colors.orange,
+                      decoration: const BoxDecoration(
+                        color: Colors.green,
                         shape: BoxShape.circle,
                       ),
                     ),
@@ -453,9 +460,8 @@ class _ChatBotPageState extends State<ChatBotPage> with TickerProviderStateMixin
                   controller: _messageController,
                   textInputAction: TextInputAction.send,
                   onSubmitted: sendMessage,
-                  enabled: isInitialized,
                   decoration: InputDecoration(
-                    hintText: isInitialized ? 'Ask me anything about health...' : 'Connecting...',
+                    hintText: 'Ask me about symptoms, health advice...',
                     hintStyle: TextStyle(color: Colors.grey.shade500),
                     contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
                     border: InputBorder.none,
@@ -488,7 +494,7 @@ class _ChatBotPageState extends State<ChatBotPage> with TickerProviderStateMixin
               ),
               child: IconButton(
                 icon: const Icon(Icons.send_rounded, color: Colors.white),
-                onPressed: isInitialized ? () => sendMessage(_messageController.text) : null,
+                onPressed: () => sendMessage(_messageController.text),
                 splashColor: Colors.white.withOpacity(0.3),
               ),
             ),
