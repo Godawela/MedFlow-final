@@ -7,7 +7,6 @@ import 'dart:convert';
 import 'package:med/pages/user%20pages/symptom_details_page.dart';
 import 'package:med/routes/router.dart';
 import 'package:med/widgets/appbar.dart';
-import 'package:med/widgets/symptom_button.dart';
 import 'package:med/widgets/user_greetings.dart';
 
 class SymptomPageAdmin extends StatefulWidget {

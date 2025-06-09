@@ -435,7 +435,7 @@ class _NotePageState extends State<NotePage> with TickerProviderStateMixin {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                        const Text(
-                          'Tap on the note to edit',
+                          'Tap on the notes to edit',
                           style:  TextStyle(
                             color: Colors.white,
                             fontSize: 18,

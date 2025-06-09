@@ -180,16 +180,27 @@ class _AddCategoryPageState extends State<AddCategoryPage> with TickerProviderSt
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.grey.shade50,
-      body: Column(
-        children: [
-          const CurvedAppBar(
-            title: 'Add New Category',
-            isProfileAvailable: false,
-            showIcon: true,
-            isBack: true,
+     appBar: AppBar(
+        title: const Text(
+          'Add New Category',
+          style: TextStyle(
+            fontWeight: FontWeight.w600,
+            fontSize: 20,
           ),
+        ),
+        backgroundColor: Colors.white,
+        foregroundColor: Colors.black87,
+        centerTitle: true,
+        elevation: 0,
+        shadowColor: Colors.transparent,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back_ios),
+          onPressed: () => Navigator.pop(context),
+        ),
+      ),
+      body: SingleChildScrollView(
           
-          Expanded(
+          
             child: AnimatedBuilder(
               animation: _animationController,
               builder: (context, child) {
@@ -561,8 +572,8 @@ class _AddCategoryPageState extends State<AddCategoryPage> with TickerProviderSt
               },
             ),
           ),
-        ],
-      ),
-    );
+        
+      );
+    
   }
 }

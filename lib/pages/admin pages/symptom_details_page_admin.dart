@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:med/widgets/appbar.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class SymptomDetailPage extends StatefulWidget {

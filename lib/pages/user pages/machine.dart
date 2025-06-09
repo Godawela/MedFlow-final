@@ -1,5 +1,7 @@
 // Category List Page 
 
+import 'dart:math';
+
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:http/http.dart' as http;
@@ -7,6 +9,7 @@ import 'dart:convert';
 
 import 'package:med/pages/user%20pages/device_list_page.dart';
 import 'package:med/widgets/appbar.dart';
+import 'package:med/widgets/quick_tip_flash_card.dart';
 import 'package:med/widgets/user_greetings.dart';
 
 class MachinePage extends StatefulWidget {
@@ -25,6 +28,23 @@ class _MachinePageState extends State<MachinePage> with TickerProviderStateMixin
   late Animation<double> _fadeAnimation;
   late Animation<Offset> _slideAnimation;
 
+ final List<Map<String, String>> categoryTips = [
+    {"id": "680a1817041a44101a751d2f", "name": "Home Automation"},
+    {"id": "680e10e3d7e1cb28ac48743f", "name": "Smart Security"},
+    // {"id": "681a2234e4f5g6h7i8j9k0l1", "name": "MRI Machines"},
+    // {"id": "682b3345f6g7h8i9j0k1l2m3", "name": "CT Scanners"},
+    // {"id": "683c4456g7h8i9j0k1l2m3n4", "name": "X-Ray Equipment"},
+    // {"id": "684d5567h8i9j0k1l2m3n4o5", "name": "Ultrasound Devices"},
+    // {"id": "685e6678i9j0k1l2m3n4o5p6", "name": "ECG Monitors"},
+    // {"id": "686f7789j0k1l2m3n4o5p6q7", "name": "Ventilators"},
+  ];
+
+  // Method to get random category
+  Map<String, String> getRandomCategory() {
+    final random = Random();
+    return categoryTips[random.nextInt(categoryTips.length)];
+  }
+  
   @override
   void initState() {
     super.initState();
@@ -462,6 +482,27 @@ Expanded(
                       ),
           ),
         ],
+      ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {
+          // Get a random category each time the button is pressed
+          final randomCategory = getRandomCategory();
+          
+          showDialog(
+            context: context,
+            barrierDismissible: true,
+            barrierColor: Colors.transparent,
+            builder: (BuildContext context) {
+              return QuickTipsFlashcards(
+                categoryId: randomCategory["id"]!,
+                categoryName: randomCategory["name"]!,
+              );
+            },
+          );
+        },
+        child: Icon(Icons.tips_and_updates),
+        backgroundColor: Colors.blue,
+        tooltip: 'Random Quick Tips',
       ),
     );
   }
