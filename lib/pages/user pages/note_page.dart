@@ -68,7 +68,7 @@ class _NotePageState extends State<NotePage> with TickerProviderStateMixin {
       return;
     }
 
-    final response = await http.post(
+  await http.post(
       Uri.parse('$baseUrl/${user.uid}'),
       headers: {'Content-Type': 'application/json'},
       body: jsonEncode({
@@ -77,21 +77,22 @@ class _NotePageState extends State<NotePage> with TickerProviderStateMixin {
     );
   }
 
-  Future<void> updateNote(String id, String newText) async {
-    await http.put(
-      Uri.parse('$baseUrl/$id'),
-      headers: {'Content-Type': 'application/json'},
-      body: jsonEncode({'text': newText}),
-    );
-  }
+Future<void> updateNote(String uid, String id, String newText) async {
+  await http.put(
+    Uri.parse('$baseUrl/$uid/$id'),
+    headers: {'Content-Type': 'application/json'},
+    body: jsonEncode({'text': newText}),
+  );
+}
 
-  Future<void> deleteNote(String id) async {
-    await http.delete(Uri.parse('$baseUrl/$id'));
-  }
+Future<void> deleteNote(String uid, String id) async {
+  await http.delete(Uri.parse('$baseUrl/$uid/$id'));
+}
 
-  Future<void> deleteAllNotes() async {
-    await http.delete(Uri.parse(baseUrl));
-  }
+Future<void> deleteAllNotes(String uid) async {
+  await http.delete(Uri.parse('$baseUrl/$uid'));
+}
+
 
   @override
   void didChangeDependencies() {
@@ -292,7 +293,10 @@ class _NotePageState extends State<NotePage> with TickerProviderStateMixin {
                               if (noteToUpdate == null) {
                                 await addNote(noteText);
                               } else {
-                                await updateNote(noteToUpdate.id, noteText);
+                                final user = FirebaseAuth.instance.currentUser;
+                                if (user != null) {
+                                  await updateNote(user.uid, noteToUpdate.id, noteText);
+                                }
                               }
 
                               currentNotes = await fetchNotes();
@@ -343,7 +347,10 @@ class _NotePageState extends State<NotePage> with TickerProviderStateMixin {
           ),
           ElevatedButton(
             onPressed: () async {
-              await deleteNote(note.id);
+              final user = FirebaseAuth.instance.currentUser;
+              if (user != null) {
+                await deleteNote(user.uid, note.id);
+              }
               currentNotes = await fetchNotes();
               setState(() {});
               Navigator.pop(context);
@@ -374,7 +381,10 @@ class _NotePageState extends State<NotePage> with TickerProviderStateMixin {
             ),
             ElevatedButton(
               onPressed: () async {
-                await deleteAllNotes();
+                final user = FirebaseAuth.instance.currentUser;
+                if (user != null) {
+                  await deleteAllNotes(user.uid);
+                }
                 currentNotes = await fetchNotes();
                 setState(() {});
                 Navigator.pop(context);

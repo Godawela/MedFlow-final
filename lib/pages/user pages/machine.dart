@@ -483,27 +483,50 @@ Expanded(
           ),
         ],
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          // Get a random category each time the button is pressed
-          final randomCategory = getRandomCategory();
-          
-          showDialog(
-            context: context,
-            barrierDismissible: true,
-            barrierColor: Colors.transparent,
-            builder: (BuildContext context) {
-              return QuickTipsFlashcards(
-                categoryId: randomCategory["id"]!,
-                categoryName: randomCategory["name"]!,
-              );
-            },
-          );
-        },
-        child: Icon(Icons.tips_and_updates),
-        backgroundColor: Colors.blue,
-        tooltip: 'Random Quick Tips',
+    
+    floatingActionButton: FloatingActionButton(
+  onPressed: () {
+    final randomCategory = getRandomCategory();
+    showDialog(
+      context: context,
+      barrierDismissible: true,
+      barrierColor: Colors.transparent,
+      builder: (BuildContext context) {
+        return QuickTipsFlashcards(
+          categoryId: randomCategory["id"]!,
+          categoryName: randomCategory["name"]!,
+        );
+      },
+    );
+  },
+  elevation: 6.0,
+  backgroundColor: Colors.transparent,
+  tooltip: 'Random Quick Tips',
+  child: Container(
+    width: 56,
+    height: 56,
+    decoration: BoxDecoration(
+      gradient: LinearGradient(
+        colors: [Colors.blue.shade400, Colors.purple.shade600],
+        begin: Alignment.topLeft,
+        end: Alignment.bottomRight,
       ),
+      shape: BoxShape.circle,
+      boxShadow: [
+        BoxShadow(
+          color: Colors.blue.withOpacity(0.3),
+          blurRadius: 8,
+          offset: const Offset(0, 4),
+        ),
+      ],
+    ),
+    child: const Icon(
+      Icons.tips_and_updates,
+      color: Colors.white,
+      size: 24.0,
+    ),
+  ),
+),
     );
   }
 }
