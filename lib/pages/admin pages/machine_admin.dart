@@ -1,5 +1,7 @@
 // Admin Category List Page with Modern Design
 
+import 'dart:async';
+
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -28,6 +30,8 @@ class _MachinePageAdminState extends State<MachinePageAdmin> with TickerProvider
   late AnimationController _headerAnimationController;
   late Animation<double> _fadeAnimation;
   late Animation<Offset> _slideAnimation;
+Timer? _refreshTimer;
+
 
   @override
   void initState() {
@@ -51,42 +55,53 @@ class _MachinePageAdminState extends State<MachinePageAdmin> with TickerProvider
     ).animate(CurvedAnimation(parent: _animationController, curve: Curves.easeOut));
     
     fetchCategories();
+    _refreshTimer = Timer.periodic(const Duration(seconds: 30), (timer) {
+    fetchCategories();
+  });
   }
 
   @override
   void dispose() {
     _animationController.dispose();
     _headerAnimationController.dispose();
+     _refreshTimer?.cancel();
     super.dispose();
   }
 
-  Future<void> fetchCategories() async {
-    try {
-      final response = await http.get(
-        Uri.parse('http://10.0.2.2:8000/api/categories'),
-      );
+Future<void> fetchCategories() async {
+  try {
+    final response = await http.get(
+      Uri.parse('http://10.0.2.2:8000/api/category'),
+      headers: {
+        'Cache-Control': 'no-cache, no-store, must-revalidate',
+        'Pragma': 'no-cache',
+      },
+    );
 
-      if (response.statusCode == 200) {
-        final List<dynamic> fetchedCategories = json.decode(response.body);
-        setState(() {
-          categories = fetchedCategories.cast<String>();
-          isLoading = false;
-        });
-        _animationController.forward();
-        _headerAnimationController.forward();
-      } else {
-        setState(() {
-          error = 'Failed to load categories: ${response.statusCode}';
-          isLoading = false;
-        });
-      }
-    } catch (e) {
+    if (response.statusCode == 200) {
+      final List<dynamic> fetchedCategories = json.decode(response.body);
       setState(() {
-        error = 'Error: $e';
+        // Extract just the names from each category object
+        categories = fetchedCategories.map<String>((category) => 
+          category['name'] as String
+        ).toList();
+        isLoading = false;
+      });
+      _animationController.forward();
+      _headerAnimationController.forward();
+    } else {
+      setState(() {
+        error = 'Failed to load categories: ${response.statusCode}';
         isLoading = false;
       });
     }
+  } catch (e) {
+    setState(() {
+      error = 'Error: $e';
+      isLoading = false;
+    });
   }
+}
 
   // Get icon for category
   IconData getCategoryIcon(String category) {
