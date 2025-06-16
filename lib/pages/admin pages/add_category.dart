@@ -6,7 +6,6 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 
-import 'package:med/widgets/appbar.dart';
 
 @RoutePage()
 class AddCategoryPage extends StatefulWidget {

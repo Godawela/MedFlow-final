@@ -32,7 +32,6 @@ class _QuickTipsFlashcardsState extends State<QuickTipsFlashcards>
   int _currentIndex = 0;
   List<QuickTip> _tips = [];
   bool _isLoading = true;
-  bool _isFlipped = false;
   bool _showContent = false;
 
   // Color themes for different cards
@@ -317,7 +316,6 @@ class _QuickTipsFlashcardsState extends State<QuickTipsFlashcards>
             onPageChanged: (index) {
               setState(() {
                 _currentIndex = index;
-                _isFlipped = false;
                 _showContent = false;
               });
               _progressController.forward();

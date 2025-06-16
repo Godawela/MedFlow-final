@@ -1,4 +1,4 @@
-//individual device information page
+//individual catagory information page
 
 import 'dart:ui';
 import 'package:auto_route/auto_route.dart';
@@ -21,11 +21,14 @@ class DeviceListPageAdmin extends StatefulWidget {
 }
 
 class _DeviceListPageAdminState extends State<DeviceListPageAdmin>
+
     with TickerProviderStateMixin {
+      final GlobalKey<RefreshIndicatorState> _refreshIndicatorKey = GlobalKey();
   List<dynamic> devices = [];
   bool isLoading = true;
   String? error;
   String? categoryDescription;
+  String? categoryId;
   late AnimationController _animationController;
   late Animation<double> _fadeAnimation;
 
@@ -79,25 +82,358 @@ class _DeviceListPageAdminState extends State<DeviceListPageAdmin>
 
   Future<void> fetchCategoryDescription() async {
     try {
+        print('Fetching category description for ${widget.category}');
+        final response = await http.get(
+            Uri.parse('http://10.0.2.2:8000/api/category/name/${widget.category}'),
+        );
+
+        print('Category description response: ${response.statusCode} - ${response.body}');
+
+        if (response.statusCode == 200) {
+            final data = json.decode(response.body);
+            print('Received category data: $data');
+            setState(() {
+                categoryDescription = data['description'];
+                categoryId = data['_id']; // Ensure this matches your backend response
+            });
+            print('Set category ID to: $categoryId');
+        } else {
+            print('Failed to fetch category description');
+            setState(() {
+                categoryDescription = 'No description available.';
+            });
+        }
+    } catch (e) {
+        print('Error fetching category description: $e');
+        setState(() {
+            categoryDescription = 'Error fetching description.';
+        });
+    }
+}
+
+Future<void> updateCategory(String newName, String newDescription) async {
+    if (categoryId == null) {
+        print('Category ID is null - cannot update');
+        return;
+    }
+
+    print('Attempting to update category $categoryId with name: $newName, description: $newDescription');
+    
+    try {
+        final response = await http.put(
+            Uri.parse('http://10.0.2.2:8000/api/category/$categoryId'),
+            headers: {'Content-Type': 'application/json'},
+            body: json.encode({
+                'name': newName,
+                'description': newDescription,
+            }),
+        );
+
+        print('Update response: ${response.statusCode} - ${response.body}');
+
+        if (response.statusCode == 200) {
+        setState(() {
+          categoryDescription = newDescription;
+        });
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Category updated successfully!'),
+            backgroundColor: Colors.green,
+          ),
+        );
+      } else {
+            print('Update failed with status ${response.statusCode}');
+            throw Exception('Failed to update category');
+        }
+    } catch (e) {
+        print('Update error: $e');
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Error updating category: $e'),
+          backgroundColor: Colors.red,
+        ),
+      );
+    }
+  }
+
+   Future<void> deleteCategory() async {
+    if (categoryId == null) {
+      print('Delete aborted: categoryId is null');
+      return;
+    }
+
+    try {
+      print('Initiating delete for category $categoryId');
+      final response = await http.delete(
+        Uri.parse('http://10.0.2.2:8000/api/category/$categoryId'),
+      );
+
+      print('Delete response: ${response.statusCode} - ${response.body}');
+
+      if (response.statusCode == 200) {
+        // Perform a complete data refresh
+        await _refreshData();
+        
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Category deleted successfully!'),
+              backgroundColor: Colors.green,
+            ),
+          );
+          
+          // Close this page if we're viewing the deleted category
+          if (widget.category == 'Meow') {
+            Navigator.of(context).pop(true);
+          }
+        }
+      } else {
+        throw Exception('Delete failed with status ${response.statusCode}');
+      }
+    } catch (e) {
+      print('Delete error: $e');
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Error deleting category: ${e.toString()}'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    }
+  }
+
+  Future<void> _refreshData() async {
+    print('Performing full data refresh');
+    await Future.wait([
+      fetchDevicesByCategory(),
+      _forceFetchCategories(), // New function
+    ]);
+    if (mounted) setState(() {});
+  }
+
+  Future<void> _forceFetchCategories() async {
+    print('Force-fetching categories');
+    try {
       final response = await http.get(
-        Uri.parse('http://10.0.2.2:8000/api/category/name/${widget.category}'),
+        Uri.parse('http://10.0.2.2:8000/api/category'),
+        headers: {
+          'Cache-Control': 'no-cache',
+          'Pragma': 'no-cache',
+        },
       );
 
       if (response.statusCode == 200) {
         final data = json.decode(response.body);
-        setState(() {
-          categoryDescription = data['description'];
-        });
-      } else {
-        setState(() {
-          categoryDescription = 'No description available.';
-        });
+        print('Received ${data.length} categories from server');
+        // Update your categories list here
       }
     } catch (e) {
-      setState(() {
-        categoryDescription = 'Error fetching description.';
-      });
+      print('Error force-fetching categories: $e');
     }
+  }
+
+Future<void> fetchAllCategories() async {
+  try {
+    final response = await http.get(
+      Uri.parse('http://10.0.2.2:8000/api/category'),
+    );
+
+    if (response.statusCode == 200) {
+      final data = json.decode(response.body);
+      print('Fetched categories: ${data.length} items');
+      // Update your state management here
+    }
+  } catch (e) {
+    print('Error fetching categories: $e');
+  }
+}
+
+  void showUpdateCategoryDialog() {
+    final nameController = TextEditingController(text: widget.category);
+    final descriptionController = TextEditingController(text: categoryDescription ?? '');
+
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(20),
+          ),
+          title: Text(
+            'Update Category',
+            style: GoogleFonts.inter(
+              fontSize: 20,
+              fontWeight: FontWeight.bold,
+              color: Colors.deepPurple.shade700,
+            ),
+          ),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              TextField(
+                controller: nameController,
+                decoration: InputDecoration(
+                  labelText: 'Category Name',
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                    borderSide: BorderSide(color: Colors.deepPurple.shade400),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 16),
+              TextField(
+                controller: descriptionController,
+                maxLines: 3,
+                decoration: InputDecoration(
+                  labelText: 'Description',
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                    borderSide: BorderSide(color: Colors.deepPurple.shade400),
+                  ),
+                ),
+              ),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: Text(
+                'Cancel',
+                style: GoogleFonts.inter(color: Colors.grey.shade600),
+              ),
+            ),
+            ElevatedButton(
+              onPressed: () {
+                if (nameController.text.trim().isNotEmpty) {
+                  updateCategory(
+                    nameController.text.trim(),
+                    descriptionController.text.trim(),
+                  );
+                  Navigator.of(context).pop();
+                }
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.deepPurple.shade500,
+                foregroundColor: Colors.white,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+              ),
+              child: Text(
+                'Update',
+                style: GoogleFonts.inter(fontWeight: FontWeight.w600),
+              ),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  void showDeleteConfirmationDialog() {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(20),
+          ),
+          title: Row(
+            children: [
+              Icon(
+                Icons.warning_rounded,
+                color: Colors.red.shade500,
+                size: 28,
+              ),
+              const SizedBox(width: 12),
+              Text(
+                'Delete Category',
+                style: GoogleFonts.inter(
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.red.shade700,
+                ),
+              ),
+            ],
+          ),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'Are you sure you want to delete this category?',
+                style: GoogleFonts.inter(
+                  fontSize: 16,
+                  color: Colors.grey.shade800,
+                ),
+              ),
+              const SizedBox(height: 12),
+              Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: Colors.red.shade50,
+                  borderRadius: BorderRadius.circular(8),
+                  border: Border.all(color: Colors.red.shade200),
+                ),
+                child: Row(
+                  children: [
+                    Icon(
+                      Icons.info_outline_rounded,
+                      color: Colors.red.shade600,
+                      size: 20,
+                    ),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: Text(
+                        'This will permanently delete all ${devices.length} devices in this category.',
+                        style: GoogleFonts.inter(
+                          fontSize: 14,
+                          color: Colors.red.shade700,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: Text(
+                'Cancel',
+                style: GoogleFonts.inter(color: Colors.grey.shade600),
+              ),
+            ),
+            ElevatedButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+                deleteCategory();
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.red.shade500,
+                foregroundColor: Colors.white,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+              ),
+              child: Text(
+                'Delete',
+                style: GoogleFonts.inter(fontWeight: FontWeight.w600),
+              ),
+            ),
+          ],
+        );
+      },
+    );
   }
 
   // Get icon for device type
@@ -135,7 +471,10 @@ class _DeviceListPageAdminState extends State<DeviceListPageAdmin>
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.grey.shade50,
-      body: Column(
+      body: RefreshIndicator(
+        key: _refreshIndicatorKey,
+        onRefresh: _refreshData,
+        child: Column(
         children: [
           CurvedAppBar(
             title: widget.category,
@@ -251,7 +590,7 @@ class _DeviceListPageAdminState extends State<DeviceListPageAdmin>
                               padding: const EdgeInsets.all(20.0),
                               child: Column(
                                 children: [
-                                  // Category header section
+                                  // Category header section with action buttons
                                   Container(
                                     width: double.infinity,
                                     padding: const EdgeInsets.all(24),
@@ -319,6 +658,67 @@ class _DeviceListPageAdminState extends State<DeviceListPageAdmin>
                                             ),
                                           ),
                                         ],
+                                        
+                                        // Action buttons moved here
+                                        const SizedBox(height: 20),
+                                        Row(
+                                          children: [
+                                            Expanded(
+                                              child: ElevatedButton.icon(
+                                                onPressed: showUpdateCategoryDialog,
+                                                icon: const Icon(Icons.edit_rounded, size: 18),
+                                                label: Text(
+                                                  'Edit Category',
+                                                  style: GoogleFonts.inter(
+                                                    fontWeight: FontWeight.w600,
+                                                    fontSize: 14,
+                                                  ),
+                                                ),
+                                                style: ElevatedButton.styleFrom(
+                                                  backgroundColor: Colors.white.withOpacity(0.2),
+                                                  foregroundColor: Colors.white,
+                                                  elevation: 0,
+                                                  padding: const EdgeInsets.symmetric(
+                                                    vertical: 12,
+                                                    horizontal: 16,
+                                                  ),
+                                                  shape: RoundedRectangleBorder(
+                                                    borderRadius: BorderRadius.circular(10),
+                                                    side: BorderSide(
+                                                      color: Colors.white.withOpacity(0.3),
+                                                    ),
+                                                  ),
+                                                ),
+                                              ),
+                                            ),
+                                            const SizedBox(width: 12),
+                                            Expanded(
+                                              child: ElevatedButton.icon(
+                                                onPressed: showDeleteConfirmationDialog,
+                                                icon: const Icon(Icons.delete_rounded, size: 18),
+                                                label: Text(
+                                                  'Delete Category',
+                                                  style: GoogleFonts.inter(
+                                                    fontWeight: FontWeight.w600,
+                                                    fontSize: 14,
+                                                  ),
+                                                ),
+                                                style: ElevatedButton.styleFrom(
+                                                  backgroundColor: Colors.red.shade500.withOpacity(0.9),
+                                                  foregroundColor: Colors.white,
+                                                  elevation: 0,
+                                                  padding: const EdgeInsets.symmetric(
+                                                    vertical: 12,
+                                                    horizontal: 16,
+                                                  ),
+                                                  shape: RoundedRectangleBorder(
+                                                    borderRadius: BorderRadius.circular(10),
+                                                  ),
+                                                ),
+                                              ),
+                                            ),
+                                          ],
+                                        ),
                                       ],
                                     ),
                                   ),
@@ -551,6 +951,7 @@ class _DeviceListPageAdminState extends State<DeviceListPageAdmin>
           ),
         ],
       ),
+      ),
       floatingActionButton: FloatingActionButton.extended(
         onPressed: () {
           // Add a new machine details
@@ -567,6 +968,7 @@ class _DeviceListPageAdminState extends State<DeviceListPageAdmin>
           ),
         ),
       ),
+    
     );
   }
 }
