@@ -2,6 +2,7 @@ import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:http/http.dart' as http;
+import 'package:med/pages/admin%20pages/symptom_details_page_admin.dart';
 import 'dart:convert';
 
 import 'package:med/pages/user%20pages/symptom_details_page.dart';
@@ -379,7 +380,7 @@ class _SymptomPageAdminState extends State<SymptomPageAdmin> with TickerProvider
                                                         Navigator.push(
                                                           context,
                                                           MaterialPageRoute(
-                                                            builder: (context) => SymptomDetailPage(
+                                                            builder: (context) => SymptomDetailPageAdmin(
                                                               symptomName: symptom,
                                                             ),
                                                           ),
