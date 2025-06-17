@@ -292,7 +292,7 @@ class _MachineDetailPageAdminState extends State<MachineDetailPageAdmin> with Ti
                                             color: Colors.white.withOpacity(0.2),
                                             borderRadius: BorderRadius.circular(16),
                                           ),
-                                          child: Icon(
+                                          child: const Icon(
                                             Icons.medical_services_rounded,
                                             size: 40,
                                             color: Colors.white,

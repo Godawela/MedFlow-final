@@ -668,7 +668,7 @@ Future<void> fetchAllCategories() async {
                                                 onPressed: showUpdateCategoryDialog,
                                                 icon: const Icon(Icons.edit_rounded, size: 18),
                                                 label: Text(
-                                                  'Edit Category',
+                                                  'Edit',
                                                   style: GoogleFonts.inter(
                                                     fontWeight: FontWeight.w600,
                                                     fontSize: 14,
@@ -697,7 +697,7 @@ Future<void> fetchAllCategories() async {
                                                 onPressed: showDeleteConfirmationDialog,
                                                 icon: const Icon(Icons.delete_rounded, size: 18),
                                                 label: Text(
-                                                  'Delete Category',
+                                                  'Delete',
                                                   style: GoogleFonts.inter(
                                                     fontWeight: FontWeight.w600,
                                                     fontSize: 14,
