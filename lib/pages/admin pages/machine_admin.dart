@@ -1,4 +1,4 @@
-// Admin Category List Page with Modern Design
+// Admin Category List Page 
 
 import 'dart:async';
 
@@ -7,6 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:http/http.dart' as http;
 import 'package:med/pages/admin%20pages/device_list_page_admin.dart';
+import 'package:med/pages/admin%20pages/quickTipManagementPage.dart';
 import 'dart:convert';
 
 import 'package:med/routes/router.dart';
@@ -158,6 +159,7 @@ class _MachinePageAdminState extends State<MachinePageAdmin>
             showIcon: true,
             isBack: true,
           ),
+         
           Expanded(
             child: isLoading
                 ? Center(
@@ -361,6 +363,39 @@ class _MachinePageAdminState extends State<MachinePageAdmin>
                                     ),
 
                                     const SizedBox(height: 16),
+                                     // Quick Tips Management Button
+          Container(
+            margin: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+            child: ElevatedButton.icon(
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const QuickTipsManagementPage(),
+                  ),
+                );
+              },
+              icon: const Icon(Icons.lightbulb_outline_rounded),
+              label: Text(
+                'Manage Quick Tips',
+                style: GoogleFonts.inter(
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.orange.shade500,
+                foregroundColor: Colors.white,
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 20,
+                  vertical: 12,
+                ),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                elevation: 4,
+              ),
+            ),
+          ),
 
                                     // Categories grid
                                     Expanded(

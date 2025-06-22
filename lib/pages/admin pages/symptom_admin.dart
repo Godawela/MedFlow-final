@@ -5,7 +5,6 @@ import 'package:http/http.dart' as http;
 import 'package:med/pages/admin%20pages/symptom_details_page_admin.dart';
 import 'dart:convert';
 
-import 'package:med/pages/user%20pages/symptom_details_page.dart';
 import 'package:med/routes/router.dart';
 import 'package:med/widgets/appbar.dart';
 import 'package:med/widgets/user_greetings.dart';
@@ -17,7 +16,8 @@ class SymptomPageAdmin extends StatefulWidget {
   State<SymptomPageAdmin> createState() => _SymptomPageAdminState();
 }
 
-class _SymptomPageAdminState extends State<SymptomPageAdmin> with TickerProviderStateMixin {
+class _SymptomPageAdminState extends State<SymptomPageAdmin>
+    with TickerProviderStateMixin {
   List<dynamic> symptoms = [];
   bool isLoading = true;
   String? error;
@@ -37,16 +37,17 @@ class _SymptomPageAdminState extends State<SymptomPageAdmin> with TickerProvider
       duration: const Duration(milliseconds: 600),
       vsync: this,
     );
-    
+
     _fadeAnimation = Tween<double>(begin: 0, end: 1).animate(
       CurvedAnimation(parent: _animationController, curve: Curves.easeOut),
     );
-    
+
     _slideAnimation = Tween<Offset>(
       begin: const Offset(0, 0.3),
       end: Offset.zero,
-    ).animate(CurvedAnimation(parent: _animationController, curve: Curves.easeOut));
-    
+    ).animate(
+        CurvedAnimation(parent: _animationController, curve: Curves.easeOut));
+
     fetchSymptoms();
   }
 
@@ -135,7 +136,6 @@ class _SymptomPageAdminState extends State<SymptomPageAdmin> with TickerProvider
             showIcon: true,
             isBack: true,
           ),
-          
           Expanded(
             child: isLoading
                 ? Center(
@@ -262,7 +262,8 @@ class _SymptomPageAdminState extends State<SymptomPageAdmin> with TickerProvider
                                         borderRadius: BorderRadius.circular(20),
                                         boxShadow: [
                                           BoxShadow(
-                                            color: Colors.deepPurple.withOpacity(0.3),
+                                            color: Colors.deepPurple
+                                                .withOpacity(0.3),
                                             blurRadius: 12,
                                             offset: const Offset(0, 6),
                                           ),
@@ -273,12 +274,14 @@ class _SymptomPageAdminState extends State<SymptomPageAdmin> with TickerProvider
                                           Container(
                                             padding: const EdgeInsets.all(16),
                                             decoration: BoxDecoration(
-                                              color: Colors.white.withOpacity(0.2),
+                                              color:
+                                                  Colors.white.withOpacity(0.2),
                                               shape: BoxShape.circle,
                                             ),
                                             child: const CircleAvatar(
                                               radius: 32,
-                                              backgroundImage: AssetImage('assets/images/logo.png'),
+                                              backgroundImage: AssetImage(
+                                                  'assets/images/logo.png'),
                                               backgroundColor: Colors.white,
                                             ),
                                           ),
@@ -289,7 +292,8 @@ class _SymptomPageAdminState extends State<SymptomPageAdmin> with TickerProvider
                                             'Select a symptom to explore possible conditions and treatments',
                                             style: GoogleFonts.inter(
                                               fontSize: 16,
-                                              color: Colors.white.withOpacity(0.9),
+                                              color:
+                                                  Colors.white.withOpacity(0.9),
                                               fontWeight: FontWeight.w500,
                                             ),
                                             textAlign: TextAlign.center,
@@ -297,9 +301,9 @@ class _SymptomPageAdminState extends State<SymptomPageAdmin> with TickerProvider
                                         ],
                                       ),
                                     ),
-                                    
+
                                     const SizedBox(height: 24),
-                                    
+
                                     // Symptoms count
                                     Row(
                                       children: [
@@ -319,7 +323,8 @@ class _SymptomPageAdminState extends State<SymptomPageAdmin> with TickerProvider
                                           ),
                                           decoration: BoxDecoration(
                                             color: Colors.deepPurple.shade100,
-                                            borderRadius: BorderRadius.circular(12),
+                                            borderRadius:
+                                                BorderRadius.circular(12),
                                           ),
                                           child: Text(
                                             '${symptoms.length} symptoms',
@@ -332,13 +337,14 @@ class _SymptomPageAdminState extends State<SymptomPageAdmin> with TickerProvider
                                         ),
                                       ],
                                     ),
-                                    
+
                                     const SizedBox(height: 16),
-                                    
+
                                     // Symptoms grid
                                     Expanded(
                                       child: GridView.builder(
-                                        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                                        gridDelegate:
+                                            const SliverGridDelegateWithFixedCrossAxisCount(
                                           crossAxisCount: 2,
                                           childAspectRatio: 1.2,
                                           crossAxisSpacing: 16,
@@ -346,12 +352,16 @@ class _SymptomPageAdminState extends State<SymptomPageAdmin> with TickerProvider
                                         ),
                                         itemCount: symptoms.length,
                                         itemBuilder: (context, index) {
-                                          final symptom = symptoms[index]['name'];
-                                          final colors = getSymptomColors(index);
+                                          final symptom =
+                                              symptoms[index]['name'];
+                                          final colors =
+                                              getSymptomColors(index);
                                           final icon = getSymptomIcon(symptom);
-                                          
+
                                           return TweenAnimationBuilder<double>(
-                                            duration: Duration(milliseconds: 300 + (index * 100)),
+                                            duration: Duration(
+                                                milliseconds:
+                                                    300 + (index * 100)),
                                             tween: Tween(begin: 0.0, end: 1.0),
                                             builder: (context, value, child) {
                                               return Transform.scale(
@@ -360,79 +370,129 @@ class _SymptomPageAdminState extends State<SymptomPageAdmin> with TickerProvider
                                                   decoration: BoxDecoration(
                                                     gradient: LinearGradient(
                                                       begin: Alignment.topLeft,
-                                                      end: Alignment.bottomRight,
+                                                      end:
+                                                          Alignment.bottomRight,
                                                       colors: colors,
                                                     ),
-                                                    borderRadius: BorderRadius.circular(20),
+                                                    borderRadius:
+                                                        BorderRadius.circular(
+                                                            20),
                                                     boxShadow: [
                                                       BoxShadow(
-                                                        color: colors[0].withOpacity(0.3),
+                                                        color: colors[0]
+                                                            .withOpacity(0.3),
                                                         blurRadius: 8,
-                                                        offset: const Offset(0, 4),
+                                                        offset:
+                                                            const Offset(0, 4),
                                                       ),
                                                     ],
                                                   ),
                                                   child: Material(
                                                     color: Colors.transparent,
                                                     child: InkWell(
-                                                      borderRadius: BorderRadius.circular(20),
+                                                      borderRadius:
+                                                          BorderRadius.circular(
+                                                              20),
                                                       onTap: () {
                                                         Navigator.push(
                                                           context,
                                                           MaterialPageRoute(
-                                                            builder: (context) => SymptomDetailPageAdmin(
-                                                              symptomName: symptom,
+                                                            builder: (context) =>
+                                                                SymptomDetailPageAdmin(
+                                                              symptomName:
+                                                                  symptom,
                                                             ),
                                                           ),
                                                         );
                                                       },
                                                       child: Padding(
-                                                        padding: const EdgeInsets.all(16),
+                                                        padding:
+                                                            const EdgeInsets
+                                                                .all(16),
                                                         child: Column(
-                                                          mainAxisAlignment: MainAxisAlignment.center,
+                                                          mainAxisAlignment:
+                                                              MainAxisAlignment
+                                                                  .center,
                                                           children: [
                                                             Container(
-                                                              padding: const EdgeInsets.all(12),
-                                                              decoration: BoxDecoration(
-                                                                color: Colors.white.withOpacity(0.2),
-                                                                borderRadius: BorderRadius.circular(16),
+                                                              padding:
+                                                                  const EdgeInsets
+                                                                      .all(12),
+                                                              decoration:
+                                                                  BoxDecoration(
+                                                                color: Colors
+                                                                    .white
+                                                                    .withOpacity(
+                                                                        0.2),
+                                                                borderRadius:
+                                                                    BorderRadius
+                                                                        .circular(
+                                                                            16),
                                                               ),
                                                               child: Icon(
                                                                 icon,
                                                                 size: 28,
-                                                                color: Colors.white,
+                                                                color: Colors
+                                                                    .white,
                                                               ),
                                                             ),
-                                                            const SizedBox(height: 10),
+                                                            const SizedBox(
+                                                                height: 10),
                                                             Flexible(
                                                               child: Text(
                                                                 symptom,
-                                                                style: GoogleFonts.inter(
+                                                                style:
+                                                                    GoogleFonts
+                                                                        .inter(
                                                                   fontSize: 15,
-                                                                  fontWeight: FontWeight.bold,
-                                                                  color: Colors.white,
+                                                                  fontWeight:
+                                                                      FontWeight
+                                                                          .bold,
+                                                                  color: Colors
+                                                                      .white,
                                                                 ),
-                                                                textAlign: TextAlign.center,
+                                                                textAlign:
+                                                                    TextAlign
+                                                                        .center,
                                                                 maxLines: 2,
-                                                                overflow: TextOverflow.ellipsis,
+                                                                overflow:
+                                                                    TextOverflow
+                                                                        .ellipsis,
                                                               ),
                                                             ),
-                                                            const SizedBox(height: 6),
+                                                            const SizedBox(
+                                                                height: 6),
                                                             Container(
-                                                              padding: const EdgeInsets.symmetric(
+                                                              padding:
+                                                                  const EdgeInsets
+                                                                      .symmetric(
                                                                 horizontal: 6,
                                                                 vertical: 3,
                                                               ),
-                                                              decoration: BoxDecoration(
-                                                                color: Colors.white.withOpacity(0.2),
-                                                                borderRadius: BorderRadius.circular(8),
+                                                              decoration:
+                                                                  BoxDecoration(
+                                                                color: Colors
+                                                                    .white
+                                                                    .withOpacity(
+                                                                        0.2),
+                                                                borderRadius:
+                                                                    BorderRadius
+                                                                        .circular(
+                                                                            8),
                                                               ),
                                                               child: Text(
                                                                 'View Details',
-                                                                style: GoogleFonts.inter(
+                                                                style:
+                                                                    GoogleFonts
+                                                                        .inter(
                                                                   fontSize: 11,
-                                                                  color: Colors.white.withOpacity(0.9),
-                                                                  fontWeight: FontWeight.w500,
+                                                                  color: Colors
+                                                                      .white
+                                                                      .withOpacity(
+                                                                          0.9),
+                                                                  fontWeight:
+                                                                      FontWeight
+                                                                          .w500,
                                                                 ),
                                                               ),
                                                             ),
@@ -459,10 +519,11 @@ class _SymptomPageAdminState extends State<SymptomPageAdmin> with TickerProvider
         ],
       ),
       floatingActionButton: FloatingActionButton.extended(
-      onPressed: () {
+        onPressed: () {
           // Add a new machine category
           context.router.push(const AddSymptomRoute());
-        },        backgroundColor: Colors.deepPurple.shade500,
+        },
+        backgroundColor: Colors.deepPurple.shade500,
         foregroundColor: Colors.white,
         elevation: 8,
         icon: const Icon(Icons.add_rounded),
