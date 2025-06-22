@@ -21,6 +21,7 @@ class _DeviceListPageState extends State<DeviceListPage> with TickerProviderStat
   bool isLoading = true;
   String? error;
   String? categoryDescription;
+    String? categoryImage;
   late AnimationController _animationController;
   late Animation<double> _fadeAnimation;
 
@@ -71,27 +72,47 @@ class _DeviceListPageState extends State<DeviceListPage> with TickerProviderStat
     }
   }
 
-  Future<void> fetchCategoryDescription() async {
+   Future<void> fetchCategoryDescription() async {
     try {
+      print('Fetching category description for ${widget.category}');
       final response = await http.get(
         Uri.parse('http://10.0.2.2:8000/api/category/name/${widget.category}'),
       );
 
+      print(
+          'Category description response: ${response.statusCode} - ${response.body}');
+
       if (response.statusCode == 200) {
         final data = json.decode(response.body);
+        print('Received category data: $data');
         setState(() {
           categoryDescription = data['description'];
+          categoryImage = data['image'];
         });
+        print('Set category image to: $categoryImage');
       } else {
+        print('Failed to fetch category description');
         setState(() {
           categoryDescription = 'No description available.';
         });
       }
     } catch (e) {
+      print('Error fetching category description: $e');
       setState(() {
         categoryDescription = 'Error fetching description.';
       });
     }
+  }
+
+  //method to construct the full image URL
+  String? getImageUrl() {
+    if (categoryImage == null || categoryImage!.isEmpty) return null;
+
+    // Convert backslashes to forward slashes for URL
+    String imagePath = categoryImage!.replaceAll('\\', '/');
+
+    // Construct full URL
+    return 'http://10.0.2.2:8000/$imagePath';
   }
 
   // Get icon for device type
@@ -270,18 +291,59 @@ class _DeviceListPageState extends State<DeviceListPage> with TickerProviderStat
                                       children: [
                                         Row(
                                           children: [
-                                            Container(
-                                              padding: const EdgeInsets.all(12),
-                                              decoration: BoxDecoration(
-                                                color: Colors.white.withOpacity(0.2),
-                                                borderRadius: BorderRadius.circular(12),
-                                              ),
-                                              child: Icon(
-                                                getDeviceIcon(widget.category),
-                                                size: 28,
-                                                color: Colors.white,
-                                              ),
-                                            ),
+                                           Container(
+              width: 56,
+              height: 56,
+              decoration: BoxDecoration(
+                color: Colors.white.withOpacity(0.2),
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(12),
+                child: getImageUrl() != null
+                    ? Image.network(
+                        getImageUrl()!,
+                        width: 56,
+                        height: 56,
+                        fit: BoxFit.cover,
+                        errorBuilder: (context, error, stackTrace) {
+                          print('Error loading image: $error');
+                          return Container(
+                            padding: const EdgeInsets.all(12),
+                            child: Icon(
+                              getDeviceIcon(widget.category),
+                              size: 28,
+                              color: Colors.white,
+                            ),
+                          );
+                        },
+                        loadingBuilder: (context, child, loadingProgress) {
+                          if (loadingProgress == null) return child;
+                          return Container(
+                            padding: const EdgeInsets.all(16),
+                            child: CircularProgressIndicator(
+                              value: loadingProgress.expectedTotalBytes != null
+                                  ? loadingProgress.cumulativeBytesLoaded /
+                                      loadingProgress.expectedTotalBytes!
+                                  : null,
+                              strokeWidth: 2,
+                              valueColor: AlwaysStoppedAnimation<Color>(
+                                Colors.white,
+                              ),
+                            ),
+                          );
+                        },
+                      )
+                    : Container(
+                        padding: const EdgeInsets.all(12),
+                        child: Icon(
+                          getDeviceIcon(widget.category),
+                          size: 28,
+                          color: Colors.white,
+                        ),
+                      ),
+              ),
+            ),
                                             const SizedBox(width: 16),
                                             Expanded(
                                               child: Text(
