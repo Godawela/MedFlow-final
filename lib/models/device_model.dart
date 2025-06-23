@@ -1,20 +1,26 @@
-class Category {
+class Device {
   final String id;
   final String name;
+  final String? reference;
+  final String category;
   final String? description;
   final String? image;
 
-  Category({
+  Device({
     required this.id,
     required this.name,
+    this.reference,
+    required this.category,
     this.description,
     this.image,
   });
 
-  factory Category.fromJson(Map<String, dynamic> json) {
-    return Category(
+  factory Device.fromJson(Map<String, dynamic> json) {
+    return Device(
       id: json['_id'] ?? '',
       name: json['name'] ?? '',
+      reference: json['reference'],
+      category: json['category'] ?? '',
       description: json['description'],
       image: json['image'],
     );
@@ -24,29 +30,17 @@ class Category {
     return {
       '_id': id,
       'name': name,
+      'reference': reference,
+      'category': category,
       'description': description,
       'image': image,
     };
   }
 
-  Category copyWith({
-    String? id,
-    String? name,
-    String? description,
-    String? image,
-  }) {
-    return Category(
-      id: id ?? this.id,
-      name: name ?? this.name,
-      description: description ?? this.description,
-      image: image ?? this.image,
-    );
-  }
-
   @override
   bool operator ==(Object other) {
     if (identical(this, other)) return true;
-    return other is Category && other.id == id;
+    return other is Device && other.id == id;
   }
 
   @override
@@ -54,6 +48,6 @@ class Category {
 
   @override
   String toString() {
-    return 'Category{id: $id, name: $name}';
+    return 'Device{id: $id, name: $name, category: $category}';
   }
 }
