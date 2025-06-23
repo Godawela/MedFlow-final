@@ -6,7 +6,7 @@ import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:http/http.dart' as http;
-import 'package:med/pages/admin%20pages/device_list_page_admin.dart';
+import 'package:med/pages/admin%20pages/device_list_page/device_list_page_admin.dart';
 import 'package:med/pages/admin%20pages/quickTipManagementPage.dart';
 import 'dart:convert';
 
