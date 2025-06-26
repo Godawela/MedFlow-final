@@ -35,11 +35,10 @@ class _DeviceListPageAdminState extends State<DeviceListPageAdmin>
   String? categoryImage;
   late AnimationController _animationController;
   late Animation<double> _fadeAnimation;
-    final ImagePicker _picker = ImagePicker();
+  final ImagePicker _picker = ImagePicker();
   File? _selectedImage;
 
-
-   @override
+  @override
   void initState() {
     super.initState();
     _animationController = AnimationController(
@@ -69,7 +68,8 @@ class _DeviceListPageAdminState extends State<DeviceListPageAdmin>
 
   Future<void> fetchDevicesByCategory() async {
     try {
-      final deviceList = await CategoryService.getDevicesByCategory(widget.category);
+      final deviceList =
+          await CategoryService.getDevicesByCategory(widget.category);
       setState(() {
         devices = deviceList;
         isLoading = false;
@@ -86,8 +86,9 @@ class _DeviceListPageAdminState extends State<DeviceListPageAdmin>
   Future<void> fetchCategoryDescription() async {
     try {
       print('Fetching category description for ${widget.category}');
-      final categoryData = await CategoryService.getCategoryByName(widget.category);
-      
+      final categoryData =
+          await CategoryService.getCategoryByName(widget.category);
+
       print('Received category data: $categoryData');
       setState(() {
         categoryDescription = categoryData['description'];
@@ -104,18 +105,20 @@ class _DeviceListPageAdminState extends State<DeviceListPageAdmin>
     }
   }
 
- // Method to construct the full image URL
+  // Method to construct the full image URL
   String? getImageUrl() {
     return CategoryService.getImageUrl(categoryImage);
   }
 
-   Future<void> updateCategory(String newName, String newDescription, {File? imageFile, bool removeImage = false}) async {
+  Future<void> updateCategory(String newName, String newDescription,
+      {File? imageFile, bool removeImage = false}) async {
     if (categoryId == null) {
       print('Category ID is null - cannot update');
       return;
     }
 
-    print('Attempting to update category $categoryId with name: $newName, description: $newDescription');
+    print(
+        'Attempting to update category $categoryId with name: $newName, description: $newDescription');
 
     try {
       final responseData = await CategoryService.updateCategory(
@@ -134,7 +137,7 @@ class _DeviceListPageAdminState extends State<DeviceListPageAdmin>
           categoryImage = responseData['image'];
         }
       });
-      
+
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
@@ -203,413 +206,424 @@ class _DeviceListPageAdminState extends State<DeviceListPageAdmin>
     if (mounted) setState(() {});
   }
 
-
-Future<void> _pickImage({Function? onImageSelected}) async {
-  showModalBottomSheet(
-    context: context,
-    backgroundColor: Colors.transparent,
-    builder: (BuildContext context) {
-      return Container(
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: const BorderRadius.only(
-            topLeft: Radius.circular(20),
-            topRight: Radius.circular(20),
-          ),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withOpacity(0.1),
-              blurRadius: 10,
-              offset: const Offset(0, -5),
+  Future<void> _pickImage({Function? onImageSelected}) async {
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.transparent,
+      builder: (BuildContext context) {
+        return Container(
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: const BorderRadius.only(
+              topLeft: Radius.circular(20),
+              topRight: Radius.circular(20),
             ),
-          ],
-        ),
-        child: SafeArea(
-          child: Padding(
-            padding: const EdgeInsets.all(20),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                // Handle bar
-                Container(
-                  width: 40,
-                  height: 4,
-                  decoration: BoxDecoration(
-                    color: Colors.grey.shade300,
-                    borderRadius: BorderRadius.circular(2),
-                  ),
-                ),
-                const SizedBox(height: 20),
-                
-                // Title
-                Text(
-                  'Select Image Source',
-                  style: GoogleFonts.inter(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.grey.shade800,
-                  ),
-                ),
-                const SizedBox(height: 20),
-                
-                // Camera option
-                ListTile(
-                  leading: Container(
-                    padding: const EdgeInsets.all(8),
-                    decoration: BoxDecoration(
-                      color: Colors.blue.shade100,
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                    child: Icon(
-                      Icons.camera_alt_rounded,
-                      color: Colors.blue.shade600,
-                      size: 24,
-                    ),
-                  ),
-                  title: Text(
-                    'Camera',
-                    style: GoogleFonts.inter(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w600,
-                      color: Colors.grey.shade800,
-                    ),
-                  ),
-                  subtitle: Text(
-                    'Take a new photo',
-                    style: GoogleFonts.inter(
-                      fontSize: 14,
-                      color: Colors.grey.shade600,
-                    ),
-                  ),
-                  onTap: () {
-                    Navigator.pop(context);
-                    _pickImageFromSource(ImageSource.camera, onImageSelected: onImageSelected);
-                  },
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                ),
-                
-                const SizedBox(height: 8),
-                
-                // Gallery option
-                ListTile(
-                  leading: Container(
-                    padding: const EdgeInsets.all(8),
-                    decoration: BoxDecoration(
-                      color: Colors.green.shade100,
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                    child: Icon(
-                      Icons.photo_library_rounded,
-                      color: Colors.green.shade600,
-                      size: 24,
-                    ),
-                  ),
-                  title: Text(
-                    'Gallery',
-                    style: GoogleFonts.inter(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w600,
-                      color: Colors.grey.shade800,
-                    ),
-                  ),
-                  subtitle: Text(
-                    'Choose from existing photos',
-                    style: GoogleFonts.inter(
-                      fontSize: 14,
-                      color: Colors.grey.shade600,
-                    ),
-                  ),
-                  onTap: () {
-                    Navigator.pop(context);
-                    _pickImageFromSource(ImageSource.gallery, onImageSelected: onImageSelected);
-                  },
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                ),
-                
-                const SizedBox(height: 16),
-                
-                // Cancel button
-                SizedBox(
-                  width: double.infinity,
-                  child: TextButton(
-                    onPressed: () => Navigator.pop(context),
-                    style: TextButton.styleFrom(
-                      padding: const EdgeInsets.symmetric(vertical: 16),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                    ),
-                    child: Text(
-                      'Cancel',
-                      style: GoogleFonts.inter(
-                        fontSize: 16,
-                        fontWeight: FontWeight.w600,
-                        color: Colors.grey.shade600,
-                      ),
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ),
-      );
-    },
-  );
-}
-
-// Add this new method to handle image picking from specific source
-Future<void> _pickImageFromSource(ImageSource source, {Function? onImageSelected}) async {
-  try {
-    final XFile? image = await _picker.pickImage(
-      source: source,
-      maxWidth: 1024,
-      maxHeight: 1024,
-      imageQuality: 85,
-    );
-    
-    if (image != null) {
-      setState(() {
-        _selectedImage = File(image.path);
-      });
-      
-      // Call the callback to update dialog state
-      if (onImageSelected != null) {
-        onImageSelected();
-      }
-    }
-  } catch (e) {
-    print('Error picking image: $e');
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text('Error selecting image: $e'),
-        backgroundColor: Colors.red,
-      ),
-    );
-  }
-}
-
- void showUpdateCategoryDialog() {
-  final nameController = TextEditingController(text: widget.category);
-  final descriptionController = TextEditingController(text: categoryDescription ?? '');
-  
-  // Reset selected image when dialog opens
-  _selectedImage = null;
-  bool removeCurrentImage = false;
-
-  showDialog(
-    context: context,
-    builder: (BuildContext context) {
-      return StatefulBuilder(
-        builder: (context, setDialogState) {
-          return AlertDialog(
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(20),
-            ),
-            title: Text(
-              'Update Category',
-              style: GoogleFonts.inter(
-                fontSize: 20,
-                fontWeight: FontWeight.bold,
-                color: Colors.deepPurple.shade700,
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.1),
+                blurRadius: 10,
+                offset: const Offset(0, -5),
               ),
-            ),
-            content: SingleChildScrollView(
+            ],
+          ),
+          child: SafeArea(
+            child: Padding(
+              padding: const EdgeInsets.all(20),
               child: Column(
                 mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // Category Name Field
-                  TextField(
-                    controller: nameController,
-                    decoration: InputDecoration(
-                      labelText: 'Category Name',
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      focusedBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(12),
-                        borderSide: BorderSide(color: Colors.deepPurple.shade400),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: 16),
-
-                  // Description Field
-                  TextField(
-                    controller: descriptionController,
-                    maxLines: 3,
-                    decoration: InputDecoration(
-                      labelText: 'Description',
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      focusedBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(12),
-                        borderSide: BorderSide(color: Colors.deepPurple.shade400),
-                      ),
+                  // Handle bar
+                  Container(
+                    width: 40,
+                    height: 4,
+                    decoration: BoxDecoration(
+                      color: Colors.grey.shade300,
+                      borderRadius: BorderRadius.circular(2),
                     ),
                   ),
                   const SizedBox(height: 20),
 
-                  // Image Management Section
+                  // Title
                   Text(
-                    'Category Image',
+                    'Select Image Source',
                     style: GoogleFonts.inter(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w600,
-                      color: Colors.grey.shade700,
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.grey.shade800,
                     ),
                   ),
-                  const SizedBox(height: 12),
+                  const SizedBox(height: 20),
 
-                  // Current/Selected Image Display
-                  Container(
-                    width: 100,
-                    height: 120,
-                    decoration: BoxDecoration(
-                      color: Colors.grey.shade100,
-                      borderRadius: BorderRadius.circular(12),
-                      border: Border.all(color: Colors.grey.shade300),
+                  // Camera option
+                  ListTile(
+                    leading: Container(
+                      padding: const EdgeInsets.all(8),
+                      decoration: BoxDecoration(
+                        color: Colors.blue.shade100,
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: Icon(
+                        Icons.camera_alt_rounded,
+                        color: Colors.blue.shade600,
+                        size: 24,
+                      ),
                     ),
-                    child: _selectedImage != null
-                        ? ClipRRect(
-                            borderRadius: BorderRadius.circular(12),
-                            child: Image.file(
-                              _selectedImage!,
-                              fit: BoxFit.cover,
-                              width: double.infinity,
-                              height: 120,
-                            ),
-                          )
-                        : (!removeCurrentImage && getImageUrl() != null)
-                            ? ClipRRect(
-                                borderRadius: BorderRadius.circular(12),
-                                child: Image.network(
-                                  getImageUrl()!,
-                                  fit: BoxFit.cover,
-                                  width: double.infinity,
-                                  height: 120,
-                                  errorBuilder: (context, error, stackTrace) {
-                                    return _buildImagePlaceholder();
-                                  },
-                                ),
-                              )
-                            : _buildImagePlaceholder(),
+                    title: Text(
+                      'Camera',
+                      style: GoogleFonts.inter(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w600,
+                        color: Colors.grey.shade800,
+                      ),
+                    ),
+                    subtitle: Text(
+                      'Take a new photo',
+                      style: GoogleFonts.inter(
+                        fontSize: 14,
+                        color: Colors.grey.shade600,
+                      ),
+                    ),
+                    onTap: () {
+                      Navigator.pop(context);
+                      _pickImageFromSource(ImageSource.camera,
+                          onImageSelected: onImageSelected);
+                    },
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
                   ),
+
+                  const SizedBox(height: 8),
+
+                  // Gallery option
+                  ListTile(
+                    leading: Container(
+                      padding: const EdgeInsets.all(8),
+                      decoration: BoxDecoration(
+                        color: Colors.green.shade100,
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: Icon(
+                        Icons.photo_library_rounded,
+                        color: Colors.green.shade600,
+                        size: 24,
+                      ),
+                    ),
+                    title: Text(
+                      'Gallery',
+                      style: GoogleFonts.inter(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w600,
+                        color: Colors.grey.shade800,
+                      ),
+                    ),
+                    subtitle: Text(
+                      'Choose from existing photos',
+                      style: GoogleFonts.inter(
+                        fontSize: 14,
+                        color: Colors.grey.shade600,
+                      ),
+                    ),
+                    onTap: () {
+                      Navigator.pop(context);
+                      _pickImageFromSource(ImageSource.gallery,
+                          onImageSelected: onImageSelected);
+                    },
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                  ),
+
                   const SizedBox(height: 16),
 
-                  // Image Action Buttons
-                  Row(
-                    children: [
-                      Expanded(
-                        child: OutlinedButton.icon(
-                          onPressed: () async {
-                            await _pickImage(
-                              onImageSelected: () {
-                                setDialogState(() {
-                                  removeCurrentImage = false;
-                                });
-                              },
-                            );
-                          },
-                          icon: const Icon(Icons.photo_library_rounded, size: 18),
-                          label: Text(
-                            'Select Image',
-                            style: GoogleFonts.inter(fontSize: 14),
-                          ),
-                          style: OutlinedButton.styleFrom(
-                            foregroundColor: Colors.deepPurple.shade600,
-                            side: BorderSide(color: Colors.deepPurple.shade300),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(10),
-                            ),
-                            padding: const EdgeInsets.symmetric(vertical: 12),
-                          ),
+                  // Cancel button
+                  SizedBox(
+                    width: double.infinity,
+                    child: TextButton(
+                      onPressed: () => Navigator.pop(context),
+                      style: TextButton.styleFrom(
+                        padding: const EdgeInsets.symmetric(vertical: 16),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
                         ),
                       ),
-                      const SizedBox(width: 12),
-                      Expanded(
-                        child: OutlinedButton.icon(
-                          onPressed: (getImageUrl() != null || _selectedImage != null)
-                              ? () {
-                                  setDialogState(() {
-                                    _selectedImage = null;
-                                    removeCurrentImage = true;
-                                  });
-                                }
-                              : null,
-                          icon: const Icon(Icons.delete_outline_rounded, size: 18),
-                          label: Text(
-                            'Remove Image',
-                            style: GoogleFonts.inter(fontSize: 14),
-                          ),
-                          style: OutlinedButton.styleFrom(
-                            foregroundColor: Colors.red.shade600,
-                            side: BorderSide(
-                              color: (getImageUrl() != null || _selectedImage != null)
-                                  ? Colors.red.shade300
-                                  : Colors.grey.shade300,
-                            ),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(10),
-                            ),
-                            padding: const EdgeInsets.symmetric(vertical: 12),
-                          ),
+                      child: Text(
+                        'Cancel',
+                        style: GoogleFonts.inter(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w600,
+                          color: Colors.grey.shade600,
                         ),
                       ),
-                    ],
+                    ),
                   ),
                 ],
               ),
             ),
-            actions: [
-              TextButton(
-                onPressed: () {
-                  _selectedImage = null;
-                  Navigator.of(context).pop();
-                },
-                child: Text(
-                  'Cancel',
-                  style: GoogleFonts.inter(color: Colors.grey.shade600),
+          ),
+        );
+      },
+    );
+  }
+
+// Add this new method to handle image picking from specific source
+  Future<void> _pickImageFromSource(ImageSource source,
+      {Function? onImageSelected}) async {
+    try {
+      final XFile? image = await _picker.pickImage(
+        source: source,
+        maxWidth: 1024,
+        maxHeight: 1024,
+        imageQuality: 85,
+      );
+
+      if (image != null) {
+        setState(() {
+          _selectedImage = File(image.path);
+        });
+
+        // Call the callback to update dialog state
+        if (onImageSelected != null) {
+          onImageSelected();
+        }
+      }
+    } catch (e) {
+      print('Error picking image: $e');
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Error selecting image: $e'),
+          backgroundColor: Colors.red,
+        ),
+      );
+    }
+  }
+
+  void showUpdateCategoryDialog() {
+    final nameController = TextEditingController(text: widget.category);
+    final descriptionController =
+        TextEditingController(text: categoryDescription ?? '');
+
+    // Reset selected image when dialog opens
+    _selectedImage = null;
+    bool removeCurrentImage = false;
+
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return StatefulBuilder(
+          builder: (context, setDialogState) {
+            return AlertDialog(
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(20),
+              ),
+              title: Text(
+                'Update Category',
+                style: GoogleFonts.inter(
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.deepPurple.shade700,
                 ),
               ),
-              ElevatedButton(
-                onPressed: () {
-                  if (nameController.text.trim().isNotEmpty) {
-                    updateCategory(
-                      nameController.text.trim(),
-                      descriptionController.text.trim(),
-                      imageFile: _selectedImage,
-                      removeImage: removeCurrentImage,
-                    );
+              content: SingleChildScrollView(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // Category Name Field
+                    TextField(
+                      controller: nameController,
+                      decoration: InputDecoration(
+                        labelText: 'Category Name',
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        focusedBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                          borderSide:
+                              BorderSide(color: Colors.deepPurple.shade400),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+
+                    // Description Field
+                    TextField(
+                      controller: descriptionController,
+                      maxLines: 3,
+                      decoration: InputDecoration(
+                        labelText: 'Description',
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        focusedBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                          borderSide:
+                              BorderSide(color: Colors.deepPurple.shade400),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 20),
+
+                    // Image Management Section
+                    Text(
+                      'Category Image',
+                      style: GoogleFonts.inter(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w600,
+                        color: Colors.grey.shade700,
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+
+                    // Current/Selected Image Display
+                    Container(
+                      width: 100,
+                      height: 120,
+                      decoration: BoxDecoration(
+                        color: Colors.grey.shade100,
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(color: Colors.grey.shade300),
+                      ),
+                      child: _selectedImage != null
+                          ? ClipRRect(
+                              borderRadius: BorderRadius.circular(12),
+                              child: Image.file(
+                                _selectedImage!,
+                                fit: BoxFit.cover,
+                                width: double.infinity,
+                                height: 120,
+                              ),
+                            )
+                          : (!removeCurrentImage && getImageUrl() != null)
+                              ? ClipRRect(
+                                  borderRadius: BorderRadius.circular(12),
+                                  child: Image.network(
+                                    getImageUrl()!,
+                                    fit: BoxFit.cover,
+                                    width: double.infinity,
+                                    height: 120,
+                                    errorBuilder: (context, error, stackTrace) {
+                                      return _buildImagePlaceholder();
+                                    },
+                                  ),
+                                )
+                              : _buildImagePlaceholder(),
+                    ),
+                    const SizedBox(height: 16),
+
+                    // Image Action Buttons
+                    Row(
+                      children: [
+                        Expanded(
+                          child: OutlinedButton.icon(
+                            onPressed: () async {
+                              await _pickImage(
+                                onImageSelected: () {
+                                  setDialogState(() {
+                                    removeCurrentImage = false;
+                                  });
+                                },
+                              );
+                            },
+                            icon: const Icon(Icons.photo_library_rounded,
+                                size: 18),
+                            label: Text(
+                              'Select Image',
+                              style: GoogleFonts.inter(fontSize: 14),
+                            ),
+                            style: OutlinedButton.styleFrom(
+                              foregroundColor: Colors.deepPurple.shade600,
+                              side:
+                                  BorderSide(color: Colors.deepPurple.shade300),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(10),
+                              ),
+                              padding: const EdgeInsets.symmetric(vertical: 12),
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: OutlinedButton.icon(
+                            onPressed: (getImageUrl() != null ||
+                                    _selectedImage != null)
+                                ? () {
+                                    setDialogState(() {
+                                      _selectedImage = null;
+                                      removeCurrentImage = true;
+                                    });
+                                  }
+                                : null,
+                            icon: const Icon(Icons.delete_outline_rounded,
+                                size: 18),
+                            label: Text(
+                              'Remove Image',
+                              style: GoogleFonts.inter(fontSize: 14),
+                            ),
+                            style: OutlinedButton.styleFrom(
+                              foregroundColor: Colors.red.shade600,
+                              side: BorderSide(
+                                color: (getImageUrl() != null ||
+                                        _selectedImage != null)
+                                    ? Colors.red.shade300
+                                    : Colors.grey.shade300,
+                              ),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(10),
+                              ),
+                              padding: const EdgeInsets.symmetric(vertical: 12),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () {
+                    _selectedImage = null;
                     Navigator.of(context).pop();
-                  }
-                },
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.deepPurple.shade500,
-                  foregroundColor: Colors.white,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
+                  },
+                  child: Text(
+                    'Cancel',
+                    style: GoogleFonts.inter(color: Colors.grey.shade600),
                   ),
                 ),
-                child: Text(
-                  'Update',
-                  style: GoogleFonts.inter(fontWeight: FontWeight.w600),
+                ElevatedButton(
+                  onPressed: () {
+                    if (nameController.text.trim().isNotEmpty) {
+                      updateCategory(
+                        nameController.text.trim(),
+                        descriptionController.text.trim(),
+                        imageFile: _selectedImage,
+                        removeImage: removeCurrentImage,
+                      );
+                      Navigator.of(context).pop();
+                    }
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.deepPurple.shade500,
+                    foregroundColor: Colors.white,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                  ),
+                  child: Text(
+                    'Update',
+                    style: GoogleFonts.inter(fontWeight: FontWeight.w600),
+                  ),
                 ),
-              ),
-            ],
-          );
-        },
-      );
-    },
-  );
-}
- Widget _buildImagePlaceholder() {
+              ],
+            );
+          },
+        );
+      },
+    );
+  }
+
+  Widget _buildImagePlaceholder() {
     return Container(
       width: double.infinity,
       height: 120,
@@ -637,8 +651,6 @@ Future<void> _pickImageFromSource(ImageSource source, {Function? onImageSelected
       ),
     );
   }
-
-  
 
   void showDeleteConfirmationDialog() {
     showDialog(
@@ -770,105 +782,105 @@ Future<void> _pickImageFromSource(ImageSource source, {Function? onImageSelected
     return colorSets[index % colorSets.length];
   }
 
- @override
-Widget build(BuildContext context) {
-  return Scaffold(
-    backgroundColor: Colors.grey.shade50,
-    body: RefreshIndicator(
-      key: _refreshIndicatorKey,
-      onRefresh: _refreshData,
-      child: Column(
-        children: [
-          CurvedAppBar(
-            title: widget.category,
-            isProfileAvailable: false,
-            showIcon: true,
-            isBack: true,
-          ),
-          Expanded(
-            child: _buildContent(),
-          ),
-        ],
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: Colors.grey.shade50,
+      body: RefreshIndicator(
+        key: _refreshIndicatorKey,
+        onRefresh: _refreshData,
+        child: Column(
+          children: [
+            CurvedAppBar(
+              title: widget.category,
+              isProfileAvailable: false,
+              showIcon: true,
+              isBack: true,
+            ),
+            Expanded(
+              child: _buildContent(),
+            ),
+          ],
+        ),
       ),
-    ),
-    floatingActionButton: AddDeviceButton(
-      onPressed: () => context.router.push(const AddDeviceRoute()),
-    ),
-  );
-}
+      floatingActionButton: AddDeviceButton(
+        onPressed: () => context.router.push(const AddDeviceRoute()),
+      ),
+    );
+  }
 
 // Content builder widget
-Widget _buildContent() {
-  if (isLoading) {
-    return const LoadingWidget();
-  }
-  
-  if (error != null) {
-    return CustomErrorWidget(
-      error: error!,
-      onRetry: () {
-        setState(() {
-          isLoading = true;
-          error = null;
-        });
-        fetchDevicesByCategory();
+  Widget _buildContent() {
+    if (isLoading) {
+      return const LoadingWidget();
+    }
+
+    if (error != null) {
+      return CustomErrorWidget(
+        error: error!,
+        onRetry: () {
+          setState(() {
+            isLoading = true;
+            error = null;
+          });
+          fetchDevicesByCategory();
+        },
+      );
+    }
+
+    return AnimatedBuilder(
+      animation: _animationController,
+      builder: (context, child) {
+        return FadeTransition(
+          opacity: _fadeAnimation,
+          child: LayoutBuilder(
+            builder: (context, constraints) {
+              return SingleChildScrollView(
+                padding: const EdgeInsets.all(20.0),
+                child: ConstrainedBox(
+                  constraints: BoxConstraints(
+                    minHeight: constraints.maxHeight,
+                  ),
+                  child: IntrinsicHeight(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        CategoryHeaderCard(
+                          category: widget.category,
+                          categoryDescription: categoryDescription,
+                          imageUrl: getImageUrl(),
+                          onEdit: showUpdateCategoryDialog,
+                          onDelete: showDeleteConfirmationDialog,
+                          getDeviceIcon: getDeviceIcon,
+                        ),
+                        const SizedBox(height: 24),
+                        Flexible(
+                          child: DevicesSection(
+                            devices: devices,
+                            category: widget.category,
+                            getDeviceColors: getDeviceColors,
+                            getDeviceIcon: getDeviceIcon,
+                            onDeviceTap: (device) {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => MachineDetailPageAdmin(
+                                    machineName: device['name'],
+                                  ),
+                                ),
+                              );
+                            },
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              );
+            },
+          ),
+        );
       },
     );
   }
-  
-  return AnimatedBuilder(
-    animation: _animationController,
-    builder: (context, child) {
-      return FadeTransition(
-        opacity: _fadeAnimation,
-        child: LayoutBuilder(
-          builder: (context, constraints) {
-            return SingleChildScrollView(
-              padding: const EdgeInsets.all(20.0),
-              child: ConstrainedBox(
-                constraints: BoxConstraints(
-                  minHeight: constraints.maxHeight,
-                ),
-                child: IntrinsicHeight(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      CategoryHeaderCard(
-                        category: widget.category,
-                        categoryDescription: categoryDescription,
-                        imageUrl: getImageUrl(),
-                        onEdit: showUpdateCategoryDialog,
-                        onDelete: showDeleteConfirmationDialog,
-                        getDeviceIcon: getDeviceIcon,
-                      ),
-                      const SizedBox(height: 24),
-                      Flexible(
-                        child: DevicesSection(
-                          devices: devices,
-                          category: widget.category,
-                          getDeviceColors: getDeviceColors,
-                          getDeviceIcon: getDeviceIcon,
-                          onDeviceTap: (device) {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) => MachineDetailPageAdmin(
-                                  machineName: device['name'],
-                                ),
-                              ),
-                            );
-                          },
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-            );
-          },
-        ),
-      );
-    },
-  );
 }
-    }
