@@ -204,8 +204,7 @@ class _DeviceListPageAdminState extends State<DeviceListPageAdmin>
   }
 
 
-Future<void> _pickImage() async {
-  // Show bottom sheet to choose between gallery and camera
+Future<void> _pickImage({Function? onImageSelected}) async {
   showModalBottomSheet(
     context: context,
     backgroundColor: Colors.transparent,
@@ -284,7 +283,7 @@ Future<void> _pickImage() async {
                   ),
                   onTap: () {
                     Navigator.pop(context);
-                    _pickImageFromSource(ImageSource.camera);
+                    _pickImageFromSource(ImageSource.camera, onImageSelected: onImageSelected);
                   },
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(12),
@@ -324,7 +323,7 @@ Future<void> _pickImage() async {
                   ),
                   onTap: () {
                     Navigator.pop(context);
-                    _pickImageFromSource(ImageSource.gallery);
+                    _pickImageFromSource(ImageSource.gallery, onImageSelected: onImageSelected);
                   },
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(12),
@@ -364,7 +363,7 @@ Future<void> _pickImage() async {
 }
 
 // Add this new method to handle image picking from specific source
-Future<void> _pickImageFromSource(ImageSource source) async {
+Future<void> _pickImageFromSource(ImageSource source, {Function? onImageSelected}) async {
   try {
     final XFile? image = await _picker.pickImage(
       source: source,
@@ -377,6 +376,11 @@ Future<void> _pickImageFromSource(ImageSource source) async {
       setState(() {
         _selectedImage = File(image.path);
       });
+      
+      // Call the callback to update dialog state
+      if (onImageSelected != null) {
+        onImageSelected();
+      }
     }
   } catch (e) {
     print('Error picking image: $e');
@@ -390,219 +394,221 @@ Future<void> _pickImageFromSource(ImageSource source) async {
 }
 
  void showUpdateCategoryDialog() {
-    final nameController = TextEditingController(text: widget.category);
-    final descriptionController = TextEditingController(text: categoryDescription ?? '');
-    
-    // Reset selected image when dialog opens
-    _selectedImage = null;
-    bool removeCurrentImage = false;
+  final nameController = TextEditingController(text: widget.category);
+  final descriptionController = TextEditingController(text: categoryDescription ?? '');
+  
+  // Reset selected image when dialog opens
+  _selectedImage = null;
+  bool removeCurrentImage = false;
 
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return StatefulBuilder(
-          builder: (context, setDialogState) {
-            return AlertDialog(
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(20),
+  showDialog(
+    context: context,
+    builder: (BuildContext context) {
+      return StatefulBuilder(
+        builder: (context, setDialogState) {
+          return AlertDialog(
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(20),
+            ),
+            title: Text(
+              'Update Category',
+              style: GoogleFonts.inter(
+                fontSize: 20,
+                fontWeight: FontWeight.bold,
+                color: Colors.deepPurple.shade700,
               ),
-              title: Text(
-                'Update Category',
-                style: GoogleFonts.inter(
-                  fontSize: 20,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.deepPurple.shade700,
-                ),
-              ),
-              content: SingleChildScrollView(
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    // Category Name Field
-                    TextField(
-                      controller: nameController,
-                      decoration: InputDecoration(
-                        labelText: 'Category Name',
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        focusedBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(12),
-                          borderSide: BorderSide(color: Colors.deepPurple.shade400),
-                        ),
-                      ),
-                    ),
-                    const SizedBox(height: 16),
-
-                    // Description Field
-                    TextField(
-                      controller: descriptionController,
-                      maxLines: 3,
-                      decoration: InputDecoration(
-                        labelText: 'Description',
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        focusedBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(12),
-                          borderSide: BorderSide(color: Colors.deepPurple.shade400),
-                        ),
-                      ),
-                    ),
-                    const SizedBox(height: 20),
-
-                    // Image Management Section
-                    Text(
-                      'Category Image',
-                      style: GoogleFonts.inter(
-                        fontSize: 16,
-                        fontWeight: FontWeight.w600,
-                        color: Colors.grey.shade700,
-                      ),
-                    ),
-                    const SizedBox(height: 12),
-
-                    // Current/Selected Image Display
-                    Container(
-                      width: 100,
-                      height: 120,
-                      decoration: BoxDecoration(
-                        color: Colors.grey.shade100,
+            ),
+            content: SingleChildScrollView(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // Category Name Field
+                  TextField(
+                    controller: nameController,
+                    decoration: InputDecoration(
+                      labelText: 'Category Name',
+                      border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12),
-                        border: Border.all(color: Colors.grey.shade300),
                       ),
-                      child: _selectedImage != null
-                          ? ClipRRect(
-                              borderRadius: BorderRadius.circular(12),
-                              child: Image.file(
-                                _selectedImage!,
-                                fit: BoxFit.cover,
-                                width: double.infinity,
-                                height: 120,
-                              ),
-                            )
-                          : (!removeCurrentImage && getImageUrl() != null)
-                              ? ClipRRect(
-                                  borderRadius: BorderRadius.circular(12),
-                                  child: Image.network(
-                                    getImageUrl()!,
-                                    fit: BoxFit.cover,
-                                    width: double.infinity,
-                                    height: 120,
-                                    errorBuilder: (context, error, stackTrace) {
-                                      return _buildImagePlaceholder();
-                                    },
-                                  ),
-                                )
-                              : _buildImagePlaceholder(),
+                      focusedBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                        borderSide: BorderSide(color: Colors.deepPurple.shade400),
+                      ),
                     ),
-                    const SizedBox(height: 16),
+                  ),
+                  const SizedBox(height: 16),
 
-                    // Image Action Buttons
-                    Row(
-                      children: [
-                        Expanded(
-                          child: OutlinedButton.icon(
-                            onPressed: () async {
-                              await _pickImage();
-                              setDialogState(() {
-                                removeCurrentImage = false;
-                              });
-                            },
-                            icon: const Icon(Icons.photo_library_rounded, size: 18),
-                            label: Text(
-                              'Select Image',
-                              style: GoogleFonts.inter(fontSize: 14),
-                            ),
-                            style: OutlinedButton.styleFrom(
-                              foregroundColor: Colors.deepPurple.shade600,
-                              side: BorderSide(color: Colors.deepPurple.shade300),
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(10),
-                              ),
-                              padding: const EdgeInsets.symmetric(vertical: 12),
-                            ),
-                          ),
-                        ),
-                        const SizedBox(width: 12),
-                        Expanded(
-                          child: OutlinedButton.icon(
-                            onPressed: (getImageUrl() != null || _selectedImage != null)
-                                ? () {
-                                    setDialogState(() {
-                                      _selectedImage = null;
-                                      removeCurrentImage = true;
-                                    });
-                                  }
-                                : null,
-                            icon: const Icon(Icons.delete_outline_rounded, size: 18),
-                            label: Text(
-                              'Remove Image',
-                              style: GoogleFonts.inter(fontSize: 14),
-                            ),
-                            style: OutlinedButton.styleFrom(
-                              foregroundColor: Colors.red.shade600,
-                              side: BorderSide(
-                                color: (getImageUrl() != null || _selectedImage != null)
-                                    ? Colors.red.shade300
-                                    : Colors.grey.shade300,
-                              ),
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(10),
-                              ),
-                              padding: const EdgeInsets.symmetric(vertical: 12),
-                            ),
-                          ),
-                        ),
-                      ],
+                  // Description Field
+                  TextField(
+                    controller: descriptionController,
+                    maxLines: 3,
+                    decoration: InputDecoration(
+                      labelText: 'Description',
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      focusedBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                        borderSide: BorderSide(color: Colors.deepPurple.shade400),
+                      ),
                     ),
-                  ],
+                  ),
+                  const SizedBox(height: 20),
+
+                  // Image Management Section
+                  Text(
+                    'Category Image',
+                    style: GoogleFonts.inter(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w600,
+                      color: Colors.grey.shade700,
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+
+                  // Current/Selected Image Display
+                  Container(
+                    width: 100,
+                    height: 120,
+                    decoration: BoxDecoration(
+                      color: Colors.grey.shade100,
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(color: Colors.grey.shade300),
+                    ),
+                    child: _selectedImage != null
+                        ? ClipRRect(
+                            borderRadius: BorderRadius.circular(12),
+                            child: Image.file(
+                              _selectedImage!,
+                              fit: BoxFit.cover,
+                              width: double.infinity,
+                              height: 120,
+                            ),
+                          )
+                        : (!removeCurrentImage && getImageUrl() != null)
+                            ? ClipRRect(
+                                borderRadius: BorderRadius.circular(12),
+                                child: Image.network(
+                                  getImageUrl()!,
+                                  fit: BoxFit.cover,
+                                  width: double.infinity,
+                                  height: 120,
+                                  errorBuilder: (context, error, stackTrace) {
+                                    return _buildImagePlaceholder();
+                                  },
+                                ),
+                              )
+                            : _buildImagePlaceholder(),
+                  ),
+                  const SizedBox(height: 16),
+
+                  // Image Action Buttons
+                  Row(
+                    children: [
+                      Expanded(
+                        child: OutlinedButton.icon(
+                          onPressed: () async {
+                            await _pickImage(
+                              onImageSelected: () {
+                                setDialogState(() {
+                                  removeCurrentImage = false;
+                                });
+                              },
+                            );
+                          },
+                          icon: const Icon(Icons.photo_library_rounded, size: 18),
+                          label: Text(
+                            'Select Image',
+                            style: GoogleFonts.inter(fontSize: 14),
+                          ),
+                          style: OutlinedButton.styleFrom(
+                            foregroundColor: Colors.deepPurple.shade600,
+                            side: BorderSide(color: Colors.deepPurple.shade300),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                            padding: const EdgeInsets.symmetric(vertical: 12),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: OutlinedButton.icon(
+                          onPressed: (getImageUrl() != null || _selectedImage != null)
+                              ? () {
+                                  setDialogState(() {
+                                    _selectedImage = null;
+                                    removeCurrentImage = true;
+                                  });
+                                }
+                              : null,
+                          icon: const Icon(Icons.delete_outline_rounded, size: 18),
+                          label: Text(
+                            'Remove Image',
+                            style: GoogleFonts.inter(fontSize: 14),
+                          ),
+                          style: OutlinedButton.styleFrom(
+                            foregroundColor: Colors.red.shade600,
+                            side: BorderSide(
+                              color: (getImageUrl() != null || _selectedImage != null)
+                                  ? Colors.red.shade300
+                                  : Colors.grey.shade300,
+                            ),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                            padding: const EdgeInsets.symmetric(vertical: 12),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+            actions: [
+              TextButton(
+                onPressed: () {
+                  _selectedImage = null;
+                  Navigator.of(context).pop();
+                },
+                child: Text(
+                  'Cancel',
+                  style: GoogleFonts.inter(color: Colors.grey.shade600),
                 ),
               ),
-              actions: [
-                TextButton(
-                  onPressed: () {
-                    _selectedImage = null;
+              ElevatedButton(
+                onPressed: () {
+                  if (nameController.text.trim().isNotEmpty) {
+                    updateCategory(
+                      nameController.text.trim(),
+                      descriptionController.text.trim(),
+                      imageFile: _selectedImage,
+                      removeImage: removeCurrentImage,
+                    );
                     Navigator.of(context).pop();
-                  },
-                  child: Text(
-                    'Cancel',
-                    style: GoogleFonts.inter(color: Colors.grey.shade600),
+                  }
+                },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.deepPurple.shade500,
+                  foregroundColor: Colors.white,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
                   ),
                 ),
-                ElevatedButton(
-                  onPressed: () {
-                    if (nameController.text.trim().isNotEmpty) {
-                      updateCategory(
-                        nameController.text.trim(),
-                        descriptionController.text.trim(),
-                        imageFile: _selectedImage,
-                        removeImage: removeCurrentImage,
-                      );
-                      Navigator.of(context).pop();
-                    }
-                  },
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.deepPurple.shade500,
-                    foregroundColor: Colors.white,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                  ),
-                  child: Text(
-                    'Update',
-                    style: GoogleFonts.inter(fontWeight: FontWeight.w600),
-                  ),
+                child: Text(
+                  'Update',
+                  style: GoogleFonts.inter(fontWeight: FontWeight.w600),
                 ),
-              ],
-            );
-          },
-        );
-      },
-    );
-  }
-
+              ),
+            ],
+          );
+        },
+      );
+    },
+  );
+}
  Widget _buildImagePlaceholder() {
     return Container(
       width: double.infinity,
