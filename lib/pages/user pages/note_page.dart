@@ -1,3 +1,5 @@
+// ignore_for_file: use_build_context_synchronously
+
 import 'package:auto_route/auto_route.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
@@ -64,7 +66,7 @@ class _NotePageState extends State<NotePage> with TickerProviderStateMixin {
   Future<void> addNote(String text) async {
     final user = FirebaseAuth.instance.currentUser;
     if (user == null) {
-      print('User not logged in');
+      debugPrint('User not logged in');
       return;
     }
 

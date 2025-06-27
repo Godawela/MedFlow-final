@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:med/models/quick_tip.dart';
 
@@ -20,7 +21,7 @@ class QuickTipsService {
       }
       return null;
     } catch (e) {
-      print('Error fetching quick tips: $e');
+      debugPrint('Error fetching quick tips: $e');
       return null;
     }
   }

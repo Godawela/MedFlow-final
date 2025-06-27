@@ -1,3 +1,5 @@
+// ignore_for_file: use_build_context_synchronously
+
 import 'package:auto_route/auto_route.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
@@ -38,12 +40,12 @@ class _SignUpScreenState extends State<SignUpScreen> {
       );
 
       if (response.statusCode == 200) {
-        print('Google user data saved to MongoDB');
+        debugPrint('Google user data saved to MongoDB');
       } else {
-        print('Failed to save to MongoDB: ${response.body}');
+        debugPrint('Failed to save to MongoDB: ${response.body}');
       }
     } catch (e) {
-      print('MongoDB error: $e');
+      debugPrint('MongoDB error: $e');
     }
   }
 

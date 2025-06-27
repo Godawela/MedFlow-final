@@ -1,3 +1,5 @@
+// ignore_for_file: use_build_context_synchronously
+
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
@@ -5,7 +7,7 @@ import 'dart:convert';
 
 @RoutePage()
 class AddDevicePage extends StatefulWidget {
-  const AddDevicePage({Key? key}) : super(key: key);
+  const AddDevicePage({super.key});
 
   @override
   _AddDevicePageState createState() => _AddDevicePageState();

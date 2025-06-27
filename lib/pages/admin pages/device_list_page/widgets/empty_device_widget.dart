@@ -3,7 +3,7 @@ import 'package:google_fonts/google_fonts.dart';
 class EmptyDevicesWidget extends StatelessWidget {
   final String category;
 
-  const EmptyDevicesWidget({Key? key, required this.category}) : super(key: key);
+  const EmptyDevicesWidget({super.key, required this.category});
 
   @override
   Widget build(BuildContext context) {

@@ -1,3 +1,5 @@
+// ignore_for_file: use_build_context_synchronously
+
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
@@ -16,7 +18,7 @@ class ActionButtons extends StatelessWidget {
       final prefs = await SharedPreferences.getInstance();
       final uid = prefs.getString('uid'); 
 
-      print("objects $uid"); 
+      debugPrint("objects $uid"); 
 
       if (uid == null) {
         return null; 
@@ -33,7 +35,7 @@ class ActionButtons extends StatelessWidget {
         return null;
       }
     } catch (e) {
-      print('Error fetching role: $e');
+      debugPrint('Error fetching role: $e');
       return null;
     }
   }

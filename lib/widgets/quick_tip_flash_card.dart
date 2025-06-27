@@ -7,10 +7,10 @@ class QuickTipsFlashcards extends StatefulWidget {
   final String categoryName;
 
   const QuickTipsFlashcards({
-    Key? key,
+    super.key,
     required this.categoryId,
     required this.categoryName,
-  }) : super(key: key);
+  });
 
   @override
   _QuickTipsFlashcardsState createState() => _QuickTipsFlashcardsState();
@@ -28,7 +28,7 @@ class _QuickTipsFlashcardsState extends State<QuickTipsFlashcards>
   late Animation<double> _floatingAnimation;
   late Animation<double> _rippleAnimation;
 
-  PageController _pageController = PageController();
+  final PageController _pageController = PageController();
   int _currentIndex = 0;
   List<QuickTip> _tips = [];
   bool _isLoading = true;
@@ -36,12 +36,12 @@ class _QuickTipsFlashcardsState extends State<QuickTipsFlashcards>
 
   // Color themes for different cards
   final List<List<Color>> _cardThemes = [
-    [Color(0xFF6C5CE7), Color(0xFFA29BFE)], // Purple
-    [Color(0xFF00B894), Color(0xFF55EFC4)], // Green
-    [Color(0xFFE17055), Color(0xFFFAB1A0)], // Orange
-    [Color(0xFF0984E3), Color(0xFF74B9FF)], // Blue
-    [Color(0xFFE84393), Color(0xFFFD79A8)], // Pink
-    [Color(0xFF00CEC9), Color(0xFF81ECEC)], // Teal
+    [const Color(0xFF6C5CE7), const Color(0xFFA29BFE)], // Purple
+    [const Color(0xFF00B894), const Color(0xFF55EFC4)], // Green
+    [const Color(0xFFE17055), const Color(0xFFFAB1A0)], // Orange
+    [const Color(0xFF0984E3), const Color(0xFF74B9FF)], // Blue
+    [const Color(0xFFE84393), const Color(0xFFFD79A8)], // Pink
+    [const Color(0xFF00CEC9), const Color(0xFF81ECEC)], // Teal
   ];
 
   @override
@@ -53,22 +53,22 @@ class _QuickTipsFlashcardsState extends State<QuickTipsFlashcards>
 
   void _initializeAnimations() {
     _cardController = AnimationController(
-      duration: Duration(milliseconds: 600),
+      duration: const Duration(milliseconds: 600),
       vsync: this,
     );
 
     _progressController = AnimationController(
-      duration: Duration(milliseconds: 1000),
+      duration: const Duration(milliseconds: 1000),
       vsync: this,
     );
 
     _floatingController = AnimationController(
-      duration: Duration(milliseconds: 3000),
+      duration: const Duration(milliseconds: 3000),
       vsync: this,
     )..repeat(reverse: true);
 
     _rippleController = AnimationController(
-      duration: Duration(milliseconds: 800),
+      duration: const Duration(milliseconds: 800),
       vsync: this,
     );
 
@@ -164,13 +164,13 @@ class _QuickTipsFlashcardsState extends State<QuickTipsFlashcards>
 
   Widget _buildModernAppBar() {
     return Container(
-      padding: EdgeInsets.all(20),
+      padding: const EdgeInsets.all(20),
       child: Row(
         children: [
           GestureDetector(
             onTap: () => Navigator.pop(context),
             child: Container(
-              padding: EdgeInsets.all(10),
+              padding: const EdgeInsets.all(10),
               decoration: BoxDecoration(
                 color: Colors.white,
                 borderRadius: BorderRadius.circular(12),
@@ -178,32 +178,32 @@ class _QuickTipsFlashcardsState extends State<QuickTipsFlashcards>
                   BoxShadow(
                     color: Colors.black.withOpacity(0.05),
                     blurRadius: 10,
-                    offset: Offset(0, 2),
+                    offset: const Offset(0, 2),
                   ),
                 ],
               ),
-              child: Icon(
+              child: const Icon(
                 Icons.arrow_back_ios_new,
                 color: Color(0xFF2D3436),
                 size: 18,
               ),
             ),
           ),
-          SizedBox(width: 16),
+          const SizedBox(width: 16),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
                   widget.categoryName,
-                  style: TextStyle(
+                  style: const TextStyle(
                     fontSize: 20,
                     fontWeight: FontWeight.w700,
                     color: Color(0xFF2D3436),
                   ),
                   overflow: TextOverflow.ellipsis,
                 ),
-                Text(
+                const Text(
                   'Flashcard Study Session',
                   style: TextStyle(
                     fontSize: 13,
@@ -216,14 +216,14 @@ class _QuickTipsFlashcardsState extends State<QuickTipsFlashcards>
           ),
           if (!_isLoading && _tips.isNotEmpty)
             Container(
-              padding: EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
               decoration: BoxDecoration(
                 color: _getThemeColors(_currentIndex)[0],
                 borderRadius: BorderRadius.circular(20),
               ),
               child: Text(
                 '${_currentIndex + 1}/${_tips.length}',
-                style: TextStyle(
+                style: const TextStyle(
                   color: Colors.white,
                   fontWeight: FontWeight.w600,
                   fontSize: 12,
@@ -237,10 +237,10 @@ class _QuickTipsFlashcardsState extends State<QuickTipsFlashcards>
 
   Widget _buildProgressIndicator() {
     return Container(
-      margin: EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+      margin: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
       height: 6,
       decoration: BoxDecoration(
-        color: Color(0xFFE8E8E8),
+        color: const Color(0xFFE8E8E8),
         borderRadius: BorderRadius.circular(3),
       ),
       child: AnimatedBuilder(
@@ -272,7 +272,7 @@ class _QuickTipsFlashcardsState extends State<QuickTipsFlashcards>
           Container(
             width: 80,
             height: 80,
-            padding: EdgeInsets.all(20),
+            padding: const EdgeInsets.all(20),
             decoration: BoxDecoration(
               color: Colors.white,
               shape: BoxShape.circle,
@@ -280,17 +280,17 @@ class _QuickTipsFlashcardsState extends State<QuickTipsFlashcards>
                 BoxShadow(
                   color: Colors.black.withOpacity(0.1),
                   blurRadius: 20,
-                  offset: Offset(0, 10),
+                  offset: const Offset(0, 10),
                 ),
               ],
             ),
-            child: CircularProgressIndicator(
+            child: const CircularProgressIndicator(
               valueColor: AlwaysStoppedAnimation<Color>(Color(0xFF6C5CE7)),
               strokeWidth: 3,
             ),
           ),
-          SizedBox(height: 24),
-          Text(
+          const SizedBox(height: 24),
+          const Text(
             'Preparing your flashcards...',
             style: TextStyle(
               fontSize: 16,
@@ -338,7 +338,7 @@ class _QuickTipsFlashcardsState extends State<QuickTipsFlashcards>
       animation: _cardAnimation,
       builder: (context, child) {
         return Container(
-          margin: EdgeInsets.all(20),
+          margin: const EdgeInsets.all(20),
           child: AnimatedBuilder(
             animation: _floatingAnimation,
             builder: (context, child) {
@@ -347,7 +347,7 @@ class _QuickTipsFlashcardsState extends State<QuickTipsFlashcards>
                 child: GestureDetector(
                   onTap: () => _toggleCard(),
                   child: AnimatedContainer(
-                    duration: Duration(milliseconds: 600),
+                    duration: const Duration(milliseconds: 600),
                     curve: Curves.elasticOut,
                     decoration: BoxDecoration(
                       borderRadius: BorderRadius.circular(24),
@@ -355,12 +355,12 @@ class _QuickTipsFlashcardsState extends State<QuickTipsFlashcards>
                         BoxShadow(
                           color: colors[0].withOpacity(0.3),
                           blurRadius: 30,
-                          offset: Offset(0, 15),
+                          offset: const Offset(0, 15),
                         ),
                         BoxShadow(
                           color: Colors.black.withOpacity(0.1),
                           blurRadius: 10,
-                          offset: Offset(0, 5),
+                          offset: const Offset(0, 5),
                         ),
                       ],
                     ),
@@ -393,7 +393,7 @@ class _QuickTipsFlashcardsState extends State<QuickTipsFlashcards>
 
   Widget _buildCardFront(QuickTip tip, List<Color> colors) {
     return Container(
-      padding: EdgeInsets.all(32),
+      padding: const EdgeInsets.all(32),
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
@@ -407,7 +407,7 @@ class _QuickTipsFlashcardsState extends State<QuickTipsFlashcards>
                 BoxShadow(
                   color: Colors.black.withOpacity(0.1),
                   blurRadius: 20,
-                  offset: Offset(0, 10),
+                  offset: const Offset(0, 10),
                 ),
               ],
             ),
@@ -417,10 +417,10 @@ class _QuickTipsFlashcardsState extends State<QuickTipsFlashcards>
               color: Colors.white,
             ),
           ),
-          SizedBox(height: 32),
+          const SizedBox(height: 32),
           Text(
             tip.title,
-            style: TextStyle(
+            style: const TextStyle(
               fontSize: 26,
               fontWeight: FontWeight.w800,
               color: Colors.white,
@@ -430,9 +430,9 @@ class _QuickTipsFlashcardsState extends State<QuickTipsFlashcards>
             maxLines: 3,
             overflow: TextOverflow.ellipsis,
           ),
-          SizedBox(height: 24),
+          const SizedBox(height: 24),
           Container(
-            padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
             decoration: BoxDecoration(
               color: Colors.white.withOpacity(0.2),
               borderRadius: BorderRadius.circular(20),
@@ -447,8 +447,8 @@ class _QuickTipsFlashcardsState extends State<QuickTipsFlashcards>
                           color: Colors.white,
                           size: 16,
                         )),
-                SizedBox(width: 8),
-                Text(
+                const SizedBox(width: 8),
+                const Text(
                   'Priority',
                   style: TextStyle(
                     color: Colors.white,
@@ -459,12 +459,12 @@ class _QuickTipsFlashcardsState extends State<QuickTipsFlashcards>
               ],
             ),
           ),
-          Spacer(),
+          const Spacer(),
           AnimatedBuilder(
             animation: _rippleAnimation,
             builder: (context, child) {
               return Container(
-                padding: EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
                 decoration: BoxDecoration(
                   color: Colors.white.withOpacity(0.2),
                   borderRadius: BorderRadius.circular(25),
@@ -473,7 +473,7 @@ class _QuickTipsFlashcardsState extends State<QuickTipsFlashcards>
                     width: 1,
                   ),
                 ),
-                child: Row(
+                child: const Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     Icon(
@@ -502,7 +502,7 @@ class _QuickTipsFlashcardsState extends State<QuickTipsFlashcards>
 
   Widget _buildCardBack(QuickTip tip, List<Color> colors) {
     return Container(
-      padding: EdgeInsets.all(32),
+      padding: const EdgeInsets.all(32),
       child: SingleChildScrollView(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -510,7 +510,7 @@ class _QuickTipsFlashcardsState extends State<QuickTipsFlashcards>
             Row(
               children: [
                 Container(
-                  padding: EdgeInsets.all(12),
+                  padding: const EdgeInsets.all(12),
                   decoration: BoxDecoration(
                     gradient: LinearGradient(colors: colors),
                     borderRadius: BorderRadius.circular(12),
@@ -521,11 +521,11 @@ class _QuickTipsFlashcardsState extends State<QuickTipsFlashcards>
                     color: Colors.white,
                   ),
                 ),
-                SizedBox(width: 12),
+                const SizedBox(width: 12),
                 Expanded(
                   child: Text(
                     tip.title,
-                    style: TextStyle(
+                    style: const TextStyle(
                       fontSize: 18,
                       fontWeight: FontWeight.w700,
                       color: Color(0xFF2D3436),
@@ -534,20 +534,20 @@ class _QuickTipsFlashcardsState extends State<QuickTipsFlashcards>
                 ),
               ],
             ),
-            SizedBox(height: 32),
+            const SizedBox(height: 32),
             Container(
-              padding: EdgeInsets.all(24),
+              padding: const EdgeInsets.all(24),
               decoration: BoxDecoration(
-                color: Color(0xFFF8F9FA),
+                color: const Color(0xFFF8F9FA),
                 borderRadius: BorderRadius.circular(16),
                 border: Border.all(
-                  color: Color(0xFFE8E8E8),
+                  color: const Color(0xFFE8E8E8),
                   width: 1,
                 ),
               ),
               child: Text(
                 tip.content,
-                style: TextStyle(
+                style: const TextStyle(
                   fontSize: 15,
                   color: Color(0xFF2D3436),
                   height: 1.6,
@@ -555,15 +555,15 @@ class _QuickTipsFlashcardsState extends State<QuickTipsFlashcards>
                 ),
               ),
             ),
-            SizedBox(height: 32),
+            const SizedBox(height: 32),
             Center(
               child: Container(
-                padding: EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
                 decoration: BoxDecoration(
                   gradient: LinearGradient(colors: colors),
                   borderRadius: BorderRadius.circular(20),
                 ),
-                child: Row(
+                child: const Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     Icon(
@@ -592,7 +592,7 @@ class _QuickTipsFlashcardsState extends State<QuickTipsFlashcards>
 
   Widget _buildBottomNavigation() {
     return Container(
-      padding: EdgeInsets.all(20),
+      padding: const EdgeInsets.all(20),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
@@ -604,14 +604,14 @@ class _QuickTipsFlashcardsState extends State<QuickTipsFlashcards>
           Row(
             children: List.generate(_tips.length, (index) {
               return AnimatedContainer(
-                duration: Duration(milliseconds: 300),
-                margin: EdgeInsets.symmetric(horizontal: 4),
+                duration: const Duration(milliseconds: 300),
+                margin: const EdgeInsets.symmetric(horizontal: 4),
                 width: _currentIndex == index ? 24 : 8,
                 height: 8,
                 decoration: BoxDecoration(
                   color: _currentIndex == index
                       ? _getThemeColors(index)[0]
-                      : Color(0xFFE8E8E8),
+                      : const Color(0xFFE8E8E8),
                   borderRadius: BorderRadius.circular(4),
                 ),
               );
@@ -633,12 +633,12 @@ class _QuickTipsFlashcardsState extends State<QuickTipsFlashcards>
     return GestureDetector(
       onTap: onPressed,
       child: Container(
-        padding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
         decoration: BoxDecoration(
-          color: isEnabled ? Colors.white : Color(0xFFF8F9FA),
+          color: isEnabled ? Colors.white : const Color(0xFFF8F9FA),
           borderRadius: BorderRadius.circular(12),
           border: Border.all(
-            color: isEnabled ? Color(0xFFE8E8E8) : Color(0xFFF0F0F0),
+            color: isEnabled ? const Color(0xFFE8E8E8) : const Color(0xFFF0F0F0),
             width: 1,
           ),
           boxShadow: isEnabled
@@ -646,7 +646,7 @@ class _QuickTipsFlashcardsState extends State<QuickTipsFlashcards>
                   BoxShadow(
                     color: Colors.black.withOpacity(0.05),
                     blurRadius: 10,
-                    offset: Offset(0, 2),
+                    offset: const Offset(0, 2),
                   ),
                 ]
               : null,
@@ -656,14 +656,14 @@ class _QuickTipsFlashcardsState extends State<QuickTipsFlashcards>
           children: [
             Icon(
               icon,
-              color: isEnabled ? Color(0xFF2D3436) : Color(0xFFB2BEC3),
+              color: isEnabled ? const Color(0xFF2D3436) : const Color(0xFFB2BEC3),
               size: 16,
             ),
-            SizedBox(width: 8),
+            const SizedBox(width: 8),
             Text(
               label,
               style: TextStyle(
-                color: isEnabled ? Color(0xFF2D3436) : Color(0xFFB2BEC3),
+                color: isEnabled ? const Color(0xFF2D3436) : const Color(0xFFB2BEC3),
                 fontSize: 14,
                 fontWeight: FontWeight.w600,
               ),
@@ -683,21 +683,21 @@ class _QuickTipsFlashcardsState extends State<QuickTipsFlashcards>
             width: 100,
             height: 100,
             decoration: BoxDecoration(
-              color: Color(0xFFF8F9FA),
+              color: const Color(0xFFF8F9FA),
               shape: BoxShape.circle,
               border: Border.all(
-                color: Color(0xFFE8E8E8),
+                color: const Color(0xFFE8E8E8),
                 width: 2,
               ),
             ),
-            child: Icon(
+            child: const Icon(
               Icons.lightbulb_outline,
               size: 40,
               color: Color(0xFF636E72),
             ),
           ),
-          SizedBox(height: 24),
-          Text(
+          const SizedBox(height: 24),
+          const Text(
             'No Tips Available',
             style: TextStyle(
               fontSize: 20,
@@ -705,8 +705,8 @@ class _QuickTipsFlashcardsState extends State<QuickTipsFlashcards>
               fontWeight: FontWeight.w700,
             ),
           ),
-          SizedBox(height: 8),
-          Text(
+          const SizedBox(height: 8),
+          const Text(
             'Check back later for new content!',
             style: TextStyle(
               fontSize: 14,
@@ -730,7 +730,7 @@ class _QuickTipsFlashcardsState extends State<QuickTipsFlashcards>
   void _nextCard() {
     if (_currentIndex < _tips.length - 1) {
       _pageController.nextPage(
-        duration: Duration(milliseconds: 300),
+        duration: const Duration(milliseconds: 300),
         curve: Curves.easeInOut,
       );
     }
@@ -739,7 +739,7 @@ class _QuickTipsFlashcardsState extends State<QuickTipsFlashcards>
   void _previousCard() {
     if (_currentIndex > 0) {
       _pageController.previousPage(
-        duration: Duration(milliseconds: 300),
+        duration: const Duration(milliseconds: 300),
         curve: Curves.easeInOut,
       );
     }

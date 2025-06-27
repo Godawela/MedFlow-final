@@ -1,5 +1,7 @@
 //individual device information page
 
+// ignore_for_file: use_build_context_synchronously
+
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:med/widgets/appbar.dart';
@@ -298,7 +300,7 @@ class _MachineDetailPageState extends State<MachineDetailPage> with TickerProvid
                                             color: Colors.white.withOpacity(0.2),
                                             borderRadius: BorderRadius.circular(16),
                                           ),
-                                          child: Icon(
+                                          child: const Icon(
                                             Icons.medical_services_rounded,
                                             size: 40,
                                             color: Colors.white,

@@ -1,5 +1,7 @@
 // lib/services/image_picker_service.dart
 
+// ignore_for_file: use_build_context_synchronously
+
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
@@ -29,7 +31,7 @@ class ImagePickerService {
       }
       return null;
     } catch (e) {
-      print('Error picking image: $e');
+      debugPrint('Error picking image: $e');
       
       if (context != null && showErrorSnackbar) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -60,7 +62,7 @@ class ImagePickerService {
       
       return images.map((image) => File(image.path)).toList();
     } catch (e) {
-      print('Error picking multiple images: $e');
+      debugPrint('Error picking multiple images: $e');
       
       if (context != null && showErrorSnackbar) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -92,7 +94,7 @@ class ImagePickerService {
       }
       return null;
     } catch (e) {
-      print('Error picking video: $e');
+      debugPrint('Error picking video: $e');
       
       if (context != null && showErrorSnackbar) {
         ScaffoldMessenger.of(context).showSnackBar(

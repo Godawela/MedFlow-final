@@ -6,11 +6,11 @@ class CategoryIcon extends StatelessWidget {
   final IconData Function(String) getDeviceIcon;
 
   const CategoryIcon({
-    Key? key,
+    super.key,
     this.imageUrl,
     required this.category,
     required this.getDeviceIcon,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -30,7 +30,7 @@ class CategoryIcon extends StatelessWidget {
                 height: 56,
                 fit: BoxFit.cover,
                 errorBuilder: (context, error, stackTrace) {
-                  print('Error loading image: $error');
+                  debugPrint('Error loading image: $error');
                   return _buildIconFallback();
                 },
                 loadingBuilder: (context, child, loadingProgress) {

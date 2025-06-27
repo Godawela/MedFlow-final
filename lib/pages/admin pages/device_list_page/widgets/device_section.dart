@@ -11,13 +11,13 @@ class DevicesSection extends StatelessWidget {
   final Function(Map<String, dynamic>) onDeviceTap;
 
   const DevicesSection({
-    Key? key,
+    super.key,
     required this.devices,
     required this.category,
     required this.getDeviceColors,
     required this.getDeviceIcon,
     required this.onDeviceTap,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

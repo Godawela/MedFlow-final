@@ -3,7 +3,7 @@ import 'package:google_fonts/google_fonts.dart';
 class DevicesHeader extends StatelessWidget {
   final int deviceCount;
 
-  const DevicesHeader({Key? key, required this.deviceCount}) : super(key: key);
+  const DevicesHeader({super.key, required this.deviceCount});
 
   @override
   Widget build(BuildContext context) {

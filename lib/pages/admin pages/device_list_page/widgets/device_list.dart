@@ -8,12 +8,12 @@ class DevicesList extends StatelessWidget {
   final Function(Map<String, dynamic>) onDeviceTap;
 
   const DevicesList({
-    Key? key,
+    super.key,
     required this.devices,
     required this.getDeviceColors,
     required this.getDeviceIcon,
     required this.onDeviceTap,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

@@ -8,11 +8,11 @@ class CategoryHeader extends StatelessWidget {
   final IconData Function(String) getDeviceIcon;
 
   const CategoryHeader({
-    Key? key,
+    super.key,
     required this.category,
     this.imageUrl,
     required this.getDeviceIcon,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

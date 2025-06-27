@@ -1,7 +1,5 @@
 //individual catagory information page
-
 import 'dart:async';
-
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -19,7 +17,6 @@ import 'package:image_picker/image_picker.dart';
 
 class DeviceListPageAdmin extends StatefulWidget {
   final String category;
-
   const DeviceListPageAdmin({super.key, required this.category});
 
   @override
@@ -38,8 +35,7 @@ class _DeviceListPageAdminState extends State<DeviceListPageAdmin>
   late Animation<double> _fadeAnimation;
   final ImagePicker _picker = ImagePicker();
   File? _selectedImage;
-      Timer? _refreshTimer;
-
+  Timer? _refreshTimer;
 
   @override
   void initState() {
@@ -53,20 +49,18 @@ class _DeviceListPageAdminState extends State<DeviceListPageAdmin>
     );
 
     _loadData();
-     _refreshTimer = Timer.periodic(const Duration(seconds: 10), (timer) {
+    _refreshTimer = Timer.periodic(const Duration(seconds: 10), (timer) {
       _loadData();
-    }); 
+    });
   }
 
   @override
   void dispose() {
     _animationController.dispose();
-            _refreshTimer?.cancel();
-
+    _refreshTimer?.cancel();
     super.dispose();
   }
 
-  // Load both devices and category description
   Future<void> _loadData() async {
     await Future.wait([
       fetchDevicesByCategory(),
@@ -93,20 +87,19 @@ class _DeviceListPageAdminState extends State<DeviceListPageAdmin>
 
   Future<void> fetchCategoryDescription() async {
     try {
-      print('Fetching category description for ${widget.category}');
+      debugPrint('Fetching category description for ${widget.category}');
       final categoryData =
           await CategoryService.getCategoryByName(widget.category);
-
-      print('Received category data: $categoryData');
+      debugPrint('Received category data: $categoryData');
       setState(() {
         categoryDescription = categoryData['description'];
         categoryId = categoryData['_id'];
         categoryImage = categoryData['image'];
       });
-      print('Set category ID to: $categoryId');
-      print('Set category image to: $categoryImage');
+      debugPrint('Set category ID to: $categoryId');
+      debugPrint('Set category image to: $categoryImage');
     } catch (e) {
-      print('Error fetching category description: $e');
+      debugPrint('Error fetching category description: $e');
       setState(() {
         categoryDescription = 'Error fetching description.';
       });
@@ -121,13 +114,11 @@ class _DeviceListPageAdminState extends State<DeviceListPageAdmin>
   Future<void> updateCategory(String newName, String newDescription,
       {File? imageFile, bool removeImage = false}) async {
     if (categoryId == null) {
-      print('Category ID is null - cannot update');
+      debugPrint('Category ID is null - cannot update');
       return;
     }
-
-    print(
+    debugPrint(
         'Attempting to update category $categoryId with name: $newName, description: $newDescription');
-
     try {
       final responseData = await CategoryService.updateCategory(
         categoryId!,
@@ -164,7 +155,7 @@ class _DeviceListPageAdminState extends State<DeviceListPageAdmin>
         );
       }
     } catch (e) {
-      print('Update error: $e');
+      debugPrint('Update error: $e');
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
@@ -178,12 +169,12 @@ class _DeviceListPageAdminState extends State<DeviceListPageAdmin>
 
   Future<void> deleteCategory() async {
     if (categoryId == null) {
-      print('Delete aborted: categoryId is null');
+      debugPrint('Delete aborted: categoryId is null');
       return;
     }
 
     try {
-      print('Initiating delete for category $categoryId');
+      debugPrint('Initiating delete for category $categoryId');
       await CategoryService.deleteCategory(categoryId!);
 
       // Perform a complete data refresh
@@ -201,7 +192,7 @@ class _DeviceListPageAdminState extends State<DeviceListPageAdmin>
         Navigator.of(context).pop(true);
       }
     } catch (e) {
-      print('Delete error: $e');
+      debugPrint('Delete error: $e');
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
@@ -214,7 +205,7 @@ class _DeviceListPageAdminState extends State<DeviceListPageAdmin>
   }
 
   Future<void> _refreshData() async {
-    print('Performing full data refresh');
+    debugPrint('Performing full data refresh');
     setState(() {
       isLoading = true;
       error = null;
@@ -259,7 +250,6 @@ class _DeviceListPageAdminState extends State<DeviceListPageAdmin>
                     ),
                   ),
                   const SizedBox(height: 20),
-
                   // Title
                   Text(
                     'Select Image Source',
@@ -270,7 +260,6 @@ class _DeviceListPageAdminState extends State<DeviceListPageAdmin>
                     ),
                   ),
                   const SizedBox(height: 20),
-
                   // Camera option
                   ListTile(
                     leading: Container(
@@ -309,9 +298,7 @@ class _DeviceListPageAdminState extends State<DeviceListPageAdmin>
                       borderRadius: BorderRadius.circular(12),
                     ),
                   ),
-
                   const SizedBox(height: 8),
-
                   // Gallery option
                   ListTile(
                     leading: Container(
@@ -350,9 +337,7 @@ class _DeviceListPageAdminState extends State<DeviceListPageAdmin>
                       borderRadius: BorderRadius.circular(12),
                     ),
                   ),
-
                   const SizedBox(height: 16),
-
                   // Cancel button
                   SizedBox(
                     width: double.infinity,
@@ -405,7 +390,7 @@ class _DeviceListPageAdminState extends State<DeviceListPageAdmin>
         }
       }
     } catch (e) {
-      print('Error picking image: $e');
+      debugPrint('Error picking image: $e');
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text('Error selecting image: $e'),
@@ -480,7 +465,6 @@ class _DeviceListPageAdminState extends State<DeviceListPageAdmin>
                       ),
                     ),
                     const SizedBox(height: 20),
-
                     // Image Management Section
                     Text(
                       'Category Image',
@@ -491,7 +475,6 @@ class _DeviceListPageAdminState extends State<DeviceListPageAdmin>
                       ),
                     ),
                     const SizedBox(height: 12),
-
                     // Current/Selected Image Display
                     Container(
                       width: 100,
@@ -527,7 +510,6 @@ class _DeviceListPageAdminState extends State<DeviceListPageAdmin>
                               : _buildImagePlaceholder(),
                     ),
                     const SizedBox(height: 16),
-
                     // Image Action Buttons
                     Row(
                       children: [
@@ -773,14 +755,16 @@ class _DeviceListPageAdminState extends State<DeviceListPageAdmin>
     final lowerName = deviceName.toLowerCase();
     if (lowerName.contains('mri')) return Icons.medical_information_rounded;
     if (lowerName.contains('ct')) return Icons.scanner_rounded;
-    if (lowerName.contains('x-ray') || lowerName.contains('xray'))
+    if (lowerName.contains('x-ray') || lowerName.contains('xray')) {
       return Icons.healing_rounded;
+    }
     if (lowerName.contains('ultrasound')) return Icons.monitor_heart_rounded;
     if (lowerName.contains('ecg')) return Icons.favorite_rounded;
     if (lowerName.contains('ventilator')) return Icons.air_rounded;
     if (lowerName.contains('dialysis')) return Icons.water_drop_rounded;
-    if (lowerName.contains('lab') || lowerName.contains('laboratory'))
+    if (lowerName.contains('lab') || lowerName.contains('laboratory')) {
       return Icons.science_rounded;
+    }
     return Icons.medical_services_rounded;
   }
 
@@ -804,19 +788,18 @@ class _DeviceListPageAdminState extends State<DeviceListPageAdmin>
     return Scaffold(
       backgroundColor: Colors.grey.shade50,
       body: Column(
-          children: [
-            CurvedAppBar(
-              title: widget.category,
-              isProfileAvailable: false,
-              showIcon: true,
-              isBack: true,
-            ),
-            Expanded(
-              child: _buildContent(),
-            ),
-          ],
-        ),
-      
+        children: [
+          CurvedAppBar(
+            title: widget.category,
+            isProfileAvailable: false,
+            showIcon: true,
+            isBack: true,
+          ),
+          Expanded(
+            child: _buildContent(),
+          ),
+        ],
+      ),
       floatingActionButton: AddDeviceButton(
         onPressed: () => context.router.push(const AddDeviceRoute()),
       ),

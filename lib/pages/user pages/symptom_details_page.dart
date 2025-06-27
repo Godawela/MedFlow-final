@@ -1,3 +1,5 @@
+// ignore_for_file: use_build_context_synchronously
+
 import 'dart:async';
 
 import 'package:flutter/material.dart';
@@ -296,7 +298,7 @@ class _SymptomDetailPageState extends State<SymptomDetailPage> with TickerProvid
                                             color: Colors.white.withOpacity(0.2),
                                             borderRadius: BorderRadius.circular(16),
                                           ),
-                                          child: Icon(
+                                          child: const Icon(
                                             Icons.health_and_safety_rounded,
                                             size: 40,
                                             color: Colors.white,

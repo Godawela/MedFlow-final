@@ -1,3 +1,5 @@
+// ignore_for_file: use_build_context_synchronously
+
 import 'dart:convert';
 import 'package:auto_route/auto_route.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -19,7 +21,7 @@ class _AuthFormState extends State<AuthForm> {
   final TextEditingController _nameController = TextEditingController();
   bool isLoading = false;
   bool isPasswordVisible = false;
-  String _selectedRole = 'student'; // default role (you can hard-code the role if needed)
+  final String _selectedRole = 'student'; 
 
   // Function to handle user sign-up with Firebase Authentication
   Future<void> signUpUser(String email, String password, String name, String role) async {
@@ -40,7 +42,7 @@ class _AuthFormState extends State<AuthForm> {
       // Navigate to bottom nav bar if sign-up is successful
       AutoRouter.of(context).push(const BottomNavigationRoute());
     } catch (e) {
-      print('Error during sign-up: $e');
+      debugPrint('Error during sign-up: $e');
       showErrorSnackBar('Error during sign-up: $e');
     } finally {
       setState(() {
@@ -66,13 +68,13 @@ class _AuthFormState extends State<AuthForm> {
       );
 
       if (response.statusCode == 200) {
-        print('User data saved to MongoDB successfully');
+        debugPrint('User data saved to MongoDB successfully');
       } else {
-        print('Error saving data to MongoDB: ${response.body}');
+        debugPrint('Error saving data to MongoDB: ${response.body}');
         showErrorSnackBar('Error saving data to MongoDB');
       }
     } catch (e) {
-      print('Error while sending data to MongoDB: $e');
+      debugPrint('Error while sending data to MongoDB: $e');
       showErrorSnackBar('Error sending data to MongoDB');
     }
   }

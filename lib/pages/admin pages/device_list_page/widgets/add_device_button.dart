@@ -5,7 +5,7 @@ import 'package:google_fonts/google_fonts.dart';
 class AddDeviceButton extends StatelessWidget {
   final VoidCallback onPressed;
 
-  const AddDeviceButton({Key? key, required this.onPressed}) : super(key: key);
+  const AddDeviceButton({super.key, required this.onPressed});
 
   @override
   Widget build(BuildContext context) {

@@ -18,16 +18,16 @@ class DeviceListPage extends StatefulWidget {
   _DeviceListPageState createState() => _DeviceListPageState();
 }
 
-class _DeviceListPageState extends State<DeviceListPage> with TickerProviderStateMixin {
+class _DeviceListPageState extends State<DeviceListPage>
+    with TickerProviderStateMixin {
   List<dynamic> devices = [];
   bool isLoading = true;
   String? error;
   String? categoryDescription;
-    String? categoryImage;
+  String? categoryImage;
   late AnimationController _animationController;
   late Animation<double> _fadeAnimation;
-      Timer? _refreshTimer;
-
+  Timer? _refreshTimer;
 
   @override
   void initState() {
@@ -39,17 +39,17 @@ class _DeviceListPageState extends State<DeviceListPage> with TickerProviderStat
     _fadeAnimation = Tween<double>(begin: 0, end: 1).animate(
       CurvedAnimation(parent: _animationController, curve: Curves.easeOut),
     );
-    
+
+    _loadData();
+    _refreshTimer = Timer.periodic(const Duration(seconds: 10), (timer) {
       _loadData();
-     _refreshTimer = Timer.periodic(const Duration(seconds: 10), (timer) {
-      _loadData();
-    }); 
+    });
   }
 
   @override
   void dispose() {
     _animationController.dispose();
-            _refreshTimer?.cancel();
+    _refreshTimer?.cancel();
 
     super.dispose();
   }
@@ -65,7 +65,8 @@ class _DeviceListPageState extends State<DeviceListPage> with TickerProviderStat
   Future<void> fetchDevicesByCategory() async {
     try {
       final response = await http.get(
-        Uri.parse('http://10.0.2.2:8000/api/devices/category/${widget.category}'),
+        Uri.parse(
+            'http://10.0.2.2:8000/api/devices/category/${widget.category}'),
       );
 
       if (response.statusCode == 200) {
@@ -88,32 +89,32 @@ class _DeviceListPageState extends State<DeviceListPage> with TickerProviderStat
     }
   }
 
-   Future<void> fetchCategoryDescription() async {
+  Future<void> fetchCategoryDescription() async {
     try {
-      print('Fetching category description for ${widget.category}');
+      debugPrint('Fetching category description for ${widget.category}');
       final response = await http.get(
         Uri.parse('http://10.0.2.2:8000/api/category/name/${widget.category}'),
       );
 
-      print(
+      debugPrint(
           'Category description response: ${response.statusCode} - ${response.body}');
 
       if (response.statusCode == 200) {
         final data = json.decode(response.body);
-        print('Received category data: $data');
+        debugPrint('Received category data: $data');
         setState(() {
           categoryDescription = data['description'];
           categoryImage = data['image'];
         });
-        print('Set category image to: $categoryImage');
+        debugPrint('Set category image to: $categoryImage');
       } else {
-        print('Failed to fetch category description');
+        debugPrint('Failed to fetch category description');
         setState(() {
           categoryDescription = 'No description available.';
         });
       }
     } catch (e) {
-      print('Error fetching category description: $e');
+      debugPrint('Error fetching category description: $e');
       setState(() {
         categoryDescription = 'Error fetching description.';
       });
@@ -136,12 +137,16 @@ class _DeviceListPageState extends State<DeviceListPage> with TickerProviderStat
     final lowerName = deviceName.toLowerCase();
     if (lowerName.contains('mri')) return Icons.medical_information_rounded;
     if (lowerName.contains('ct')) return Icons.scanner_rounded;
-    if (lowerName.contains('x-ray') || lowerName.contains('xray')) return Icons.healing_rounded;
+    if (lowerName.contains('x-ray') || lowerName.contains('xray')) {
+      return Icons.healing_rounded;
+    }
     if (lowerName.contains('ultrasound')) return Icons.monitor_heart_rounded;
     if (lowerName.contains('ecg')) return Icons.favorite_rounded;
     if (lowerName.contains('ventilator')) return Icons.air_rounded;
     if (lowerName.contains('dialysis')) return Icons.water_drop_rounded;
-    if (lowerName.contains('lab') || lowerName.contains('laboratory')) return Icons.science_rounded;
+    if (lowerName.contains('lab') || lowerName.contains('laboratory')) {
+      return Icons.science_rounded;
+    }
     return Icons.medical_services_rounded;
   }
 
@@ -166,13 +171,12 @@ class _DeviceListPageState extends State<DeviceListPage> with TickerProviderStat
       backgroundColor: Colors.grey.shade50,
       body: Column(
         children: [
-           CurvedAppBar(
+          CurvedAppBar(
             title: widget.category,
             isProfileAvailable: false,
             showIcon: true,
             isBack: true,
           ),
-          
           Expanded(
             child: isLoading
                 ? Center(
@@ -189,7 +193,8 @@ class _DeviceListPageState extends State<DeviceListPage> with TickerProviderStat
                                 color: Colors.black.withOpacity(0.1),
                                 blurRadius: 20,
                                 offset: const Offset(0, 10),
-                          )],
+                              )
+                            ],
                           ),
                           child: CircularProgressIndicator(
                             strokeWidth: 3,
@@ -296,70 +301,99 @@ class _DeviceListPageState extends State<DeviceListPage> with TickerProviderStat
                                       borderRadius: BorderRadius.circular(20),
                                       boxShadow: [
                                         BoxShadow(
-                                          color: Colors.deepPurple.withOpacity(0.3),
+                                          color: Colors.deepPurple
+                                              .withOpacity(0.3),
                                           blurRadius: 12,
                                           offset: const Offset(0, 6),
                                         ),
                                       ],
                                     ),
                                     child: Column(
-                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
                                       children: [
                                         Row(
                                           children: [
-                                           Container(
-              width: 56,
-              height: 56,
-              decoration: BoxDecoration(
-                color: Colors.white.withOpacity(0.2),
-                borderRadius: BorderRadius.circular(12),
-              ),
-              child: ClipRRect(
-                borderRadius: BorderRadius.circular(12),
-                child: getImageUrl() != null
-                    ? Image.network(
-                        getImageUrl()!,
-                        width: 56,
-                        height: 56,
-                        fit: BoxFit.cover,
-                        errorBuilder: (context, error, stackTrace) {
-                          print('Error loading image: $error');
-                          return Container(
-                            padding: const EdgeInsets.all(12),
-                            child: Icon(
-                              getDeviceIcon(widget.category),
-                              size: 28,
-                              color: Colors.white,
-                            ),
-                          );
-                        },
-                        loadingBuilder: (context, child, loadingProgress) {
-                          if (loadingProgress == null) return child;
-                          return Container(
-                            padding: const EdgeInsets.all(16),
-                            child: CircularProgressIndicator(
-                              value: loadingProgress.expectedTotalBytes != null
-                                  ? loadingProgress.cumulativeBytesLoaded /
-                                      loadingProgress.expectedTotalBytes!
-                                  : null,
-                              strokeWidth: 2,
-                              valueColor: AlwaysStoppedAnimation<Color>(
-                                Colors.white,
-                              ),
-                            ),
-                          );
-                        },
-                      )
-                    : Container(
-                        padding: const EdgeInsets.all(12),
-                        child: Icon(
-                          getDeviceIcon(widget.category),
-                          size: 28,
-                          color: Colors.white,
-                        ),
-                      ),
-              ),
-            ),
+                                            Container(
+                                              width: 56,
+                                              height: 56,
+                                              decoration: BoxDecoration(
+                                                color: Colors.white
+                                                    .withOpacity(0.2),
+                                                borderRadius:
+                                                    BorderRadius.circular(12),
+                                              ),
+                                              child: ClipRRect(
+                                                borderRadius:
+                                                    BorderRadius.circular(12),
+                                                child: getImageUrl() != null
+                                                    ? Image.network(
+                                                        getImageUrl()!,
+                                                        width: 56,
+                                                        height: 56,
+                                                        fit: BoxFit.cover,
+                                                        errorBuilder: (context,
+                                                            error, stackTrace) {
+                                                          debugPrint(
+                                                              'Error loading image: $error');
+                                                          return Container(
+                                                            padding:
+                                                                const EdgeInsets
+                                                                    .all(12),
+                                                            child: Icon(
+                                                              getDeviceIcon(
+                                                                  widget
+                                                                      .category),
+                                                              size: 28,
+                                                              color:
+                                                                  Colors.white,
+                                                            ),
+                                                          );
+                                                        },
+                                                        loadingBuilder: (context,
+                                                            child,
+                                                            loadingProgress) {
+                                                          if (loadingProgress ==
+                                                              null) {
+                                                            return child;
+                                                          }
+                                                          return Container(
+                                                            padding:
+                                                                const EdgeInsets
+                                                                    .all(16),
+                                                            child:
+                                                                CircularProgressIndicator(
+                                                              value: loadingProgress
+                                                                          .expectedTotalBytes !=
+                                                                      null
+                                                                  ? loadingProgress
+                                                                          .cumulativeBytesLoaded /
+                                                                      loadingProgress
+                                                                          .expectedTotalBytes!
+                                                                  : null,
+                                                              strokeWidth: 2,
+                                                              valueColor:
+                                                                 const AlwaysStoppedAnimation<
+                                                                      Color>(
+                                                                Colors.white,
+                                                              ),
+                                                            ),
+                                                          );
+                                                        },
+                                                      )
+                                                    : Container(
+                                                        padding:
+                                                            const EdgeInsets
+                                                                .all(12),
+                                                        child: Icon(
+                                                          getDeviceIcon(
+                                                              widget.category),
+                                                          size: 28,
+                                                          color: Colors.white,
+                                                        ),
+                                                      ),
+                                              ),
+                                            ),
                                             const SizedBox(width: 16),
                                             Expanded(
                                               child: Text(
@@ -379,7 +413,8 @@ class _DeviceListPageState extends State<DeviceListPage> with TickerProviderStat
                                             categoryDescription!,
                                             style: GoogleFonts.inter(
                                               fontSize: 16,
-                                              color: Colors.white.withOpacity(0.9),
+                                              color:
+                                                  Colors.white.withOpacity(0.9),
                                               height: 1.5,
                                             ),
                                           ),
@@ -387,9 +422,9 @@ class _DeviceListPageState extends State<DeviceListPage> with TickerProviderStat
                                       ],
                                     ),
                                   ),
-                                  
+
                                   const SizedBox(height: 24),
-                                  
+
                                   // Devices count
                                   Row(
                                     children: [
@@ -409,7 +444,8 @@ class _DeviceListPageState extends State<DeviceListPage> with TickerProviderStat
                                         ),
                                         decoration: BoxDecoration(
                                           color: Colors.deepPurple.shade100,
-                                          borderRadius: BorderRadius.circular(12),
+                                          borderRadius:
+                                              BorderRadius.circular(12),
                                         ),
                                         child: Text(
                                           '${devices.length} devices',
@@ -422,15 +458,16 @@ class _DeviceListPageState extends State<DeviceListPage> with TickerProviderStat
                                       ),
                                     ],
                                   ),
-                                  
+
                                   const SizedBox(height: 16),
-                                  
+
                                   // Devices list
                                   Expanded(
                                     child: devices.isEmpty
                                         ? Center(
                                             child: Column(
-                                              mainAxisAlignment: MainAxisAlignment.center,
+                                              mainAxisAlignment:
+                                                  MainAxisAlignment.center,
                                               children: [
                                                 Icon(
                                                   Icons.devices_other_rounded,
@@ -449,93 +486,149 @@ class _DeviceListPageState extends State<DeviceListPage> with TickerProviderStat
                                             ),
                                           )
                                         : ListView.builder(
-                                            physics: const BouncingScrollPhysics(),
+                                            physics:
+                                                const BouncingScrollPhysics(),
                                             itemCount: devices.length,
                                             itemBuilder: (context, index) {
                                               final device = devices[index];
-                                              final colors = getDeviceColors(index);
-                                              final icon = getDeviceIcon(device['name']);
-                                              
-                                              return TweenAnimationBuilder<double>(
-                                                duration: Duration(milliseconds: 300 + (index * 100)),
-                                                tween: Tween(begin: 0.0, end: 1.0),
-                                                builder: (context, value, child) {
+                                              final colors =
+                                                  getDeviceColors(index);
+                                              final icon =
+                                                  getDeviceIcon(device['name']);
+
+                                              return TweenAnimationBuilder<
+                                                  double>(
+                                                duration: Duration(
+                                                    milliseconds:
+                                                        300 + (index * 100)),
+                                                tween:
+                                                    Tween(begin: 0.0, end: 1.0),
+                                                builder:
+                                                    (context, value, child) {
                                                   return Transform.scale(
                                                     scale: value,
                                                     child: Container(
-                                                      margin: const EdgeInsets.only(bottom: 16),
+                                                      margin:
+                                                          const EdgeInsets.only(
+                                                              bottom: 16),
                                                       decoration: BoxDecoration(
-                                                        gradient: LinearGradient(
-                                                          begin: Alignment.topLeft,
-                                                          end: Alignment.bottomRight,
+                                                        gradient:
+                                                            LinearGradient(
+                                                          begin:
+                                                              Alignment.topLeft,
+                                                          end: Alignment
+                                                              .bottomRight,
                                                           colors: colors,
                                                         ),
-                                                        borderRadius: BorderRadius.circular(20),
+                                                        borderRadius:
+                                                            BorderRadius
+                                                                .circular(20),
                                                         boxShadow: [
                                                           BoxShadow(
-                                                            color: colors[0].withOpacity(0.3),
+                                                            color: colors[0]
+                                                                .withOpacity(
+                                                                    0.3),
                                                             blurRadius: 8,
-                                                            offset: const Offset(0, 4),
+                                                            offset:
+                                                                const Offset(
+                                                                    0, 4),
                                                           ),
                                                         ],
                                                       ),
                                                       child: Material(
-                                                        color: Colors.transparent,
+                                                        color:
+                                                            Colors.transparent,
                                                         child: InkWell(
-                                                          borderRadius: BorderRadius.circular(20),
+                                                          borderRadius:
+                                                              BorderRadius
+                                                                  .circular(20),
                                                           onTap: () {
                                                             Navigator.push(
                                                               context,
                                                               MaterialPageRoute(
-                                                                builder: (context) => MachineDetailPage(
-                                                                  machineName: device['name'],
+                                                                builder:
+                                                                    (context) =>
+                                                                        MachineDetailPage(
+                                                                  machineName:
+                                                                      device[
+                                                                          'name'],
                                                                 ),
                                                               ),
                                                             );
                                                           },
                                                           child: Padding(
-                                                            padding: const EdgeInsets.all(16),
+                                                            padding:
+                                                                const EdgeInsets
+                                                                    .all(16),
                                                             child: Row(
                                                               children: [
                                                                 Container(
-                                                                  padding: const EdgeInsets.all(12),
-                                                                  decoration: BoxDecoration(
-                                                                    color: Colors.white.withOpacity(0.2),
-                                                                    borderRadius: BorderRadius.circular(12),
+                                                                  padding:
+                                                                      const EdgeInsets
+                                                                          .all(
+                                                                          12),
+                                                                  decoration:
+                                                                      BoxDecoration(
+                                                                    color: Colors
+                                                                        .white
+                                                                        .withOpacity(
+                                                                            0.2),
+                                                                    borderRadius:
+                                                                        BorderRadius.circular(
+                                                                            12),
                                                                   ),
                                                                   child: Icon(
                                                                     icon,
                                                                     size: 28,
-                                                                    color: Colors.white,
+                                                                    color: Colors
+                                                                        .white,
                                                                   ),
                                                                 ),
-                                                                const SizedBox(width: 16),
+                                                                const SizedBox(
+                                                                    width: 16),
                                                                 Expanded(
                                                                   child: Column(
-                                                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                                                    crossAxisAlignment:
+                                                                        CrossAxisAlignment
+                                                                            .start,
                                                                     children: [
                                                                       Text(
-                                                                        device['name'],
-                                                                        style: GoogleFonts.inter(
-                                                                          fontSize: 18,
-                                                                          fontWeight: FontWeight.bold,
-                                                                          color: Colors.white,
+                                                                        device[
+                                                                            'name'],
+                                                                        style: GoogleFonts
+                                                                            .inter(
+                                                                          fontSize:
+                                                                              18,
+                                                                          fontWeight:
+                                                                              FontWeight.bold,
+                                                                          color:
+                                                                              Colors.white,
                                                                         ),
                                                                       ),
-                                                                      if (device['reference'] != null && device['reference'].toString().isNotEmpty)
+                                                                      if (device['reference'] !=
+                                                                              null &&
+                                                                          device['reference']
+                                                                              .toString()
+                                                                              .isNotEmpty)
                                                                         Text(
-                                                                          device['reference'],
-                                                                          style: GoogleFonts.inter(
-                                                                            fontSize: 14,
-                                                                            color: Colors.white.withOpacity(0.9),
+                                                                          device[
+                                                                              'reference'],
+                                                                          style:
+                                                                              GoogleFonts.inter(
+                                                                            fontSize:
+                                                                                14,
+                                                                            color:
+                                                                                Colors.white.withOpacity(0.9),
                                                                           ),
                                                                         ),
                                                                     ],
                                                                   ),
                                                                 ),
                                                                 const Icon(
-                                                                  Icons.chevron_right_rounded,
-                                                                  color: Colors.white,
+                                                                  Icons
+                                                                      .chevron_right_rounded,
+                                                                  color: Colors
+                                                                      .white,
                                                                 ),
                                                               ],
                                                             ),

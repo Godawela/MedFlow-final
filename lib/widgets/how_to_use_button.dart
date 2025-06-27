@@ -10,7 +10,7 @@ class HowToUseButton extends StatelessWidget {
       final prefs = await SharedPreferences.getInstance();
       final uid = prefs.getString('uid');
 
-      print("objects $uid");
+      debugPrint("objects $uid");
 
       if (uid == null) {
         return null;
@@ -22,13 +22,13 @@ class HowToUseButton extends StatelessWidget {
 
       if (response.statusCode == 200) {
         final data = json.decode(response.body);
-        print("role how to use: ${data['role']}"); // Debugging line to check role
+        debugPrint("role how to use: ${data['role']}"); // Debugging line to check role
         return data['role'];
       } else {
         return null;
       }
     } catch (e) {
-      print('Error fetching role: $e');
+      debugPrint('Error fetching role: $e');
       return null;
     }
   }

@@ -12,14 +12,14 @@ class CategoryHeaderCard extends StatelessWidget {
   final IconData Function(String) getDeviceIcon;
 
   const CategoryHeaderCard({
-    Key? key,
+    super.key,
     required this.category,
     this.categoryDescription,
     this.imageUrl,
     required this.onEdit,
     required this.onDelete,
     required this.getDeviceIcon,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
