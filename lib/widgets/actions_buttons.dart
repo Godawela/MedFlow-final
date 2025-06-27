@@ -6,8 +6,7 @@ import 'package:med/pages/admin%20pages/machine_admin.dart';
 import 'package:med/pages/admin%20pages/symptom_admin.dart';
 import 'package:med/pages/user%20pages/machine.dart';
 import 'package:med/pages/user%20pages/symptom.dart';
-import 'package:med/widgets/buildActionButton.dart';
-import 'package:shared_preferences/shared_preferences.dart'; // keep this for uid
+import 'package:shared_preferences/shared_preferences.dart'; 
 
 class ActionButtons extends StatelessWidget {
   const ActionButtons({super.key});
@@ -77,4 +76,28 @@ class ActionButtons extends StatelessWidget {
       ],
     );
   }
+
+  Widget buildActionButton(String text, VoidCallback onPressed) {
+    return ElevatedButton(
+      onPressed: onPressed,
+      style: ElevatedButton.styleFrom(
+        backgroundColor: const Color(0xFF9CE6F6),
+        padding: const EdgeInsets.symmetric(vertical: 14),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(8),
+        ),
+      ),
+      child: Center(
+        child: Text(
+          text,
+          style: const TextStyle(
+            fontSize: 20,
+            fontFamily: 'Inter',
+            color: Colors.black,
+          ),
+        ),
+      ),
+    );
+  }
+
 }
