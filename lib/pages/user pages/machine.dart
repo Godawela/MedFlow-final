@@ -1,5 +1,6 @@
-// Category List Page 
+// Category List Page
 
+import 'dart:async';
 import 'dart:math';
 
 import 'package:flutter/material.dart';
@@ -19,7 +20,8 @@ class MachinePage extends StatefulWidget {
   _MachinePageState createState() => _MachinePageState();
 }
 
-class _MachinePageState extends State<MachinePage> with TickerProviderStateMixin {
+class _MachinePageState extends State<MachinePage>
+    with TickerProviderStateMixin {
   List<String> categories = [];
   bool isLoading = true;
   String? error;
@@ -27,8 +29,9 @@ class _MachinePageState extends State<MachinePage> with TickerProviderStateMixin
   late AnimationController _headerAnimationController;
   late Animation<double> _fadeAnimation;
   late Animation<Offset> _slideAnimation;
+  Timer? _refreshTimer;
 
- final List<Map<String, String>> categoryTips = [
+  final List<Map<String, String>> categoryTips = [
     {"id": "680a1817041a44101a751d2f", "name": "Home Automation"},
     {"id": "680e10e3d7e1cb28ac48743f", "name": "Smart Security"},
     // {"id": "681a2234e4f5g6h7i8j9k0l1", "name": "MRI Machines"},
@@ -44,7 +47,7 @@ class _MachinePageState extends State<MachinePage> with TickerProviderStateMixin
     final random = Random();
     return categoryTips[random.nextInt(categoryTips.length)];
   }
-  
+
   @override
   void initState() {
     super.initState();
@@ -56,36 +59,49 @@ class _MachinePageState extends State<MachinePage> with TickerProviderStateMixin
       duration: const Duration(milliseconds: 600),
       vsync: this,
     );
-    
+
     _fadeAnimation = Tween<double>(begin: 0, end: 1).animate(
       CurvedAnimation(parent: _animationController, curve: Curves.easeOut),
     );
-    
+
     _slideAnimation = Tween<Offset>(
       begin: const Offset(0, 0.3),
       end: Offset.zero,
-    ).animate(CurvedAnimation(parent: _animationController, curve: Curves.easeOut));
-    
+    ).animate(
+        CurvedAnimation(parent: _animationController, curve: Curves.easeOut));
+
     fetchCategories();
+    _refreshTimer = Timer.periodic(const Duration(seconds: 10), (timer) {
+      fetchCategories();
+    });
   }
 
   @override
   void dispose() {
     _animationController.dispose();
     _headerAnimationController.dispose();
+    _refreshTimer?.cancel();
+
     super.dispose();
   }
 
   Future<void> fetchCategories() async {
     try {
       final response = await http.get(
-        Uri.parse('http://10.0.2.2:8000/api/categories'),
+        Uri.parse('http://10.0.2.2:8000/api/category'),
+        headers: {
+          'Cache-Control': 'no-cache, no-store, must-revalidate',
+          'Pragma': 'no-cache',
+        },
       );
 
       if (response.statusCode == 200) {
         final List<dynamic> fetchedCategories = json.decode(response.body);
         setState(() {
-          categories = fetchedCategories.cast<String>();
+          // Extract just the names from each category object
+          categories = fetchedCategories
+              .map<String>((category) => category['name'] as String)
+              .toList();
           isLoading = false;
         });
         _animationController.forward();
@@ -160,7 +176,6 @@ class _MachinePageState extends State<MachinePage> with TickerProviderStateMixin
             showIcon: true,
             isBack: true,
           ),
-          
           Expanded(
             child: isLoading
                 ? Center(
@@ -287,7 +302,8 @@ class _MachinePageState extends State<MachinePage> with TickerProviderStateMixin
                                         borderRadius: BorderRadius.circular(20),
                                         boxShadow: [
                                           BoxShadow(
-                                            color: Colors.deepPurple.withOpacity(0.3),
+                                            color: Colors.deepPurple
+                                                .withOpacity(0.3),
                                             blurRadius: 12,
                                             offset: const Offset(0, 6),
                                           ),
@@ -298,12 +314,14 @@ class _MachinePageState extends State<MachinePage> with TickerProviderStateMixin
                                           Container(
                                             padding: const EdgeInsets.all(16),
                                             decoration: BoxDecoration(
-                                              color: Colors.white.withOpacity(0.2),
+                                              color:
+                                                  Colors.white.withOpacity(0.2),
                                               shape: BoxShape.circle,
                                             ),
                                             child: const CircleAvatar(
                                               radius: 32,
-                                              backgroundImage: AssetImage('assets/images/logo.png'),
+                                              backgroundImage: AssetImage(
+                                                  'assets/images/logo.png'),
                                               backgroundColor: Colors.white,
                                             ),
                                           ),
@@ -314,7 +332,8 @@ class _MachinePageState extends State<MachinePage> with TickerProviderStateMixin
                                             'Select a device category to explore available medical equipment',
                                             style: GoogleFonts.inter(
                                               fontSize: 16,
-                                              color: Colors.white.withOpacity(0.9),
+                                              color:
+                                                  Colors.white.withOpacity(0.9),
                                               fontWeight: FontWeight.w500,
                                             ),
                                             textAlign: TextAlign.center,
@@ -322,9 +341,9 @@ class _MachinePageState extends State<MachinePage> with TickerProviderStateMixin
                                         ],
                                       ),
                                     ),
-                                    
+
                                     const SizedBox(height: 24),
-                                    
+
                                     // Categories count
                                     Row(
                                       children: [
@@ -344,7 +363,8 @@ class _MachinePageState extends State<MachinePage> with TickerProviderStateMixin
                                           ),
                                           decoration: BoxDecoration(
                                             color: Colors.deepPurple.shade100,
-                                            borderRadius: BorderRadius.circular(12),
+                                            borderRadius:
+                                                BorderRadius.circular(12),
                                           ),
                                           child: Text(
                                             '${categories.length} types',
@@ -357,122 +377,186 @@ class _MachinePageState extends State<MachinePage> with TickerProviderStateMixin
                                         ),
                                       ],
                                     ),
-                                    
+
                                     const SizedBox(height: 16),
-                                    
-                                  // Categories grid
-Expanded(
-  child: GridView.builder(
-    gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-      crossAxisCount: 2,
-      childAspectRatio: 1.2,  // Increased from 1.1 to give more vertical space
-      crossAxisSpacing: 16,
-      mainAxisSpacing: 16,
-    ),
-    itemCount: categories.length,
-    itemBuilder: (context, index) {
-      final category = categories[index];
-      final colors = getCategoryColors(index);
-      final icon = getCategoryIcon(category);
-      
-      return TweenAnimationBuilder<double>(
-        duration: Duration(milliseconds: 300 + (index * 100)),
-        tween: Tween(begin: 0.0, end: 1.0),
-        builder: (context, value, child) {
-          return Transform.scale(
-            scale: value,
-            child: Container(
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                  colors: colors,
-                ),
-                borderRadius: BorderRadius.circular(20),
-                boxShadow: [
-                  BoxShadow(
-                    color: colors[0].withOpacity(0.3),
-                    blurRadius: 8,
-                    offset: const Offset(0, 4),
-                  ),
-                ],
-              ),
-              child: Material(
-                color: Colors.transparent,
-                child: InkWell(
-                  borderRadius: BorderRadius.circular(20),
-                  onTap: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => DeviceListPage(
-                          category: category,
-                        ),
-                      ),
-                    );
-                  },
-                  child: Padding(
-                    padding: const EdgeInsets.all(16),  // Reduced from 20
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Container(
-                          padding: const EdgeInsets.all(12),  // Reduced from 16
-                          decoration: BoxDecoration(
-                            color: Colors.white.withOpacity(0.2),
-                            borderRadius: BorderRadius.circular(16),
-                          ),
-                          child: Icon(
-                            icon,
-                            size: 28,  // Reduced from 32
-                            color: Colors.white,
-                          ),
-                        ),
-                        const SizedBox(height: 10),  // Reduced from 12
-                        Flexible(  // Added Flexible widget
-                          child: Text(
-                            category,
-                            style: GoogleFonts.inter(
-                              fontSize: 15,  // Reduced from 16
-                              fontWeight: FontWeight.bold,
-                              color: Colors.white,
-                            ),
-                            textAlign: TextAlign.center,
-                            maxLines: 2,
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                        ),
-                        const SizedBox(height: 6),  // Reduced from 4
-                        Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 6,  // Reduced from 8
-                            vertical: 3,   // Reduced from 4
-                          ),
-                          decoration: BoxDecoration(
-                            color: Colors.white.withOpacity(0.2),
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                          child: Text(
-                            'View Devices',
-                            style: GoogleFonts.inter(
-                              fontSize: 11,  // Reduced from 12
-                              color: Colors.white.withOpacity(0.9),
-                              fontWeight: FontWeight.w500,
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-              ),
-            ),
-          );
-        },
-      );
-    },
-  ),
-),
+
+                                    // Categories grid
+                                    Expanded(
+                                      child: GridView.builder(
+                                        gridDelegate:
+                                            const SliverGridDelegateWithFixedCrossAxisCount(
+                                          crossAxisCount: 2,
+                                          childAspectRatio:
+                                              1.2,
+                                          crossAxisSpacing: 16,
+                                          mainAxisSpacing: 16,
+                                        ),
+                                        itemCount: categories.length,
+                                        itemBuilder: (context, index) {
+                                          final category = categories[index];
+                                          final colors =
+                                              getCategoryColors(index);
+                                          final icon =
+                                              getCategoryIcon(category);
+
+                                          return TweenAnimationBuilder<double>(
+                                            duration: Duration(
+                                                milliseconds:
+                                                    300 + (index * 100)),
+                                            tween: Tween(begin: 0.0, end: 1.0),
+                                            builder: (context, value, child) {
+                                              return Transform.scale(
+                                                scale: value,
+                                                child: Container(
+                                                  decoration: BoxDecoration(
+                                                    gradient: LinearGradient(
+                                                      begin: Alignment.topLeft,
+                                                      end:
+                                                          Alignment.bottomRight,
+                                                      colors: colors,
+                                                    ),
+                                                    borderRadius:
+                                                        BorderRadius.circular(
+                                                            20),
+                                                    boxShadow: [
+                                                      BoxShadow(
+                                                        color: colors[0]
+                                                            .withOpacity(0.3),
+                                                        blurRadius: 8,
+                                                        offset:
+                                                            const Offset(0, 4),
+                                                      ),
+                                                    ],
+                                                  ),
+                                                  child: Material(
+                                                    color: Colors.transparent,
+                                                    child: InkWell(
+                                                      borderRadius:
+                                                          BorderRadius.circular(
+                                                              20),
+                                                      onTap: () {
+                                                        Navigator.push(
+                                                          context,
+                                                          MaterialPageRoute(
+                                                            builder: (context) =>
+                                                                DeviceListPage(
+                                                              category:
+                                                                  category,
+                                                            ),
+                                                          ),
+                                                        );
+                                                      },
+                                                      child: Padding(
+                                                        padding: const EdgeInsets
+                                                            .all(
+                                                            16), 
+                                                        child: Column(
+                                                          mainAxisAlignment:
+                                                              MainAxisAlignment
+                                                                  .center,
+                                                          children: [
+                                                            Container(
+                                                              padding:
+                                                                  const EdgeInsets
+                                                                      .all(
+                                                                      12), 
+                                                              decoration:
+                                                                  BoxDecoration(
+                                                                color: Colors
+                                                                    .white
+                                                                    .withOpacity(
+                                                                        0.2),
+                                                                borderRadius:
+                                                                    BorderRadius
+                                                                        .circular(
+                                                                            16),
+                                                              ),
+                                                              child: Icon(
+                                                                icon,
+                                                                size:
+                                                                    28,
+                                                                color: Colors
+                                                                    .white,
+                                                              ),
+                                                            ),
+                                                            const SizedBox(
+                                                                height:
+                                                                    10), 
+                                                            Flexible(
+                                                              child: Text(
+                                                                category,
+                                                                style:
+                                                                    GoogleFonts
+                                                                        .inter(
+                                                                  fontSize:
+                                                                      15, 
+                                                                  fontWeight:
+                                                                      FontWeight
+                                                                          .bold,
+                                                                  color: Colors
+                                                                      .white,
+                                                                ),
+                                                                textAlign:
+                                                                    TextAlign
+                                                                        .center,
+                                                                maxLines: 2,
+                                                                overflow:
+                                                                    TextOverflow
+                                                                        .ellipsis,
+                                                              ),
+                                                            ),
+                                                            const SizedBox(
+                                                                height:
+                                                                    6),
+                                                            Container(
+                                                              padding:
+                                                                  const EdgeInsets
+                                                                      .symmetric(
+                                                                horizontal:
+                                                                    6, 
+                                                                vertical:
+                                                                    3, 
+                                                              ),
+                                                              decoration:
+                                                                  BoxDecoration(
+                                                                color: Colors
+                                                                    .white
+                                                                    .withOpacity(
+                                                                        0.2),
+                                                                borderRadius:
+                                                                    BorderRadius
+                                                                        .circular(
+                                                                            8),
+                                                              ),
+                                                              child: Text(
+                                                                'View Devices',
+                                                                style:
+                                                                    GoogleFonts
+                                                                        .inter(
+                                                                  fontSize:
+                                                                      11, // Reduced from 12
+                                                                  color: Colors
+                                                                      .white
+                                                                      .withOpacity(
+                                                                          0.9),
+                                                                  fontWeight:
+                                                                      FontWeight
+                                                                          .w500,
+                                                                ),
+                                                              ),
+                                                            ),
+                                                          ],
+                                                        ),
+                                                      ),
+                                                    ),
+                                                  ),
+                                                ),
+                                              );
+                                            },
+                                          );
+                                        },
+                                      ),
+                                    ),
                                   ],
                                 ),
                               ),
@@ -483,50 +567,49 @@ Expanded(
           ),
         ],
       ),
-    
-    floatingActionButton: FloatingActionButton(
-  onPressed: () {
-    final randomCategory = getRandomCategory();
-    showDialog(
-      context: context,
-      barrierDismissible: true,
-      barrierColor: Colors.transparent,
-      builder: (BuildContext context) {
-        return QuickTipsFlashcards(
-          categoryId: randomCategory["id"]!,
-          categoryName: randomCategory["name"]!,
-        );
-      },
-    );
-  },
-  elevation: 6.0,
-  backgroundColor: Colors.transparent,
-  tooltip: 'Random Quick Tips',
-  child: Container(
-    width: 56,
-    height: 56,
-    decoration: BoxDecoration(
-      gradient: LinearGradient(
-        colors: [Colors.blue.shade400, Colors.purple.shade600],
-        begin: Alignment.topLeft,
-        end: Alignment.bottomRight,
-      ),
-      shape: BoxShape.circle,
-      boxShadow: [
-        BoxShadow(
-          color: Colors.blue.withOpacity(0.3),
-          blurRadius: 8,
-          offset: const Offset(0, 4),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {
+          final randomCategory = getRandomCategory();
+          showDialog(
+            context: context,
+            barrierDismissible: true,
+            barrierColor: Colors.transparent,
+            builder: (BuildContext context) {
+              return QuickTipsFlashcards(
+                categoryId: randomCategory["id"]!,
+                categoryName: randomCategory["name"]!,
+              );
+            },
+          );
+        },
+        elevation: 6.0,
+        backgroundColor: Colors.transparent,
+        tooltip: 'Random Quick Tips',
+        child: Container(
+          width: 56,
+          height: 56,
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              colors: [Colors.blue.shade400, Colors.purple.shade600],
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+            ),
+            shape: BoxShape.circle,
+            boxShadow: [
+              BoxShadow(
+                color: Colors.blue.withOpacity(0.3),
+                blurRadius: 8,
+                offset: const Offset(0, 4),
+              ),
+            ],
+          ),
+          child: const Icon(
+            Icons.tips_and_updates,
+            color: Colors.white,
+            size: 24.0,
+          ),
         ),
-      ],
-    ),
-    child: const Icon(
-      Icons.tips_and_updates,
-      color: Colors.white,
-      size: 24.0,
-    ),
-  ),
-),
+      ),
     );
   }
 }

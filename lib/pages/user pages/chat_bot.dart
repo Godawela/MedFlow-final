@@ -151,7 +151,7 @@ class _ChatBotPageState extends State<ChatBotPage> with TickerProviderStateMixin
       child: Align(
         alignment: isUser ? Alignment.centerRight : Alignment.centerLeft,
         child: Container(
-          margin: EdgeInsets.symmetric(
+          margin: const EdgeInsets.symmetric(
             vertical: 6, 
             horizontal: 16,
           ),

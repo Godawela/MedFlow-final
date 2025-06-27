@@ -1,3 +1,5 @@
+// ignore_for_file: use_build_context_synchronously
+
 import 'package:auto_route/auto_route.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
@@ -10,6 +12,8 @@ import 'package:med/widgets/user_greetings.dart';
 
 @RoutePage()
 class ProfilePage extends StatefulWidget {
+  const ProfilePage({super.key});
+
   @override
   _ProfilePageState createState() => _ProfilePageState();
 }
@@ -203,7 +207,7 @@ class _ProfilePageState extends State<ProfilePage> {
                           onPressed: () async {
                             Navigator.of(context).pop();
                             await FirebaseAuth.instance.signOut();
-                            context.router.navigate(LoginRoute());
+                            context.router.navigate(const LoginRoute());
                           },
                           style: ElevatedButton.styleFrom(
                             backgroundColor: Colors.transparent,
@@ -375,9 +379,9 @@ class _ProfilePageState extends State<ProfilePage> {
                                     ),
                                     child: Row(
                                       children: [
-                                        Icon(
+                                        const Icon(
                                           Icons.person_outline,
-                                          color: const Color(0xFF8E2DE2),
+                                          color: Color(0xFF8E2DE2),
                                           size: 20,
                                         ),
                                         const SizedBox(width: 12),

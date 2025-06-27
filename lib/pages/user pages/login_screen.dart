@@ -8,7 +8,6 @@ import 'package:med/routes/router.dart';
 import 'package:med/widgets/social_login_button.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:google_sign_in/google_sign_in.dart';
-import 'package:flutter/animation.dart';
 
 @RoutePage()
 class LoginScreen extends StatefulWidget {

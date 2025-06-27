@@ -1,3 +1,7 @@
+// ignore_for_file: use_build_context_synchronously
+
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
@@ -20,6 +24,8 @@ class _SymptomDetailPageState extends State<SymptomDetailPage> with TickerProvid
   String? error;
   late AnimationController _animationController;
   late Animation<double> _fadeAnimation;
+      Timer? _refreshTimer;
+
 
   @override
   void initState() {
@@ -33,11 +39,15 @@ class _SymptomDetailPageState extends State<SymptomDetailPage> with TickerProvid
     );
     
     fetchSymptomDetails();
+    _refreshTimer = Timer.periodic(const Duration(seconds: 10), (timer) {
+      fetchSymptomDetails();
+    });
   }
 
   @override
   void dispose() {
     _animationController.dispose();
+    _refreshTimer?.cancel();
     super.dispose();
   }
 
@@ -288,7 +298,7 @@ class _SymptomDetailPageState extends State<SymptomDetailPage> with TickerProvid
                                             color: Colors.white.withOpacity(0.2),
                                             borderRadius: BorderRadius.circular(16),
                                           ),
-                                          child: Icon(
+                                          child: const Icon(
                                             Icons.health_and_safety_rounded,
                                             size: 40,
                                             color: Colors.white,

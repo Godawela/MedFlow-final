@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:http/http.dart' as http;
@@ -22,6 +24,8 @@ class _SymptomPageState extends State<SymptomPage> with TickerProviderStateMixin
   late AnimationController _headerAnimationController;
   late Animation<double> _fadeAnimation;
   late Animation<Offset> _slideAnimation;
+      Timer? _refreshTimer;
+
 
   @override
   void initState() {
@@ -45,12 +49,16 @@ class _SymptomPageState extends State<SymptomPage> with TickerProviderStateMixin
     ).animate(CurvedAnimation(parent: _animationController, curve: Curves.easeOut));
     
     fetchSymptoms();
+    _refreshTimer = Timer.periodic(const Duration(seconds: 10), (timer) {
+      fetchSymptoms();
+    });
   }
 
   @override
   void dispose() {
     _animationController.dispose();
     _headerAnimationController.dispose();
+    _refreshTimer?.cancel();
     super.dispose();
   }
 

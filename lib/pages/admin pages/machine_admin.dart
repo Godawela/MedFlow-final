@@ -1,17 +1,18 @@
-// Admin Category List Page with Modern Design
+// Admin Category List Page
+
+import 'dart:async';
 
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:http/http.dart' as http;
-import 'package:med/pages/admin%20pages/device_list_page_admin.dart';
+import 'package:med/pages/admin%20pages/device_list_page/device_list_page_admin.dart';
+import 'package:med/pages/admin%20pages/quickTipManagementPage.dart';
 import 'dart:convert';
 
 import 'package:med/routes/router.dart';
 import 'package:med/widgets/appbar.dart';
 import 'package:med/widgets/user_greetings.dart';
-
-
 
 class MachinePageAdmin extends StatefulWidget {
   const MachinePageAdmin({super.key});
@@ -20,7 +21,8 @@ class MachinePageAdmin extends StatefulWidget {
   _MachinePageAdminState createState() => _MachinePageAdminState();
 }
 
-class _MachinePageAdminState extends State<MachinePageAdmin> with TickerProviderStateMixin {
+class _MachinePageAdminState extends State<MachinePageAdmin>
+    with TickerProviderStateMixin {
   List<String> categories = [];
   bool isLoading = true;
   String? error;
@@ -28,6 +30,7 @@ class _MachinePageAdminState extends State<MachinePageAdmin> with TickerProvider
   late AnimationController _headerAnimationController;
   late Animation<double> _fadeAnimation;
   late Animation<Offset> _slideAnimation;
+  Timer? _refreshTimer;
 
   @override
   void initState() {
@@ -40,36 +43,48 @@ class _MachinePageAdminState extends State<MachinePageAdmin> with TickerProvider
       duration: const Duration(milliseconds: 600),
       vsync: this,
     );
-    
+
     _fadeAnimation = Tween<double>(begin: 0, end: 1).animate(
       CurvedAnimation(parent: _animationController, curve: Curves.easeOut),
     );
-    
+
     _slideAnimation = Tween<Offset>(
       begin: const Offset(0, 0.3),
       end: Offset.zero,
-    ).animate(CurvedAnimation(parent: _animationController, curve: Curves.easeOut));
-    
+    ).animate(
+        CurvedAnimation(parent: _animationController, curve: Curves.easeOut));
+
     fetchCategories();
+    _refreshTimer = Timer.periodic(const Duration(seconds: 5), (timer) {
+      fetchCategories();
+    });
   }
 
   @override
   void dispose() {
     _animationController.dispose();
     _headerAnimationController.dispose();
+    _refreshTimer?.cancel();
     super.dispose();
   }
 
   Future<void> fetchCategories() async {
     try {
       final response = await http.get(
-        Uri.parse('http://10.0.2.2:8000/api/categories'),
+        Uri.parse('http://10.0.2.2:8000/api/category'),
+        headers: {
+          'Cache-Control': 'no-cache, no-store, must-revalidate',
+          'Pragma': 'no-cache',
+        },
       );
 
       if (response.statusCode == 200) {
         final List<dynamic> fetchedCategories = json.decode(response.body);
         setState(() {
-          categories = fetchedCategories.cast<String>();
+          // Extract just the names from each category object
+          categories = fetchedCategories
+              .map<String>((category) => category['name'] as String)
+              .toList();
           isLoading = false;
         });
         _animationController.forward();
@@ -144,7 +159,6 @@ class _MachinePageAdminState extends State<MachinePageAdmin> with TickerProvider
             showIcon: true,
             isBack: true,
           ),
-          
           Expanded(
             child: isLoading
                 ? Center(
@@ -271,7 +285,8 @@ class _MachinePageAdminState extends State<MachinePageAdmin> with TickerProvider
                                         borderRadius: BorderRadius.circular(20),
                                         boxShadow: [
                                           BoxShadow(
-                                            color: Colors.deepPurple.withOpacity(0.3),
+                                            color: Colors.deepPurple
+                                                .withOpacity(0.3),
                                             blurRadius: 12,
                                             offset: const Offset(0, 6),
                                           ),
@@ -282,12 +297,14 @@ class _MachinePageAdminState extends State<MachinePageAdmin> with TickerProvider
                                           Container(
                                             padding: const EdgeInsets.all(16),
                                             decoration: BoxDecoration(
-                                              color: Colors.white.withOpacity(0.2),
+                                              color:
+                                                  Colors.white.withOpacity(0.2),
                                               shape: BoxShape.circle,
                                             ),
                                             child: const CircleAvatar(
                                               radius: 32,
-                                              backgroundImage: AssetImage('assets/images/logo.png'),
+                                              backgroundImage: AssetImage(
+                                                  'assets/images/logo.png'),
                                               backgroundColor: Colors.white,
                                             ),
                                           ),
@@ -298,7 +315,8 @@ class _MachinePageAdminState extends State<MachinePageAdmin> with TickerProvider
                                             'Select a device category to explore available medical equipment',
                                             style: GoogleFonts.inter(
                                               fontSize: 16,
-                                              color: Colors.white.withOpacity(0.9),
+                                              color:
+                                                  Colors.white.withOpacity(0.9),
                                               fontWeight: FontWeight.w500,
                                             ),
                                             textAlign: TextAlign.center,
@@ -306,9 +324,9 @@ class _MachinePageAdminState extends State<MachinePageAdmin> with TickerProvider
                                         ],
                                       ),
                                     ),
-                                    
+
                                     const SizedBox(height: 24),
-                                    
+
                                     // Categories count
                                     Row(
                                       children: [
@@ -328,7 +346,8 @@ class _MachinePageAdminState extends State<MachinePageAdmin> with TickerProvider
                                           ),
                                           decoration: BoxDecoration(
                                             color: Colors.deepPurple.shade100,
-                                            borderRadius: BorderRadius.circular(12),
+                                            borderRadius:
+                                                BorderRadius.circular(12),
                                           ),
                                           child: Text(
                                             '${categories.length} types',
@@ -341,122 +360,225 @@ class _MachinePageAdminState extends State<MachinePageAdmin> with TickerProvider
                                         ),
                                       ],
                                     ),
-                                    
+
                                     const SizedBox(height: 16),
-                                    
-                                  // Categories grid
-Expanded(
-  child: GridView.builder(
-    gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-      crossAxisCount: 2,
-      childAspectRatio: 1.2,  // Increased from 1.1 to give more vertical space
-      crossAxisSpacing: 16,
-      mainAxisSpacing: 16,
-    ),
-    itemCount: categories.length,
-    itemBuilder: (context, index) {
-      final category = categories[index];
-      final colors = getCategoryColors(index);
-      final icon = getCategoryIcon(category);
-      
-      return TweenAnimationBuilder<double>(
-        duration: Duration(milliseconds: 300 + (index * 100)),
-        tween: Tween(begin: 0.0, end: 1.0),
-        builder: (context, value, child) {
-          return Transform.scale(
-            scale: value,
-            child: Container(
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                  colors: colors,
-                ),
-                borderRadius: BorderRadius.circular(20),
-                boxShadow: [
-                  BoxShadow(
-                    color: colors[0].withOpacity(0.3),
-                    blurRadius: 8,
-                    offset: const Offset(0, 4),
-                  ),
-                ],
-              ),
-              child: Material(
-                color: Colors.transparent,
-                child: InkWell(
-                  borderRadius: BorderRadius.circular(20),
-                  onTap: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => DeviceListPageAdmin(
-                          category: category,
-                        ),
-                      ),
-                    );
-                  },
-                  child: Padding(
-                    padding: const EdgeInsets.all(16),  // Reduced from 20
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Container(
-                          padding: const EdgeInsets.all(12),  // Reduced from 16
-                          decoration: BoxDecoration(
-                            color: Colors.white.withOpacity(0.2),
-                            borderRadius: BorderRadius.circular(16),
-                          ),
-                          child: Icon(
-                            icon,
-                            size: 28,  // Reduced from 32
-                            color: Colors.white,
-                          ),
-                        ),
-                        const SizedBox(height: 10),  // Reduced from 12
-                        Flexible(  // Added Flexible widget
-                          child: Text(
-                            category,
-                            style: GoogleFonts.inter(
-                              fontSize: 15,  // Reduced from 16
-                              fontWeight: FontWeight.bold,
-                              color: Colors.white,
-                            ),
-                            textAlign: TextAlign.center,
-                            maxLines: 2,
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                        ),
-                        const SizedBox(height: 6),  // Reduced from 4
-                        Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 6,  // Reduced from 8
-                            vertical: 3,   // Reduced from 4
-                          ),
-                          decoration: BoxDecoration(
-                            color: Colors.white.withOpacity(0.2),
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                          child: Text(
-                            'View Devices',
-                            style: GoogleFonts.inter(
-                              fontSize: 11,  // Reduced from 12
-                              color: Colors.white.withOpacity(0.9),
-                              fontWeight: FontWeight.w500,
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-              ),
-            ),
-          );
-        },
-      );
-    },
-  ),
-),
+                                    // Quick Tips Management Button
+                                    Container(
+                                      margin: const EdgeInsets.symmetric(
+                                          horizontal: 20, vertical: 10),
+                                      child: ElevatedButton.icon(
+                                        onPressed: () {
+                                          Navigator.push(
+                                            context,
+                                            MaterialPageRoute(
+                                              builder: (context) =>
+                                                  const QuickTipsManagementPage(),
+                                            ),
+                                          );
+                                        },
+                                        icon: const Icon(
+                                            Icons.lightbulb_outline_rounded),
+                                        label: Text(
+                                          'Manage Quick Tips',
+                                          style: GoogleFonts.inter(
+                                            fontWeight: FontWeight.w600,
+                                          ),
+                                        ),
+                                        style: ElevatedButton.styleFrom(
+                                          backgroundColor:
+                                              Colors.orange.shade500,
+                                          foregroundColor: Colors.white,
+                                          padding: const EdgeInsets.symmetric(
+                                            horizontal: 20,
+                                            vertical: 12,
+                                          ),
+                                          shape: RoundedRectangleBorder(
+                                            borderRadius:
+                                                BorderRadius.circular(12),
+                                          ),
+                                          elevation: 4,
+                                        ),
+                                      ),
+                                    ),
+
+                                    // Categories grid
+                                    Expanded(
+                                      child: GridView.builder(
+                                        gridDelegate:
+                                            const SliverGridDelegateWithFixedCrossAxisCount(
+                                          crossAxisCount: 2,
+                                          childAspectRatio:
+                                              1.2, // Increased from 1.1 to give more vertical space
+                                          crossAxisSpacing: 16,
+                                          mainAxisSpacing: 16,
+                                        ),
+                                        itemCount: categories.length,
+                                        itemBuilder: (context, index) {
+                                          final category = categories[index];
+                                          final colors =
+                                              getCategoryColors(index);
+                                          final icon =
+                                              getCategoryIcon(category);
+
+                                          return TweenAnimationBuilder<double>(
+                                            duration: Duration(
+                                                milliseconds:
+                                                    300 + (index * 100)),
+                                            tween: Tween(begin: 0.0, end: 1.0),
+                                            builder: (context, value, child) {
+                                              return Transform.scale(
+                                                scale: value,
+                                                child: Container(
+                                                  decoration: BoxDecoration(
+                                                    gradient: LinearGradient(
+                                                      begin: Alignment.topLeft,
+                                                      end:
+                                                          Alignment.bottomRight,
+                                                      colors: colors,
+                                                    ),
+                                                    borderRadius:
+                                                        BorderRadius.circular(
+                                                            20),
+                                                    boxShadow: [
+                                                      BoxShadow(
+                                                        color: colors[0]
+                                                            .withOpacity(0.3),
+                                                        blurRadius: 8,
+                                                        offset:
+                                                            const Offset(0, 4),
+                                                      ),
+                                                    ],
+                                                  ),
+                                                  child: Material(
+                                                    color: Colors.transparent,
+                                                    child: InkWell(
+                                                      borderRadius:
+                                                          BorderRadius.circular(
+                                                              20),
+                                                      onTap: () {
+                                                        Navigator.push(
+                                                          context,
+                                                          MaterialPageRoute(
+                                                            builder: (context) =>
+                                                                DeviceListPageAdmin(
+                                                              category:
+                                                                  category,
+                                                            ),
+                                                          ),
+                                                        );
+                                                      },
+                                                      child: Padding(
+                                                        padding: const EdgeInsets
+                                                            .all(
+                                                            16), // Reduced from 20
+                                                        child: Column(
+                                                          mainAxisAlignment:
+                                                              MainAxisAlignment
+                                                                  .center,
+                                                          children: [
+                                                            Container(
+                                                              padding:
+                                                                  const EdgeInsets
+                                                                      .all(
+                                                                      12), // Reduced from 16
+                                                              decoration:
+                                                                  BoxDecoration(
+                                                                color: Colors
+                                                                    .white
+                                                                    .withOpacity(
+                                                                        0.2),
+                                                                borderRadius:
+                                                                    BorderRadius
+                                                                        .circular(
+                                                                            16),
+                                                              ),
+                                                              child: Icon(
+                                                                icon,
+                                                                size:
+                                                                    28, // Reduced from 32
+                                                                color: Colors
+                                                                    .white,
+                                                              ),
+                                                            ),
+                                                            const SizedBox(
+                                                                height:
+                                                                    10), // Reduced from 12
+                                                            Flexible(
+                                                              // Added Flexible widget
+                                                              child: Text(
+                                                                category,
+                                                                style:
+                                                                    GoogleFonts
+                                                                        .inter(
+                                                                  fontSize:
+                                                                      15, // Reduced from 16
+                                                                  fontWeight:
+                                                                      FontWeight
+                                                                          .bold,
+                                                                  color: Colors
+                                                                      .white,
+                                                                ),
+                                                                textAlign:
+                                                                    TextAlign
+                                                                        .center,
+                                                                maxLines: 2,
+                                                                overflow:
+                                                                    TextOverflow
+                                                                        .ellipsis,
+                                                              ),
+                                                            ),
+                                                            const SizedBox(
+                                                                height:
+                                                                    6), // Reduced from 4
+                                                            Container(
+                                                              padding:
+                                                                  const EdgeInsets
+                                                                      .symmetric(
+                                                                horizontal:
+                                                                    6, // Reduced from 8
+                                                                vertical:
+                                                                    3, // Reduced from 4
+                                                              ),
+                                                              decoration:
+                                                                  BoxDecoration(
+                                                                color: Colors
+                                                                    .white
+                                                                    .withOpacity(
+                                                                        0.2),
+                                                                borderRadius:
+                                                                    BorderRadius
+                                                                        .circular(
+                                                                            8),
+                                                              ),
+                                                              child: Text(
+                                                                'View Devices',
+                                                                style:
+                                                                    GoogleFonts
+                                                                        .inter(
+                                                                  fontSize:
+                                                                      11, // Reduced from 12
+                                                                  color: Colors
+                                                                      .white
+                                                                      .withOpacity(
+                                                                          0.9),
+                                                                  fontWeight:
+                                                                      FontWeight
+                                                                          .w500,
+                                                                ),
+                                                              ),
+                                                            ),
+                                                          ],
+                                                        ),
+                                                      ),
+                                                    ),
+                                                  ),
+                                                ),
+                                              );
+                                            },
+                                          );
+                                        },
+                                      ),
+                                    ),
                                   ],
                                 ),
                               ),

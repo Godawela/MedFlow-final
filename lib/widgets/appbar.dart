@@ -11,6 +11,7 @@ class CurvedAppBar extends StatelessWidget {
   final Color? backgroundColor;
   final bool? isBack;
   final VoidCallback? backFunction;
+  final List<PopupMenuButton<String>> actions;
 
   const CurvedAppBar({
     super.key,
@@ -23,7 +24,8 @@ class CurvedAppBar extends StatelessWidget {
     this.showIcon = true,
     this.backgroundColor,
     this.isBack,
-    this.backFunction,
+    this.backFunction, 
+    this.actions = const [],
   }) : assert(
           isProfileAvailable == false || profileImage != null,
           'If isProfileAvailable is true, you must provide profileImage',
