@@ -1,5 +1,7 @@
 //device list in a one category
 
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:http/http.dart' as http;
@@ -24,6 +26,8 @@ class _DeviceListPageState extends State<DeviceListPage> with TickerProviderStat
     String? categoryImage;
   late AnimationController _animationController;
   late Animation<double> _fadeAnimation;
+      Timer? _refreshTimer;
+
 
   @override
   void initState() {
@@ -36,14 +40,26 @@ class _DeviceListPageState extends State<DeviceListPage> with TickerProviderStat
       CurvedAnimation(parent: _animationController, curve: Curves.easeOut),
     );
     
-    fetchDevicesByCategory();
-    fetchCategoryDescription();
+      _loadData();
+     _refreshTimer = Timer.periodic(const Duration(seconds: 10), (timer) {
+      _loadData();
+    }); 
   }
 
   @override
   void dispose() {
     _animationController.dispose();
+            _refreshTimer?.cancel();
+
     super.dispose();
+  }
+
+  // Load both devices and category description
+  Future<void> _loadData() async {
+    await Future.wait([
+      fetchDevicesByCategory(),
+      fetchCategoryDescription(),
+    ]);
   }
 
   Future<void> fetchDevicesByCategory() async {

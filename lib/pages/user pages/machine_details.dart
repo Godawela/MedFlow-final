@@ -23,6 +23,8 @@ class _MachineDetailPageState extends State<MachineDetailPage> with TickerProvid
   String? error;
   late AnimationController _animationController;
   late Animation<double> _fadeAnimation;
+    Timer? _refreshTimer;
+
 
   @override
   void initState() {
@@ -36,11 +38,16 @@ class _MachineDetailPageState extends State<MachineDetailPage> with TickerProvid
     );
     
     fetchMachineDetails();
+      _refreshTimer = Timer.periodic(const Duration(seconds: 10), (timer) {
+      fetchMachineDetails();
+    });
   }
 
   @override
   void dispose() {
     _animationController.dispose();
+            _refreshTimer?.cancel();
+
     super.dispose();
   }
 

@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
@@ -20,6 +22,8 @@ class _SymptomDetailPageState extends State<SymptomDetailPage> with TickerProvid
   String? error;
   late AnimationController _animationController;
   late Animation<double> _fadeAnimation;
+      Timer? _refreshTimer;
+
 
   @override
   void initState() {
@@ -33,11 +37,15 @@ class _SymptomDetailPageState extends State<SymptomDetailPage> with TickerProvid
     );
     
     fetchSymptomDetails();
+    _refreshTimer = Timer.periodic(const Duration(seconds: 10), (timer) {
+      fetchSymptomDetails();
+    });
   }
 
   @override
   void dispose() {
     _animationController.dispose();
+    _refreshTimer?.cancel();
     super.dispose();
   }
 
