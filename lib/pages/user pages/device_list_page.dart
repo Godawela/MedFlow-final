@@ -1,7 +1,5 @@
 //device list in a one category
-
 import 'dart:async';
-
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:http/http.dart' as http;
@@ -315,8 +313,8 @@ class _DeviceListPageState extends State<DeviceListPage>
                                         Row(
                                           children: [
                                             Container(
-                                              width: 56,
-                                              height: 56,
+                                              width: 100,
+                                              height: 100,
                                               decoration: BoxDecoration(
                                                 color: Colors.white
                                                     .withOpacity(0.2),
@@ -329,8 +327,8 @@ class _DeviceListPageState extends State<DeviceListPage>
                                                 child: getImageUrl() != null
                                                     ? Image.network(
                                                         getImageUrl()!,
-                                                        width: 56,
-                                                        height: 56,
+                                                        width: 80,
+                                                        height: 80,
                                                         fit: BoxFit.cover,
                                                         errorBuilder: (context,
                                                             error, stackTrace) {
@@ -373,7 +371,7 @@ class _DeviceListPageState extends State<DeviceListPage>
                                                                   : null,
                                                               strokeWidth: 2,
                                                               valueColor:
-                                                                 const AlwaysStoppedAnimation<
+                                                                  const AlwaysStoppedAnimation<
                                                                       Color>(
                                                                 Colors.white,
                                                               ),
