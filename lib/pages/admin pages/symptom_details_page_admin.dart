@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
@@ -27,6 +29,8 @@ class _SymptomDetailPageAdminState extends State<SymptomDetailPageAdmin> with Ti
   final TextEditingController _nameController = TextEditingController();
   final TextEditingController _descriptionController = TextEditingController();
   final TextEditingController _resourceLinkController = TextEditingController();
+    Timer? _refreshTimer;
+
 
   @override
   void initState() {
@@ -40,6 +44,9 @@ class _SymptomDetailPageAdminState extends State<SymptomDetailPageAdmin> with Ti
     );
     
     fetchSymptomDetails();
+     _refreshTimer = Timer.periodic(const Duration(seconds: 10), (timer) {
+      fetchSymptomDetails();
+    });
   }
 
   @override
@@ -48,6 +55,8 @@ class _SymptomDetailPageAdminState extends State<SymptomDetailPageAdmin> with Ti
     _nameController.dispose();
     _descriptionController.dispose();
     _resourceLinkController.dispose();
+        _refreshTimer?.cancel();
+
     super.dispose();
   }
 

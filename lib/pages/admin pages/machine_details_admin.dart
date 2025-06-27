@@ -1,13 +1,12 @@
 //individual device information page
 
-
+import 'dart:async';
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:med/widgets/appbar.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:http/http.dart' as http;
-
 
 class MachineDetailPageAdmin extends StatefulWidget {
   final String machineName;
@@ -18,12 +17,14 @@ class MachineDetailPageAdmin extends StatefulWidget {
   _MachineDetailPageAdminState createState() => _MachineDetailPageAdminState();
 }
 
-class _MachineDetailPageAdminState extends State<MachineDetailPageAdmin> with TickerProviderStateMixin {
+class _MachineDetailPageAdminState extends State<MachineDetailPageAdmin>
+    with TickerProviderStateMixin {
   Map<String, dynamic>? machineDetails;
   bool isLoading = true;
   String? error;
   late AnimationController _animationController;
   late Animation<double> _fadeAnimation;
+  Timer? _refreshTimer;
 
   @override
   void initState() {
@@ -35,20 +36,26 @@ class _MachineDetailPageAdminState extends State<MachineDetailPageAdmin> with Ti
     _fadeAnimation = Tween<double>(begin: 0, end: 1).animate(
       CurvedAnimation(parent: _animationController, curve: Curves.easeOut),
     );
-    
+
     fetchMachineDetails();
+    _refreshTimer = Timer.periodic(const Duration(seconds: 10), (timer) {
+      fetchMachineDetails();
+    });
   }
 
   @override
   void dispose() {
     _animationController.dispose();
+    _refreshTimer?.cancel();
+
     super.dispose();
   }
 
   Future<void> fetchMachineDetails() async {
     try {
       final response = await http.get(
-        Uri.parse('http://10.0.2.2:8000/api/devices/name/${widget.machineName}'),
+        Uri.parse(
+            'http://10.0.2.2:8000/api/devices/name/${widget.machineName}'),
       );
 
       if (response.statusCode == 200) {
@@ -171,7 +178,8 @@ class _MachineDetailPageAdminState extends State<MachineDetailPageAdmin> with Ti
                                 color: Colors.black.withOpacity(0.1),
                                 blurRadius: 20,
                                 offset: const Offset(0, 10),
-                          )],
+                              )
+                            ],
                           ),
                           child: CircularProgressIndicator(
                             strokeWidth: 3,
@@ -278,7 +286,8 @@ class _MachineDetailPageAdminState extends State<MachineDetailPageAdmin> with Ti
                                       borderRadius: BorderRadius.circular(20),
                                       boxShadow: [
                                         BoxShadow(
-                                          color: Colors.deepPurple.withOpacity(0.3),
+                                          color: Colors.deepPurple
+                                              .withOpacity(0.3),
                                           blurRadius: 12,
                                           offset: const Offset(0, 6),
                                         ),
@@ -289,8 +298,10 @@ class _MachineDetailPageAdminState extends State<MachineDetailPageAdmin> with Ti
                                         Container(
                                           padding: const EdgeInsets.all(16),
                                           decoration: BoxDecoration(
-                                            color: Colors.white.withOpacity(0.2),
-                                            borderRadius: BorderRadius.circular(16),
+                                            color:
+                                                Colors.white.withOpacity(0.2),
+                                            borderRadius:
+                                                BorderRadius.circular(16),
                                           ),
                                           child: const Icon(
                                             Icons.medical_services_rounded,
@@ -311,9 +322,9 @@ class _MachineDetailPageAdminState extends State<MachineDetailPageAdmin> with Ti
                                       ],
                                     ),
                                   ),
-                                  
+
                                   const SizedBox(height: 24),
-                                  
+
                                   // Device details
                                   if (machineDetails!['category'] != null)
                                     _buildDetailCard(
@@ -321,46 +332,50 @@ class _MachineDetailPageAdminState extends State<MachineDetailPageAdmin> with Ti
                                       machineDetails!['category'],
                                       Icons.category_rounded,
                                     ),
-                                  
+
                                   if (machineDetails!['description'] != null)
                                     _buildDetailCard(
                                       'Description',
                                       machineDetails!['description'],
                                       Icons.description_rounded,
                                     ),
-                                  
+
                                   if (machineDetails!['reference'] != null)
                                     _buildDetailCard(
                                       'Reference',
                                       machineDetails!['reference'],
                                       Icons.badge_rounded,
                                     ),
-                                  
-                                  if (machineDetails!['linkOfResource'] != null) ...[
+
+                                  if (machineDetails!['linkOfResource'] !=
+                                      null) ...[
                                     const SizedBox(height: 16),
                                     Center(
                                       child: ElevatedButton.icon(
                                         onPressed: () {
-                                          _launchURL(machineDetails!['linkOfResource']);
+                                          _launchURL(machineDetails![
+                                              'linkOfResource']);
                                         },
                                         icon: const Icon(Icons.link_rounded),
                                         label: const Text('View Resource'),
                                         style: ElevatedButton.styleFrom(
-                                          backgroundColor: Colors.deepPurple.shade500,
+                                          backgroundColor:
+                                              Colors.deepPurple.shade500,
                                           foregroundColor: Colors.white,
                                           padding: const EdgeInsets.symmetric(
                                             horizontal: 24,
                                             vertical: 16,
                                           ),
                                           shape: RoundedRectangleBorder(
-                                            borderRadius: BorderRadius.circular(15),
+                                            borderRadius:
+                                                BorderRadius.circular(15),
                                           ),
                                           elevation: 5,
                                         ),
                                       ),
                                     ),
                                   ],
-                                  
+
                                   const SizedBox(height: 20),
                                 ],
                               ),

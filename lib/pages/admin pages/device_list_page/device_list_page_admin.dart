@@ -1,5 +1,7 @@
 //individual catagory information page
 
+import 'dart:async';
+
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -36,6 +38,8 @@ class _DeviceListPageAdminState extends State<DeviceListPageAdmin>
   late Animation<double> _fadeAnimation;
   final ImagePicker _picker = ImagePicker();
   File? _selectedImage;
+      Timer? _refreshTimer;
+
 
   @override
   void initState() {
@@ -49,11 +53,16 @@ class _DeviceListPageAdminState extends State<DeviceListPageAdmin>
     );
 
     _loadData();
+     _refreshTimer = Timer.periodic(const Duration(seconds: 10), (timer) {
+      _loadData();
+    }); 
   }
 
   @override
   void dispose() {
     _animationController.dispose();
+            _refreshTimer?.cancel();
+
     super.dispose();
   }
 
