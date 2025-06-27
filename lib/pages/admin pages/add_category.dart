@@ -1,5 +1,7 @@
 // Modern Add Category Page with Image Upload
 
+// ignore_for_file: library_private_types_in_public_api
+
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
