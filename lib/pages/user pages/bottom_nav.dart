@@ -20,7 +20,7 @@ class BottomNavigation extends ConsumerWidget {
     // List of pages to navigate to
     final List<Widget> pages = [
       const HomeScreen(),
-      ProfilePage(),
+      const ProfilePage(),
       const NotePage(),
       const ChatBotPage()
     ];
