@@ -138,6 +138,15 @@ class _DeviceListPageAdminState extends State<DeviceListPageAdmin>
         }
       });
 
+      // If the category name was changed, navigate back to the main page
+      if (newName != widget.category) {
+        if (mounted) {
+          Navigator.of(context).pop(true);
+        }
+      } else {
+        await _refreshData();
+      }
+
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
@@ -786,10 +795,7 @@ class _DeviceListPageAdminState extends State<DeviceListPageAdmin>
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.grey.shade50,
-      body: RefreshIndicator(
-        key: _refreshIndicatorKey,
-        onRefresh: _refreshData,
-        child: Column(
+      body: Column(
           children: [
             CurvedAppBar(
               title: widget.category,
@@ -802,7 +808,7 @@ class _DeviceListPageAdminState extends State<DeviceListPageAdmin>
             ),
           ],
         ),
-      ),
+      
       floatingActionButton: AddDeviceButton(
         onPressed: () => context.router.push(const AddDeviceRoute()),
       ),
