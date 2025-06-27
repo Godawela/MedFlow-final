@@ -1,4 +1,4 @@
-// Admin Category List Page 
+// Admin Category List Page
 
 import 'dart:async';
 
@@ -55,7 +55,7 @@ class _MachinePageAdminState extends State<MachinePageAdmin>
         CurvedAnimation(parent: _animationController, curve: Curves.easeOut));
 
     fetchCategories();
-    _refreshTimer = Timer.periodic(const Duration(seconds: 10), (timer) {
+    _refreshTimer = Timer.periodic(const Duration(seconds: 5), (timer) {
       fetchCategories();
     });
   }
@@ -159,7 +159,6 @@ class _MachinePageAdminState extends State<MachinePageAdmin>
             showIcon: true,
             isBack: true,
           ),
-         
           Expanded(
             child: isLoading
                 ? Center(
@@ -363,39 +362,44 @@ class _MachinePageAdminState extends State<MachinePageAdmin>
                                     ),
 
                                     const SizedBox(height: 16),
-                                     // Quick Tips Management Button
-          Container(
-            margin: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-            child: ElevatedButton.icon(
-              onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => const QuickTipsManagementPage(),
-                  ),
-                );
-              },
-              icon: const Icon(Icons.lightbulb_outline_rounded),
-              label: Text(
-                'Manage Quick Tips',
-                style: GoogleFonts.inter(
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.orange.shade500,
-                foregroundColor: Colors.white,
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 20,
-                  vertical: 12,
-                ),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                elevation: 4,
-              ),
-            ),
-          ),
+                                    // Quick Tips Management Button
+                                    Container(
+                                      margin: const EdgeInsets.symmetric(
+                                          horizontal: 20, vertical: 10),
+                                      child: ElevatedButton.icon(
+                                        onPressed: () {
+                                          Navigator.push(
+                                            context,
+                                            MaterialPageRoute(
+                                              builder: (context) =>
+                                                  const QuickTipsManagementPage(),
+                                            ),
+                                          );
+                                        },
+                                        icon: const Icon(
+                                            Icons.lightbulb_outline_rounded),
+                                        label: Text(
+                                          'Manage Quick Tips',
+                                          style: GoogleFonts.inter(
+                                            fontWeight: FontWeight.w600,
+                                          ),
+                                        ),
+                                        style: ElevatedButton.styleFrom(
+                                          backgroundColor:
+                                              Colors.orange.shade500,
+                                          foregroundColor: Colors.white,
+                                          padding: const EdgeInsets.symmetric(
+                                            horizontal: 20,
+                                            vertical: 12,
+                                          ),
+                                          shape: RoundedRectangleBorder(
+                                            borderRadius:
+                                                BorderRadius.circular(12),
+                                          ),
+                                          elevation: 4,
+                                        ),
+                                      ),
+                                    ),
 
                                     // Categories grid
                                     Expanded(
