@@ -55,7 +55,7 @@ class _MachinePageAdminState extends State<MachinePageAdmin>
         CurvedAnimation(parent: _animationController, curve: Curves.easeOut));
 
     fetchCategories();
-    _refreshTimer = Timer.periodic(const Duration(seconds: 30), (timer) {
+    _refreshTimer = Timer.periodic(const Duration(seconds: 10), (timer) {
       fetchCategories();
     });
   }

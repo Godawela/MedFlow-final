@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -25,6 +27,8 @@ class _SymptomPageAdminState extends State<SymptomPageAdmin>
   late AnimationController _headerAnimationController;
   late Animation<double> _fadeAnimation;
   late Animation<Offset> _slideAnimation;
+    Timer? _refreshTimer;
+
 
   @override
   void initState() {
@@ -49,12 +53,17 @@ class _SymptomPageAdminState extends State<SymptomPageAdmin>
         CurvedAnimation(parent: _animationController, curve: Curves.easeOut));
 
     fetchSymptoms();
+     _refreshTimer = Timer.periodic(const Duration(seconds: 10), (timer) {
+      fetchSymptoms();
+    });
   }
 
   @override
   void dispose() {
     _animationController.dispose();
     _headerAnimationController.dispose();
+        _refreshTimer?.cancel();
+
     super.dispose();
   }
 

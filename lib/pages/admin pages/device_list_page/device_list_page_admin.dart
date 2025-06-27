@@ -26,7 +26,6 @@ class DeviceListPageAdmin extends StatefulWidget {
 
 class _DeviceListPageAdminState extends State<DeviceListPageAdmin>
     with TickerProviderStateMixin {
-  final GlobalKey<RefreshIndicatorState> _refreshIndicatorKey = GlobalKey();
   List<dynamic> devices = [];
   bool isLoading = true;
   String? error;
