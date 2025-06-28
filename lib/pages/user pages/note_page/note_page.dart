@@ -7,6 +7,8 @@ import 'package:http/http.dart' as http;
 import 'dart:convert';
 
 import 'package:med/models/note_model.dart';
+import 'package:med/pages/user%20pages/note_page/widgets/pdf_download_button.dart';
+import 'package:med/pages/user%20pages/note_page/widgets/voice_input_widget.dart';
 import 'package:med/widgets/appbar.dart';
 
 @RoutePage()
@@ -21,7 +23,7 @@ class _NotePageState extends State<NotePage> with TickerProviderStateMixin {
   final textController = TextEditingController();
   bool _hasInitialized = false;
   List<Note> currentNotes = [];
-  final String baseUrl = 'http://10.0.2.2:8000/api/notes';
+  final String baseUrl = 'http:// 192.168.1.25/api/notes';
   late AnimationController _fabAnimationController;
   late AnimationController _listAnimationController;
   late Animation<double> _fabAnimation;
@@ -233,7 +235,10 @@ Future<void> deleteAllNotes(String uid) async {
                       ),
                     ),
                   ),
-                  
+                  Padding(
+            padding: const EdgeInsets.only(top: 16, right: 12),
+            child: VoiceInputWidget(controller: textController),
+          ),
                   const SizedBox(height: 32),
                   
                   // Buttons
@@ -462,6 +467,7 @@ Future<void> deleteAllNotes(String uid) async {
                             fontSize: 14,
                           ),
                         ),
+                         PDFDownloadButton(notes: currentNotes),
                       ],
                     ),
                   ),
