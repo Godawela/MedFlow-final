@@ -5,7 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:med/data/providers.dart';
 import 'package:med/pages/user%20pages/chat_bot.dart';
 import 'package:med/pages/user%20pages/home_screen.dart';
-import 'package:med/pages/user%20pages/note_page.dart';
+import 'package:med/pages/user%20pages/note_page/note_page.dart';
 import 'package:med/pages/user%20pages/profile_page.dart';
 
 @RoutePage()
