@@ -10,6 +10,8 @@ import 'package:image_picker/image_picker.dart';
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:med/widgets/show_sucess_bar.dart';
+
 @RoutePage()
 class AddCategoryPage extends StatefulWidget {
   const AddCategoryPage({super.key});
@@ -274,7 +276,7 @@ class _AddCategoryPageState extends State<AddCategoryPage> with TickerProviderSt
       final responseBody = await response.stream.bytesToString();
 
       if (response.statusCode == 201 || response.statusCode == 200) {
-        _showSuccessSnackBar('Category added successfully!');
+        SuccessSnackBar(message: 'Category added successfully!');
         _nameController.clear();
         _descriptionController.clear();
         setState(() {
@@ -302,38 +304,6 @@ class _AddCategoryPageState extends State<AddCategoryPage> with TickerProviderSt
     }
   }
 
-  void _showSuccessSnackBar(String message) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Row(
-          children: [
-            Container(
-              padding: const EdgeInsets.all(8),
-              decoration: BoxDecoration(
-                color: Colors.white.withOpacity(0.2),
-                shape: BoxShape.circle,
-              ),
-              child: const Icon(Icons.check_rounded, color: Colors.white, size: 20),
-            ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: Text(
-                message,
-                style: GoogleFonts.inter(
-                  fontWeight: FontWeight.w500,
-                  fontSize: 14,
-                ),
-              ),
-            ),
-          ],
-        ),
-        backgroundColor: Colors.green.shade500,
-        behavior: SnackBarBehavior.floating,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-        duration: const Duration(seconds: 3),
-      ),
-    );
-  }
 
   void _showErrorSnackBar(String message) {
     ScaffoldMessenger.of(context).showSnackBar(
