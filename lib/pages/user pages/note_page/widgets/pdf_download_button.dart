@@ -32,7 +32,7 @@ class PDFDownloadButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return IconButton(
-      icon: const Icon(Icons.picture_as_pdf_rounded, color: Colors.deepPurple),
+      icon: const Icon(Icons.picture_as_pdf_rounded, color: Colors.white),
       tooltip: 'Download as PDF',
       onPressed: () => _generatePdf(context),
     );
