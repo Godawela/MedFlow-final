@@ -25,7 +25,7 @@ class SignUpScreen extends StatefulWidget {
 class _SignUpScreenState extends State<SignUpScreen> {
   // 🔹 Send user data to your backend MongoDB
   Future<void> sendToMongoDB(String uid, String? email, String? name) async {
-    final url = Uri.parse('http://10.0.2.2:8000/api/users');
+    final url = Uri.parse('https://medflow-phi.vercel.app/api/users');
 
     try {
       final response = await http.post(

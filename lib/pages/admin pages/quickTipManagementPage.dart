@@ -65,7 +65,7 @@ class _QuickTipsManagementPageState extends State<QuickTipsManagementPage>
   Future<void> fetchCategories() async {
     try {
       final response = await http.get(
-        Uri.parse('http://10.0.2.2:8000/api/category'),
+        Uri.parse('https://medflow-phi.vercel.app/api/category'),
         headers: {
           'Cache-Control': 'no-cache, no-store, must-revalidate',
           'Pragma': 'no-cache',
@@ -101,7 +101,7 @@ class _QuickTipsManagementPageState extends State<QuickTipsManagementPage>
 
     try {
       final response = await http.get(
-        Uri.parse('http://10.0.2.2:8000/api/quicktips/category/$categoryId'),
+        Uri.parse('https://medflow-phi.vercel.app/api/quicktips/category/$categoryId'),
         headers: {
           'Cache-Control': 'no-cache, no-store, must-revalidate',
           'Pragma': 'no-cache',
@@ -148,7 +148,7 @@ class _QuickTipsManagementPageState extends State<QuickTipsManagementPage>
 
     try {
       final response = await http.post(
-        Uri.parse('http://10.0.2.2:8000/api/quicktips/category/$selectedCategoryId/tip'),
+        Uri.parse('https://medflow-phi.vercel.app/api/quicktips/category/$selectedCategoryId/tip'),
         headers: {
           'Content-Type': 'application/json',
         },
@@ -184,7 +184,7 @@ class _QuickTipsManagementPageState extends State<QuickTipsManagementPage>
   Future<void> updateTip(String tipId, String title, String content) async {
     try {
       final response = await http.put(
-        Uri.parse('http://10.0.2.2:8000/api/quicktips/category/$selectedCategoryId/tip/$tipId'),
+        Uri.parse('https://medflow-phi.vercel.app/api/quicktips/category/$selectedCategoryId/tip/$tipId'),
         headers: {
           'Content-Type': 'application/json',
         },
@@ -218,7 +218,7 @@ class _QuickTipsManagementPageState extends State<QuickTipsManagementPage>
   Future<void> deleteTip(String tipId) async {
     try {
       final response = await http.delete(
-        Uri.parse('http://10.0.2.2:8000/api/quicktips/category/$selectedCategoryId/tip/$tipId'),
+        Uri.parse('https://medflow-phi.vercel.app/api/quicktips/category/$selectedCategoryId/tip/$tipId'),
       );
 
       if (response.statusCode == 200) {

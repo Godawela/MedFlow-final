@@ -53,7 +53,7 @@ class _AuthFormState extends State<AuthForm> {
 
   // Function to send data to your MongoDB backend API
   Future<void> sendToMongoDB(String uid, String email, String name, String role) async {
-    final url = Uri.parse('http://10.0.2.2:8000/api/users'); // Change this to your backend endpoint
+    final url = Uri.parse('https://medflow-phi.vercel.app/api/users'); // Change this to your backend endpoint
 
     try {
       final response = await http.post(

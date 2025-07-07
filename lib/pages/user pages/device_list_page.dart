@@ -65,7 +65,7 @@ class _DeviceListPageState extends State<DeviceListPage>
     try {
       final response = await http.get(
         Uri.parse(
-            'http://10.0.2.2:8000/api/devices/category/${widget.category}'),
+            'https://medflow-phi.vercel.app/api/devices/category/${widget.category}'),
       );
 
       if (response.statusCode == 200) {
@@ -92,7 +92,7 @@ class _DeviceListPageState extends State<DeviceListPage>
     try {
       debugPrint('Fetching category description for ${widget.category}');
       final response = await http.get(
-        Uri.parse('http://10.0.2.2:8000/api/category/name/${widget.category}'),
+        Uri.parse('https://medflow-phi.vercel.app/api/category/name/${widget.category}'),
       );
 
       debugPrint(

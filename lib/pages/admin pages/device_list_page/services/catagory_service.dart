@@ -3,7 +3,7 @@ import 'dart:io';
 import 'package:http/http.dart' as http;
 
 class CategoryService {
-  static const String baseUrl = 'http://10.0.2.2:8000/api';
+  static const String baseUrl = 'https://medflow-phi.vercel.app/api';
   
   // Get devices by category
   static Future<List<dynamic>> getDevicesByCategory(String category) async {

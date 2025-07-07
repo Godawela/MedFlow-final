@@ -70,7 +70,7 @@ class _SymptomPageAdminState extends State<SymptomPageAdmin>
   Future<void> fetchSymptoms() async {
     try {
       final response =
-          await http.get(Uri.parse('http://10.0.2.2:8000/api/symptoms'));
+          await http.get(Uri.parse('https://medflow-phi.vercel.app/api/symptoms'));
 
       if (response.statusCode == 200) {
         final List<dynamic> symptomData = json.decode(response.body);

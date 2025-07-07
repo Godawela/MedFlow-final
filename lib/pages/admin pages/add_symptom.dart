@@ -31,7 +31,7 @@ class _AddSymptomPageState extends State<AddSymptomPage> {
       errorMessage = null;
     });
 
-    final url = Uri.parse('http://10.0.2.2:8000/api/symptoms');
+    final url = Uri.parse('https://medflow-phi.vercel.app/api/symptoms');
     final body = json.encode({
       'name': _nameController.text.trim(),
       'description': _descriptionController.text.trim(),

@@ -65,7 +65,7 @@ class _SymptomDetailPageAdminState extends State<SymptomDetailPageAdmin> with Ti
   Future<void> fetchSymptomDetails() async {
     try {
       final response = await http.get(
-        Uri.parse('http://10.0.2.2:8000/api/symptoms/name/${widget.symptomName}'),
+        Uri.parse('https://medflow-phi.vercel.app/api/symptoms/name/${widget.symptomName}'),
       );
 
       if (response.statusCode == 200) {
@@ -116,7 +116,7 @@ class _SymptomDetailPageAdminState extends State<SymptomDetailPageAdmin> with Ti
       };
 
       final response = await http.patch(
-        Uri.parse('http://10.0.2.2:8000/api/symptoms/${symptomDetails!['_id']}'),
+        Uri.parse('https://medflow-phi.vercel.app/api/symptoms/${symptomDetails!['_id']}'),
         headers: {
           'Content-Type': 'application/json',
         },
@@ -208,7 +208,7 @@ class _SymptomDetailPageAdminState extends State<SymptomDetailPageAdmin> with Ti
     if (confirmDelete == true) {
       try {
         final response = await http.delete(
-          Uri.parse('http://10.0.2.2:8000/api/symptoms/${symptomDetails!['_id']}'),
+          Uri.parse('https://medflow-phi.vercel.app/api/symptoms/${symptomDetails!['_id']}'),
         );
 
         if (response.statusCode == 200) {

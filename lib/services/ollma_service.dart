@@ -5,7 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 
 class OllamaService {
-static const String baseUrl = 'http://10.0.2.2:11434';
+static const String baseUrl = 'http://192.168.1.25:11434';
   static const String model = 'llama3.2:3b';
   
   Future<String> generateResponse(String prompt) async {

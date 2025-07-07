@@ -54,7 +54,7 @@ class _SymptomDetailPageState extends State<SymptomDetailPage> with TickerProvid
   Future<void> fetchSymptomDetails() async {
     try {
       final response = await http.get(
-        Uri.parse('http://10.0.2.2:8000/api/symptoms/name/${widget.symptomName}'),
+        Uri.parse('https://medflow-phi.vercel.app/api/symptoms/name/${widget.symptomName}'),
       );
 
       if (response.statusCode == 200) {

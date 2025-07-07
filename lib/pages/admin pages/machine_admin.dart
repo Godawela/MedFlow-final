@@ -73,7 +73,7 @@ class _MachinePageAdminState extends State<MachinePageAdmin>
   Future<void> fetchCategories() async {
     try {
       final response = await http.get(
-        Uri.parse('http://10.0.2.2:8000/api/category'),
+        Uri.parse('https://medflow-phi.vercel.app/api/category'),
         headers: {
           'Cache-Control': 'no-cache, no-store, must-revalidate',
           'Pragma': 'no-cache',

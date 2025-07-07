@@ -57,7 +57,7 @@ class _MachineDetailPageAdminState extends State<MachineDetailPageAdmin>
     try {
       final response = await http.get(
         Uri.parse(
-            'http://10.0.2.2:8000/api/devices/name/${widget.machineName}'),
+            'https://medflow-phi.vercel.app/api/devices/name/${widget.machineName}'),
       );
 
       if (response.statusCode == 200) {

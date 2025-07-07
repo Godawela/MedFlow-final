@@ -14,36 +14,47 @@ class UserGreeting extends StatefulWidget {
 class _UserGreetingState extends State<UserGreeting> {
   String? role;
 
-  @override
-  void initState() {
-    super.initState();
-    fetchUserRole();
-  }
+ @override
+void initState() {
+  super.initState();
+  Future.delayed(Duration.zero, fetchUserRole);
+}
+
 
   Future<void> fetchUserRole() async {
-    try {
-      final uid = FirebaseAuth.instance.currentUser?.uid;
-      if (uid == null) {
-        setState(() => role = 'Guest');
-        return;
-      }
+  try {
+    final user = FirebaseAuth.instance.currentUser;
+    print('Current user: $user');
+    
+    final uid = user?.uid;
+    print('UID: $uid');
 
-      final response = await http.get(
-        Uri.parse('http://10.0.2.2:8000/api/users/$uid/role'),
-      );
-
-      if (response.statusCode == 200) {
-        final data = json.decode(response.body);
-        setState(() {
-          role = data['role'] ?? 'User';
-        });
-      } else {
-        setState(() => role = 'Unknown');
-      }
-    } catch (e) {
-      setState(() => role = 'Error');
+    if (uid == null) {
+      print('UID is null — Firebase not ready yet?');
+      setState(() => role = 'Guest');
+      return;
     }
+
+    final url = 'https://medflow-phi.vercel.app/api/users/$uid/role';
+    print('Requesting: $url');
+
+    final response = await http.get(Uri.parse(url));
+    print('Status code: ${response.statusCode}');
+    print('Body: ${response.body}');
+
+    if (response.statusCode == 200) {
+      final data = json.decode(response.body);
+      setState(() {
+        role = data['role'] ?? 'student';
+      });
+    } else {
+      setState(() => role = 'Unknown');
+    }
+  } catch (e) {
+    print('Exception: $e');
+    setState(() => role = 'Error');
   }
+}
 
   @override
   Widget build(BuildContext context) {

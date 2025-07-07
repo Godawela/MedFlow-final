@@ -35,7 +35,7 @@ class _AddDevicePageState extends State<AddDevicePage> {
 
   Future<void> _fetchCategories() async {
     try {
-      final response = await http.get(Uri.parse('http://10.0.2.2:8000/api/category'));
+      final response = await http.get(Uri.parse('https://medflow-phi.vercel.app/api/category'));
 
       if (response.statusCode == 200) {
         final List<dynamic> data = jsonDecode(response.body);
@@ -80,7 +80,7 @@ class _AddDevicePageState extends State<AddDevicePage> {
 
     try {
       final response = await http.post(
-        Uri.parse('http://10.0.2.2:8000/api/devices'),
+        Uri.parse('https://medflow-phi.vercel.app/api/devices'),
         headers: {'Content-Type': 'application/json'},
         body: jsonEncode(deviceData),
       );

@@ -56,7 +56,7 @@ class _MachineDetailPageState extends State<MachineDetailPage> with TickerProvid
   Future<void> fetchMachineDetails() async {
     try {
       final response = await http.get(
-        Uri.parse('http://10.0.2.2:8000/api/devices/name/${widget.machineName}'),
+        Uri.parse('https://medflow-phi.vercel.app/api/devices/name/${widget.machineName}'),
       );
 
       if (response.statusCode == 200) {

@@ -50,7 +50,7 @@ class _ProfilePageState extends State<ProfilePage> {
       throw Exception('User not logged in');
     }
     try {
-      final response = await http.get(Uri.parse('http://10.0.2.2:8000/api/users/$uid'));
+      final response = await http.get(Uri.parse('https://medflow-phi.vercel.app/api/users/$uid'));
 
       if (response.statusCode == 200) {
         final data = json.decode(response.body);
@@ -86,7 +86,7 @@ class _ProfilePageState extends State<ProfilePage> {
 
     try {
       final response = await http.put(
-        Uri.parse('http://10.0.2.2:8000/api/users/$uid'),
+        Uri.parse('https://medflow-phi.vercel.app/api/users/$uid'),
         headers: {'Content-Type': 'application/json'},
         body: json.encode(updatedData),
       );

@@ -23,7 +23,7 @@ class _NotePageState extends State<NotePage> with TickerProviderStateMixin {
   final textController = TextEditingController();
   bool _hasInitialized = false;
   List<Note> currentNotes = [];
-  final String baseUrl = 'http:// 192.168.1.25/api/notes';
+  final String baseUrl = 'https://medflow-phi.vercel.app/api/notes';
   late AnimationController _fabAnimationController;
   late AnimationController _listAnimationController;
   late Animation<double> _fabAnimation;

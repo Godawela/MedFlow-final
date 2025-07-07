@@ -4,7 +4,7 @@ import 'package:http/http.dart' as http;
 import 'package:med/models/quick_tip.dart';
 
 class QuickTipsService {
-  static const String baseUrl = 'http://10.0.2.2:8000';
+  static const String baseUrl = 'https://medflow-phi.vercel.app';
 
   static Future<QuickTipsResponse?> getQuickTips(String categoryId) async {
     try {
