@@ -8,7 +8,7 @@ import 'dart:convert';
 
 import 'package:med/models/note_model.dart';
 import 'package:med/pages/user%20pages/note_page/widgets/pdf_download_button.dart';
-import 'package:med/pages/user%20pages/note_page/widgets/voice_input_widget.dart';
+import 'package:med/pages/user%20pages/note_page/widgets/note_dialog.dart'; // Import the new dialog
 import 'package:med/widgets/appbar.dart';
 
 @RoutePage()
@@ -20,7 +20,6 @@ class NotePage extends StatefulWidget {
 }
 
 class _NotePageState extends State<NotePage> with TickerProviderStateMixin {
-  final textController = TextEditingController();
   bool _hasInitialized = false;
   List<Note> currentNotes = [];
   final String baseUrl = 'https://medflow-phi.vercel.app/api/notes';
@@ -40,7 +39,8 @@ class _NotePageState extends State<NotePage> with TickerProviderStateMixin {
       vsync: this,
     );
     _fabAnimation = Tween<double>(begin: 0, end: 1).animate(
-      CurvedAnimation(parent: _fabAnimationController, curve: Curves.elasticOut),
+      CurvedAnimation(
+          parent: _fabAnimationController, curve: Curves.elasticOut),
     );
   }
 
@@ -72,7 +72,7 @@ class _NotePageState extends State<NotePage> with TickerProviderStateMixin {
       return;
     }
 
-  await http.post(
+    await http.post(
       Uri.parse('$baseUrl/${user.uid}'),
       headers: {'Content-Type': 'application/json'},
       body: jsonEncode({
@@ -81,22 +81,21 @@ class _NotePageState extends State<NotePage> with TickerProviderStateMixin {
     );
   }
 
-Future<void> updateNote(String uid, String id, String newText) async {
-  await http.put(
-    Uri.parse('$baseUrl/$uid/$id'),
-    headers: {'Content-Type': 'application/json'},
-    body: jsonEncode({'text': newText}),
-  );
-}
+  Future<void> updateNote(String uid, String id, String newText) async {
+    await http.put(
+      Uri.parse('$baseUrl/$uid/$id'),
+      headers: {'Content-Type': 'application/json'},
+      body: jsonEncode({'text': newText}),
+    );
+  }
 
-Future<void> deleteNote(String uid, String id) async {
-  await http.delete(Uri.parse('$baseUrl/$uid/$id'));
-}
+  Future<void> deleteNote(String uid, String id) async {
+    await http.delete(Uri.parse('$baseUrl/$uid/$id'));
+  }
 
-Future<void> deleteAllNotes(String uid) async {
-  await http.delete(Uri.parse('$baseUrl/$uid'));
-}
-
+  Future<void> deleteAllNotes(String uid) async {
+    await http.delete(Uri.parse('$baseUrl/$uid'));
+  }
 
   @override
   void didChangeDependencies() {
@@ -113,231 +112,31 @@ Future<void> deleteAllNotes(String uid) async {
     }
   }
 
-  void openNoteDialog({Note? noteToUpdate}) {
-    if (noteToUpdate != null) {
-      textController.text = noteToUpdate.text;
-    } else {
-      textController.clear();
-    }
-
-    showDialog(
+  // Updated method to use the reusable dialog
+  Future<void> openNoteDialog({Note? noteToUpdate}) async {
+    await showNoteDialog(
       context: context,
-      barrierDismissible: false,
-      builder: (context) {
-        return Dialog(
-          backgroundColor: Colors.transparent,
-          child: Container(
-            width: MediaQuery.of(context).size.width * 0.9,
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(24),
-              gradient: LinearGradient(
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-                colors: [
-                  Colors.white,
-                  Colors.grey.shade50,
-                ],
-              ),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withOpacity(0.1),
-                  blurRadius: 20,
-                  offset: const Offset(0, 10),
-                ),
-              ],
-            ),
-            child: Padding(
-              padding: const EdgeInsets.all(28),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  // Header
-                  Row(
-                    children: [
-                      Container(
-                        padding: const EdgeInsets.all(16),
-                        decoration: BoxDecoration(
-                          gradient: LinearGradient(
-                            colors: [
-                              Colors.deepPurple.shade400,
-                              Colors.deepPurple.shade600,
-                            ],
-                          ),
-                          borderRadius: BorderRadius.circular(16),
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.deepPurple.withOpacity(0.3),
-                              blurRadius: 8,
-                              offset: const Offset(0, 4),
-                            ),
-                          ],
-                        ),
-                        child: Icon(
-                          noteToUpdate == null ? Icons.edit_note_rounded : Icons.note_alt_rounded,
-                          color: Colors.white,
-                          size: 28,
-                        ),
-                      ),
-                      const SizedBox(width: 20),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              noteToUpdate == null ? 'Create Note' : 'Edit Note',
-                              style: const TextStyle(
-                                fontSize: 24,
-                                fontWeight: FontWeight.bold,
-                                color: Color(0xFF1A1A1A),
-                              ),
-                            ),
-                            Text(
-                              noteToUpdate == null 
-                                  ? 'Capture your thoughts'
-                                  : 'Update your note',
-                              style: TextStyle(
-                                fontSize: 15,
-                                color: Colors.grey.shade600,
-                                fontWeight: FontWeight.w500,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ],
-                  ),
-                  
-                  const SizedBox(height: 32),
-                  
-                  // Text input
-                  Container(
-                    decoration: BoxDecoration(
-                      color: Colors.grey.shade50,
-                      borderRadius: BorderRadius.circular(16),
-                      border: Border.all(color: Colors.grey.shade200, width: 1.5),
-                    ),
-                    child: TextField(
-                      controller: textController,
-                      maxLines: 8,
-                      style: const TextStyle(
-                        fontSize: 16,
-                        height: 1.6,
-                        color: Color(0xFF1A1A1A),
-                      ),
-                      decoration: InputDecoration(
-                        hintText: 'Write your note here...',
-                        hintStyle: TextStyle(
-                          color: Colors.grey.shade500,
-                          fontSize: 16,
-                        ),
-                        border: InputBorder.none,
-                        contentPadding: const EdgeInsets.all(20),
-                      ),
-                    ),
-                  ),
-                  Padding(
-            padding: const EdgeInsets.only(top: 16, right: 12),
-            child: VoiceInputWidget(controller: textController),
-          ),
-                  const SizedBox(height: 32),
-                  
-                  // Buttons
-                  Row(
-                    children: [
-                      Expanded(
-                        child: Container(
-                          height: 52,
-                          decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(12),
-                            border: Border.all(color: Colors.grey.shade300),
-                          ),
-                          child: TextButton(
-                            onPressed: () {
-                              textController.clear();
-                              Navigator.pop(context);
-                            },
-                            style: TextButton.styleFrom(
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(12),
-                              ),
-                            ),
-                            child: Text(
-                              'Cancel',
-                              style: TextStyle(
-                                color: Colors.grey.shade700,
-                                fontSize: 16,
-                                fontWeight: FontWeight.w600,
-                              ),
-                            ),
-                          ),
-                        ),
-                      ),
-                      const SizedBox(width: 16),
-                      Expanded(
-                        child: Container(
-                          height: 52,
-                          decoration: BoxDecoration(
-                            gradient: LinearGradient(
-                              colors: [
-                                Colors.deepPurple.shade400,
-                                Colors.deepPurple.shade600,
-                              ],
-                            ),
-                            borderRadius: BorderRadius.circular(12),
-                            boxShadow: [
-                              BoxShadow(
-                                color: Colors.deepPurple.withOpacity(0.3),
-                                blurRadius: 8,
-                                offset: const Offset(0, 4),
-                              ),
-                            ],
-                          ),
-                          child: ElevatedButton(
-                            onPressed: () async {
-                              final noteText = textController.text.trim();
-                              if (noteText.isEmpty) return;
-
-                              if (noteToUpdate == null) {
-                                await addNote(noteText);
-                              } else {
-                                final user = FirebaseAuth.instance.currentUser;
-                                if (user != null) {
-                                  await updateNote(user.uid, noteToUpdate.id, noteText);
-                                }
-                              }
-
-                              currentNotes = await fetchNotes();
-                              setState(() {});
-                              textController.clear();
-                              Navigator.pop(context);
-                            },
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: Colors.transparent,
-                              shadowColor: Colors.transparent,
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(12),
-                              ),
-                            ),
-                            child: Text(
-                              noteToUpdate == null ? 'Create' : 'Update',
-                              style: const TextStyle(
-                                color: Colors.white,
-                                fontSize: 16,
-                                fontWeight: FontWeight.w600,
-                              ),
-                            ),
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ],
-              ),
-            ),
-          ),
-        );
+      noteToUpdate: noteToUpdate,
+      onSave: (text) async {
+        await addNote(text);
+        await _refreshNotes();
+      },
+      onUpdate: (id, text) async {
+        final user = FirebaseAuth.instance.currentUser;
+        if (user != null) {
+          await updateNote(user.uid, id, text);
+          await _refreshNotes();
+        }
       },
     );
+  }
+
+  // Helper method to refresh notes
+  Future<void> _refreshNotes() async {
+    final notes = await fetchNotes();
+    setState(() {
+      currentNotes = notes;
+    });
   }
 
   void confirmDelete(Note note) {
@@ -345,12 +144,14 @@ Future<void> deleteAllNotes(String uid) async {
       context: context,
       builder: (context) => AlertDialog(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        title: const Text("Delete Note", style: TextStyle(fontWeight: FontWeight.bold)),
+        title: const Text("Delete Note",
+            style: TextStyle(fontWeight: FontWeight.bold)),
         content: const Text("Are you sure you want to delete this note?"),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: Text("Cancel", style: TextStyle(color: Colors.grey.shade600)),
+            child:
+                Text("Cancel", style: TextStyle(color: Colors.grey.shade600)),
           ),
           ElevatedButton(
             onPressed: () async {
@@ -358,13 +159,13 @@ Future<void> deleteAllNotes(String uid) async {
               if (user != null) {
                 await deleteNote(user.uid, note.id);
               }
-              currentNotes = await fetchNotes();
-              setState(() {});
+              await _refreshNotes();
               Navigator.pop(context);
             },
             style: ElevatedButton.styleFrom(
               backgroundColor: Colors.red.shade500,
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+              shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8)),
             ),
             child: const Text("Delete", style: TextStyle(color: Colors.white)),
           ),
@@ -378,13 +179,17 @@ Future<void> deleteAllNotes(String uid) async {
       showDialog(
         context: context,
         builder: (context) => AlertDialog(
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-          title: const Text("Delete All Notes", style: TextStyle(fontWeight: FontWeight.bold)),
-          content: const Text("Are you sure you want to delete ALL notes? This action cannot be undone."),
+          shape:
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+          title: const Text("Delete All Notes",
+              style: TextStyle(fontWeight: FontWeight.bold)),
+          content: const Text(
+              "Are you sure you want to delete ALL notes? This action cannot be undone."),
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(context),
-              child: Text("Cancel", style: TextStyle(color: Colors.grey.shade600)),
+              child:
+                  Text("Cancel", style: TextStyle(color: Colors.grey.shade600)),
             ),
             ElevatedButton(
               onPressed: () async {
@@ -392,15 +197,16 @@ Future<void> deleteAllNotes(String uid) async {
                 if (user != null) {
                   await deleteAllNotes(user.uid);
                 }
-                currentNotes = await fetchNotes();
-                setState(() {});
+                await _refreshNotes();
                 Navigator.pop(context);
               },
               style: ElevatedButton.styleFrom(
                 backgroundColor: Colors.red.shade500,
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8)),
               ),
-              child: const Text("Delete All", style: TextStyle(color: Colors.white)),
+              child: const Text("Delete All",
+                  style: TextStyle(color: Colors.white)),
             ),
           ],
         ),
@@ -417,11 +223,12 @@ Future<void> deleteAllNotes(String uid) async {
           // AppBar
           CurvedAppBar(
             title: 'My Notes',
-            subtitle: '${currentNotes.length} ${currentNotes.length == 1 ? 'note' : 'notes'}',
+            subtitle:
+                '${currentNotes.length} ${currentNotes.length == 1 ? 'note' : 'notes'}',
             isProfileAvailable: false,
             showIcon: true,
           ),
-          
+
           // Header section with stats
           if (currentNotes.isNotEmpty)
             Container(
@@ -451,9 +258,9 @@ Future<void> deleteAllNotes(String uid) async {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                       const Text(
+                        const Text(
                           'Tap on the notes to edit',
-                          style:  TextStyle(
+                          style: TextStyle(
                             color: Colors.white,
                             fontSize: 18,
                             fontWeight: FontWeight.bold,
@@ -467,7 +274,7 @@ Future<void> deleteAllNotes(String uid) async {
                             fontSize: 14,
                           ),
                         ),
-                         PDFDownloadButton(notes: currentNotes),
+                        PDFDownloadButton(notes: currentNotes),
                       ],
                     ),
                   ),
@@ -478,20 +285,23 @@ Future<void> deleteAllNotes(String uid) async {
                     ),
                     child: TextButton.icon(
                       onPressed: confirmDeleteAll,
-                      icon: const Icon(Icons.delete_sweep_rounded, color: Colors.white, size: 20),
+                      icon: const Icon(Icons.delete_sweep_rounded,
+                          color: Colors.white, size: 20),
                       label: const Text(
                         'Clear All',
-                        style: TextStyle(color: Colors.white, fontWeight: FontWeight.w600),
+                        style: TextStyle(
+                            color: Colors.white, fontWeight: FontWeight.w600),
                       ),
                       style: TextButton.styleFrom(
-                        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 16, vertical: 8),
                       ),
                     ),
                   ),
                 ],
               ),
             ),
-          
+
           // Main content
           Expanded(
             child: currentNotes.isEmpty
@@ -543,7 +353,9 @@ Future<void> deleteAllNotes(String uid) async {
                           return Transform.translate(
                             offset: Offset(
                               0,
-                              50 * (1 - _listAnimationController.value) * (index + 1),
+                              50 *
+                                  (1 - _listAnimationController.value) *
+                                  (index + 1),
                             ),
                             child: Opacity(
                               opacity: _listAnimationController.value,
@@ -564,7 +376,8 @@ Future<void> deleteAllNotes(String uid) async {
                                   color: Colors.transparent,
                                   child: InkWell(
                                     borderRadius: BorderRadius.circular(16),
-                                    onTap: () => openNoteDialog(noteToUpdate: note),
+                                    onTap: () =>
+                                        openNoteDialog(noteToUpdate: note),
                                     child: Padding(
                                       padding: const EdgeInsets.all(20),
                                       child: Row(
@@ -581,7 +394,8 @@ Future<void> deleteAllNotes(String uid) async {
                                                   Colors.deepPurple.shade600,
                                                 ],
                                               ),
-                                              borderRadius: BorderRadius.circular(2),
+                                              borderRadius:
+                                                  BorderRadius.circular(2),
                                             ),
                                           ),
                                           const SizedBox(width: 16),
@@ -601,7 +415,8 @@ Future<void> deleteAllNotes(String uid) async {
                                           Container(
                                             decoration: BoxDecoration(
                                               color: Colors.red.shade50,
-                                              borderRadius: BorderRadius.circular(8),
+                                              borderRadius:
+                                                  BorderRadius.circular(8),
                                             ),
                                             child: IconButton(
                                               icon: Icon(
@@ -609,7 +424,8 @@ Future<void> deleteAllNotes(String uid) async {
                                                 color: Colors.red.shade400,
                                                 size: 20,
                                               ),
-                                              onPressed: () => confirmDelete(note),
+                                              onPressed: () =>
+                                                  confirmDelete(note),
                                             ),
                                           ),
                                         ],
@@ -635,7 +451,8 @@ Future<void> deleteAllNotes(String uid) async {
             onPressed: () => openNoteDialog(),
             backgroundColor: Colors.deepPurple.shade500,
             elevation: 8,
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+            shape:
+                RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
             label: const Text(
               'New Note',
               style: TextStyle(
