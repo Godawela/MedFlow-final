@@ -87,31 +87,57 @@ class _DeviceListPageAdminState extends State<DeviceListPageAdmin>
     }
   }
 
-  Future<void> fetchCategoryDescription() async {
-    try {
-      debugPrint('Fetching category description for ${widget.category}');
-      final categoryData =
-          await CategoryService.getCategoryByName(widget.category);
-      debugPrint('Received category data: $categoryData');
-      setState(() {
-        categoryDescription = categoryData['description'];
-        categoryId = categoryData['_id'];
-        categoryImage = categoryData['image'];
-      });
-      debugPrint('Set category ID to: $categoryId');
-      debugPrint('Set category image to: $categoryImage');
-    } catch (e) {
-      debugPrint('Error fetching category description: $e');
-      setState(() {
-        categoryDescription = 'Error fetching description.';
-      });
-    }
+Future<void> fetchCategoryDescription() async {
+  try {
+    debugPrint('Fetching category description for ${widget.category}');
+    final categoryData = await CategoryService.getCategoryByName(widget.category);
+    debugPrint('Received category data: $categoryData');
+    setState(() {
+      categoryDescription = categoryData['description'];
+      categoryId = categoryData['_id'];
+      categoryImage = categoryData['image'];
+    });
+    debugPrint('Set category ID to: $categoryId');
+    debugPrint('Set category image to: $categoryImage');
+    
+    // DEBUG: Check what getImageUrl() returns
+    final constructedUrl = getImageUrl();
+    debugPrint('getImageUrl() returned: $constructedUrl');
+    
+    // DEBUG: Call the service method directly
+    final serviceUrl = CategoryService.getImageUrl(categoryImage);
+    debugPrint('CategoryService.getImageUrl() returned: $serviceUrl');
+    
+  } catch (e) {
+    debugPrint('Error fetching category description: $e');
+    setState(() {
+      categoryDescription = 'Error fetching description.';
+    });
   }
+}
 
   // Method to construct the full image URL
-  String? getImageUrl() {
-    return CategoryService.getImageUrl(categoryImage);
+String? getImageUrl() {
+  debugPrint('=== Widget getImageUrl() called ===');
+  debugPrint('categoryImage: $categoryImage');
+  
+  if (categoryImage == null || categoryImage!.isEmpty) {
+    debugPrint('categoryImage is null or empty, returning null');
+    return null;
   }
+  
+  // For full URLs (like Cloudinary), return as-is
+  if (categoryImage!.startsWith('http://') || categoryImage!.startsWith('https://')) {
+    debugPrint('categoryImage is a full URL, returning as-is: $categoryImage');
+    return categoryImage;
+  }
+  
+  // For relative paths, construct the full URL
+  final constructedUrl = CategoryService.getImageUrl(categoryImage);
+  debugPrint('Constructed URL for relative path: $constructedUrl');
+  return constructedUrl;
+}
+
 
   Future<void> updateCategory(String newName, String newDescription,
       {File? imageFile, bool removeImage = false}) async {

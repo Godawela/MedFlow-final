@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:http/http.dart' as http;
+import 'package:med/pages/admin%20pages/device_list_page/services/catagory_service.dart';
 import 'package:med/pages/user%20pages/machine_details.dart';
 import 'dart:convert';
 import 'package:med/widgets/appbar.dart';
@@ -120,15 +121,26 @@ class _DeviceListPageState extends State<DeviceListPage>
   }
 
   //method to construct the full image URL
-  String? getImageUrl() {
-    if (categoryImage == null || categoryImage!.isEmpty) return null;
-
-    // Convert backslashes to forward slashes for URL
-    String imagePath = categoryImage!.replaceAll('\\', '/');
-
-    // Construct full URL
-    return 'http://10.0.2.2:8000/$imagePath';
+ String? getImageUrl() {
+  debugPrint('=== Widget getImageUrl() called ===');
+  debugPrint('categoryImage: $categoryImage');
+  
+  if (categoryImage == null || categoryImage!.isEmpty) {
+    debugPrint('categoryImage is null or empty, returning null');
+    return null;
   }
+  
+  // For full URLs (like Cloudinary), return as-is
+  if (categoryImage!.startsWith('http://') || categoryImage!.startsWith('https://')) {
+    debugPrint('categoryImage is a full URL, returning as-is: $categoryImage');
+    return categoryImage;
+  }
+  
+  // For relative paths, construct the full URL
+  final constructedUrl = CategoryService.getImageUrl(categoryImage);
+  debugPrint('Constructed URL for relative path: $constructedUrl');
+  return constructedUrl;
+}
 
   // Get icon for device type
   IconData getDeviceIcon(String deviceName) {

@@ -121,14 +121,47 @@ class CategoryService {
     }
   }
 
-  // Helper method to construct full image URL
-  static String? getImageUrl(String? imagePath) {
-    if (imagePath == null || imagePath.isEmpty) return null;
+static String? getImageUrl(String? imagePath) {
+  print('=== getImageUrl DEBUG ===');
+  print('Input imagePath: $imagePath');
+  
+  if (imagePath == null || imagePath.isEmpty) {
+    print('Image path is null or empty');
+    return null;
+  }
+  
+  // Check if it's already a full URL (like Cloudinary URLs)
+  if (imagePath.startsWith('http://') || imagePath.startsWith('https://')) {
+    print('Image path is already a full URL, returning as-is: $imagePath');
+    return imagePath; // Return as-is since it's already a complete URL
+  }
+  
+  // Only for relative paths - construct full URL with your server
+  String cleanImagePath = imagePath.replaceAll('\\', '/');
+  if (cleanImagePath.startsWith('/')) {
+    cleanImagePath = cleanImagePath.substring(1);
+  }
+  
+  String constructedUrl = '$baseUrl/upload/$cleanImagePath';
+  print('Constructed URL for relative path: $constructedUrl');
+  return constructedUrl;
+}
+
+
+}
+// Additional debugging helper class
+class ImageUrlDebugger {
+  static void debugImageUrl(String? imagePath) {
+    print('=== IMAGE URL DEBUG ===');
+    print('Original path: $imagePath');
+    print('Is null or empty: ${imagePath == null || imagePath.isEmpty}');
     
-    // Convert backslashes to forward slashes for URL
-    String cleanImagePath = imagePath.replaceAll('\\', '/');
-    
-    // Construct full URL
-    return '$baseUrl/../$cleanImagePath';
+    if (imagePath != null && imagePath.isNotEmpty) {
+      print('Starts with http://: ${imagePath.startsWith('http://')}');
+      print('Starts with https://: ${imagePath.startsWith('https://')}');
+      print('Contains cloudinary: ${imagePath.contains('cloudinary.com')}');
+      print('Final URL: ${CategoryService.getImageUrl(imagePath)}');
+    }
+    print('======================');
   }
 }

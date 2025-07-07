@@ -257,23 +257,36 @@ class _AddCategoryPageState extends State<AddCategoryPage> with TickerProviderSt
       request.fields['name'] = _nameController.text.trim();
       request.fields['description'] = _descriptionController.text.trim();
       
+      print('Request fields: ${request.fields}');
+      
       // Add image if selected
       if (_selectedImage != null) {
+        print('Selected image path: ${_selectedImage!.path}');
+        
         final imageStream = http.ByteStream(_selectedImage!.openRead());
         final imageLength = await _selectedImage!.length();
         
+        print('Image length: $imageLength bytes');
+        
         final multipartFile = http.MultipartFile(
-          'image',
+          'image', // Make sure this matches your multer field name
           imageStream,
           imageLength,
           filename: 'category_${DateTime.now().millisecondsSinceEpoch}.jpg',
         );
         
         request.files.add(multipartFile);
+        print('Added file to request: ${multipartFile.filename}');
+      } else {
+        print('No image selected');
       }
 
+      print('Sending request...');
       final response = await request.send();
       final responseBody = await response.stream.bytesToString();
+      
+      print('Response status: ${response.statusCode}');
+      print('Response body: $responseBody');
 
       if (response.statusCode == 201 || response.statusCode == 200) {
         SuccessSnackBar(message: 'Category added successfully!');
@@ -284,7 +297,6 @@ class _AddCategoryPageState extends State<AddCategoryPage> with TickerProviderSt
         });
         _imageAnimationController.reset();
         
-        // Navigate back after a short delay
         Future.delayed(const Duration(seconds: 1), () {
           if (mounted) {
             Navigator.pop(context);
@@ -292,9 +304,10 @@ class _AddCategoryPageState extends State<AddCategoryPage> with TickerProviderSt
         });
       } else {
         final errorData = json.decode(responseBody);
-        _showErrorSnackBar('Failed to add category: ${errorData['message'] ?? 'Unknown error'}');
+        _showErrorSnackBar('Failed to add category: ${errorData['error'] ?? 'Unknown error'}');
       }
     } catch (e) {
+      print('Exception occurred: $e');
       _showErrorSnackBar('Network error: Please check your connection');
     } finally {
       setState(() {
@@ -303,7 +316,6 @@ class _AddCategoryPageState extends State<AddCategoryPage> with TickerProviderSt
       _buttonAnimationController.reverse();
     }
   }
-
 
   void _showErrorSnackBar(String message) {
     ScaffoldMessenger.of(context).showSnackBar(
