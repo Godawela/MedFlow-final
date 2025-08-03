@@ -20,7 +20,7 @@ class PDFDownloadButton extends StatelessWidget {
           pw.SizedBox(height: 16),
           ...notes.map((note) => pw.Padding(
             padding: const pw.EdgeInsets.symmetric(vertical: 8),
-            child: pw.Text('• ${note.text}', style: pw.TextStyle(fontSize: 14)),
+            child: pw.Text('• ${note.text}', style: const pw.TextStyle(fontSize: 14)),
           )),
         ],
       ),

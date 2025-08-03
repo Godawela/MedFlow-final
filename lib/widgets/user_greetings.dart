@@ -45,10 +45,10 @@ void initState() {
     if (response.statusCode == 200) {
       final data = json.decode(response.body);
       setState(() {
-        role = data['role'] ?? 'student';
+        role = data['role'] ?? 'Student';
       });
     } else {
-      setState(() => role = 'Unknown');
+      setState(() => role = 'Student');
     }
   } catch (e) {
     print('Exception: $e');
