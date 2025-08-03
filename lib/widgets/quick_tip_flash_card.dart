@@ -33,6 +33,8 @@ class _QuickTipsFlashcardsState extends State<QuickTipsFlashcards>
   List<QuickTip> _tips = [];
   bool _isLoading = true;
   bool _showContent = false;
+  bool _isRefreshing = false;
+  String? _errorMessage;
 
   // Color themes for different cards
   final List<List<Color>> _cardThemes = [
@@ -105,20 +107,60 @@ class _QuickTipsFlashcardsState extends State<QuickTipsFlashcards>
     ));
   }
 
-  Future<void> _loadQuickTips() async {
-    final response = await QuickTipsService.getQuickTips(widget.categoryId);
-    if (response != null) {
+  Future<void> _loadQuickTips({bool isRefresh = false}) async {
+    if (isRefresh) {
       setState(() {
-        _tips = response.tips;
-        _isLoading = false;
+        _isRefreshing = true;
+        _errorMessage = null;
       });
-      _cardController.forward();
-      _progressController.forward();
     } else {
       setState(() {
-        _isLoading = false;
+        _isLoading = true;
+        _errorMessage = null;
       });
     }
+
+    try {
+      final response = await QuickTipsService.getQuickTips(widget.categoryId);
+      
+      if (response != null && response.tips.isNotEmpty) {
+        setState(() {
+          _tips = response.tips;
+          _isLoading = false;
+          _isRefreshing = false;
+          _errorMessage = null;
+          
+          // Reset to first card if current index is out of bounds
+          if (_currentIndex >= _tips.length) {
+            _currentIndex = 0;
+            _showContent = false;
+          }
+        });
+        
+        if (!isRefresh) {
+          _cardController.forward();
+          _progressController.forward();
+        }
+      } else {
+        setState(() {
+          _tips = [];
+          _isLoading = false;
+          _isRefreshing = false;
+          _errorMessage = 'No tips available for this category';
+        });
+      }
+    } catch (e) {
+      setState(() {
+        _isLoading = false;
+        _isRefreshing = false;
+        _errorMessage = 'Failed to load tips. Please try again.';
+      });
+    }
+  }
+
+  // Method to refresh data - can be called from UI
+  Future<void> _refreshData() async {
+    await _loadQuickTips(isRefresh: true);
   }
 
   @override
@@ -134,7 +176,6 @@ class _QuickTipsFlashcardsState extends State<QuickTipsFlashcards>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      // Use a vertical gradient background from purple to white
       extendBodyBehindAppBar: true,
       body: Container(
         decoration: const BoxDecoration(
@@ -151,9 +192,15 @@ class _QuickTipsFlashcardsState extends State<QuickTipsFlashcards>
           child: Column(
             children: [
               _buildModernAppBar(),
-              if (!_isLoading) _buildProgressIndicator(),
+              if (!_isLoading && _tips.isNotEmpty) _buildProgressIndicator(),
               Expanded(
-                child: _isLoading ? _buildLoadingState() : _buildCardView(),
+                child: _isLoading 
+                    ? _buildLoadingState() 
+                    : _errorMessage != null 
+                        ? _buildErrorState()
+                        : _tips.isEmpty 
+                            ? _buildEmptyState()
+                            : _buildCardView(),
               ),
             ],
           ),
@@ -214,6 +261,39 @@ class _QuickTipsFlashcardsState extends State<QuickTipsFlashcards>
               ],
             ),
           ),
+          // Refresh button
+          GestureDetector(
+            onTap: _isRefreshing ? null : _refreshData,
+            child: Container(
+              padding: const EdgeInsets.all(10),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(12),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.05),
+                    blurRadius: 10,
+                    offset: const Offset(0, 2),
+                  ),
+                ],
+              ),
+              child: _isRefreshing
+                  ? const SizedBox(
+                      width: 18,
+                      height: 18,
+                      child: CircularProgressIndicator(
+                        strokeWidth: 2,
+                        valueColor: AlwaysStoppedAnimation<Color>(Color(0xFF6C5CE7)),
+                      ),
+                    )
+                  : const Icon(
+                      Icons.refresh,
+                      color: Color(0xFF2D3436),
+                      size: 18,
+                    ),
+            ),
+          ),
+          const SizedBox(width: 12),
           if (!_isLoading && _tips.isNotEmpty)
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
@@ -303,31 +383,100 @@ class _QuickTipsFlashcardsState extends State<QuickTipsFlashcards>
     );
   }
 
+  Widget _buildErrorState() {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Container(
+            width: 100,
+            height: 100,
+            decoration: BoxDecoration(
+              color: const Color(0xFFFFF5F5),
+              shape: BoxShape.circle,
+              border: Border.all(
+                color: const Color(0xFFFFE5E5),
+                width: 2,
+              ),
+            ),
+            child: const Icon(
+              Icons.error_outline,
+              size: 40,
+              color: Color(0xFFE74C3C),
+            ),
+          ),
+          const SizedBox(height: 24),
+          const Text(
+            'Oops! Something went wrong',
+            style: TextStyle(
+              fontSize: 20,
+              color: Color(0xFF2D3436),
+              fontWeight: FontWeight.w700,
+            ),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            _errorMessage ?? 'Failed to load content',
+            style: const TextStyle(
+              fontSize: 14,
+              color: Color(0xFF636E72),
+            ),
+            textAlign: TextAlign.center,
+          ),
+          const SizedBox(height: 24),
+          ElevatedButton(
+            onPressed: _refreshData,
+            style: ElevatedButton.styleFrom(
+              backgroundColor: const Color(0xFF6C5CE7),
+              foregroundColor: Colors.white,
+              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(25),
+              ),
+            ),
+            child: const Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(Icons.refresh, size: 18),
+                SizedBox(width: 8),
+                Text('Try Again'),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   Widget _buildCardView() {
     if (_tips.isEmpty) {
       return _buildEmptyState();
     }
 
-    return Column(
-      children: [
-        Expanded(
-          child: PageView.builder(
-            controller: _pageController,
-            onPageChanged: (index) {
-              setState(() {
-                _currentIndex = index;
-                _showContent = false;
-              });
-              _progressController.forward();
-            },
-            itemCount: _tips.length,
-            itemBuilder: (context, index) {
-              return _buildFlashcard(_tips[index], index);
-            },
+    return RefreshIndicator(
+      onRefresh: _refreshData,
+      color: const Color(0xFF6C5CE7),
+      child: Column(
+        children: [
+          Expanded(
+            child: PageView.builder(
+              controller: _pageController,
+              onPageChanged: (index) {
+                setState(() {
+                  _currentIndex = index;
+                  _showContent = false;
+                });
+                _progressController.forward();
+              },
+              itemCount: _tips.length,
+              itemBuilder: (context, index) {
+                return _buildFlashcard(_tips[index], index);
+              },
+            ),
           ),
-        ),
-        _buildBottomNavigation(),
-      ],
+          _buildBottomNavigation(),
+        ],
+      ),
     );
   }
 
@@ -711,6 +860,26 @@ class _QuickTipsFlashcardsState extends State<QuickTipsFlashcards>
             style: TextStyle(
               fontSize: 14,
               color: Color(0xFF636E72),
+            ),
+          ),
+          const SizedBox(height: 24),
+          ElevatedButton(
+            onPressed: _refreshData,
+            style: ElevatedButton.styleFrom(
+              backgroundColor: const Color(0xFF6C5CE7),
+              foregroundColor: Colors.white,
+              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(25),
+              ),
+            ),
+            child: const Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(Icons.refresh, size: 18),
+                SizedBox(width: 8),
+                Text('Refresh'),
+              ],
             ),
           ),
         ],
