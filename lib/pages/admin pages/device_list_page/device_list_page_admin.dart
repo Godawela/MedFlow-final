@@ -11,7 +11,7 @@ import 'package:med/pages/admin%20pages/device_list_page/widgets/catagory_header
 import 'package:med/pages/admin%20pages/device_list_page/widgets/device_section.dart';
 import 'package:med/pages/admin%20pages/device_list_page/widgets/error_widget.dart';
 import 'package:med/pages/admin%20pages/device_list_page/widgets/loading_widget.dart';
-import 'package:med/pages/admin%20pages/machine_details_admin.dart';
+import 'package:med/pages/admin%20pages/machine_details/machine_details_admin.dart';
 import 'package:med/routes/router.dart';
 import 'package:med/widgets/appbar.dart';
 import 'dart:io';

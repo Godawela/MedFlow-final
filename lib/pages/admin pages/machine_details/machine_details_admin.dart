@@ -1,4 +1,4 @@
-//individual device information page
+//individual device information page with update functionality
 
 // ignore_for_file: library_private_types_in_public_api, use_build_context_synchronously
 
@@ -6,6 +6,8 @@ import 'dart:async';
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:med/pages/admin%20pages/machine_details/delete_device_popup.dart';
+import 'package:med/pages/admin%20pages/machine_details/update_device_popup.dart';
 import 'package:med/widgets/appbar.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:http/http.dart' as http;
@@ -49,7 +51,6 @@ class _MachineDetailPageAdminState extends State<MachineDetailPageAdmin>
   void dispose() {
     _animationController.dispose();
     _refreshTimer?.cancel();
-
     super.dispose();
   }
 
@@ -98,6 +99,41 @@ class _MachineDetailPageAdminState extends State<MachineDetailPageAdmin>
         SnackBar(content: Text('Could not launch $url')),
       );
     }
+  }
+
+  void _showUpdateDevicePopup() {
+    if (machineDetails == null) return;
+
+    // Call the static method of UpdateDevicePopup
+    UpdateDevicePopup.show(
+      context: context,
+      deviceData: machineDetails!,
+      onUpdateSuccess: () {
+        // Refresh the data after successful update
+        setState(() {
+          isLoading = true;
+        });
+        fetchMachineDetails();
+      },
+    );
+  }
+
+  void _showDeleteDevicePopup() {
+    if (machineDetails == null) return;
+
+    // Call the static method of UpdateDevicePopup
+    DeleteDevicePopup.show(
+      context: context,
+      deviceData: machineDetails!,
+      onDeleteSuccess: () {
+        // Refresh the data after successful delete
+        setState(() {
+          isLoading = true;
+        });
+        fetchMachineDetails();
+        Navigator.of(context).pop();
+      },
+    );
   }
 
   Widget _buildDetailCard(String title, String content, IconData icon) {
@@ -321,6 +357,60 @@ class _MachineDetailPageAdminState extends State<MachineDetailPageAdmin>
                                           ),
                                           textAlign: TextAlign.center,
                                         ),
+                                        const SizedBox(height: 16),
+                                        // Edit and Delete Device Buttons
+                                        Row(
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.center,
+                                          children: [
+                                            ElevatedButton.icon(
+                                              onPressed: _showUpdateDevicePopup,
+                                              icon: const Icon(
+                                                  Icons.edit_rounded,
+                                                  size: 18),
+                                              label: const Text('Edit Device'),
+                                              style: ElevatedButton.styleFrom(
+                                                backgroundColor: Colors.white,
+                                                foregroundColor:
+                                                    Colors.deepPurple.shade700,
+                                                padding:
+                                                    const EdgeInsets.symmetric(
+                                                  horizontal: 20,
+                                                  vertical: 12,
+                                                ),
+                                                shape: RoundedRectangleBorder(
+                                                  borderRadius:
+                                                      BorderRadius.circular(12),
+                                                ),
+                                                elevation: 2,
+                                              ),
+                                            ),
+                                            const SizedBox(width: 12),
+                                            ElevatedButton.icon(
+                                              onPressed: _showDeleteDevicePopup,
+                                              icon: const Icon(
+                                                  Icons.delete_rounded,
+                                                  size: 18),
+                                              label:
+                                                  const Text('Delete Device'),
+                                              style: ElevatedButton.styleFrom(
+                                                backgroundColor:
+                                                    Colors.red.shade700,
+                                                foregroundColor: Colors.white,
+                                                padding:
+                                                    const EdgeInsets.symmetric(
+                                                  horizontal: 20,
+                                                  vertical: 12,
+                                                ),
+                                                shape: RoundedRectangleBorder(
+                                                  borderRadius:
+                                                      BorderRadius.circular(12),
+                                                ),
+                                                elevation: 2,
+                                              ),
+                                            ),
+                                          ],
+                                        ),
                                       ],
                                     ),
                                   ),
@@ -328,6 +418,13 @@ class _MachineDetailPageAdminState extends State<MachineDetailPageAdmin>
                                   const SizedBox(height: 24),
 
                                   // Device details
+                                  if (machineDetails!['reference'] != null)
+                                    _buildDetailCard(
+                                      'Device Ref No',
+                                      machineDetails!['reference'],
+                                      Icons.badge_rounded,
+                                    ),
+
                                   if (machineDetails!['category'] != null)
                                     _buildDetailCard(
                                       'Category',
@@ -340,13 +437,6 @@ class _MachineDetailPageAdminState extends State<MachineDetailPageAdmin>
                                       'Description',
                                       machineDetails!['description'],
                                       Icons.description_rounded,
-                                    ),
-
-                                  if (machineDetails!['reference'] != null)
-                                    _buildDetailCard(
-                                      'Reference',
-                                      machineDetails!['reference'],
-                                      Icons.badge_rounded,
                                     ),
 
                                   if (machineDetails!['linkOfResource'] !=

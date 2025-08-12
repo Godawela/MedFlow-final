@@ -1,3 +1,4 @@
 {
-    "cmake.sourceDirectory": "D:/project/med/MedFlow-final/linux"
+    "cmake.sourceDirectory": "D:/project/med/MedFlow-final/linux",
+    "java.configuration.updateBuildConfiguration": "interactive"
 }
