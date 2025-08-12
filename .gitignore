@@ -44,4 +44,4 @@ app.*.map.json
 
 
 # API Keys and sensitive files
-lib/services/ollma_service.dart
+lib/config/api_keys.dart
