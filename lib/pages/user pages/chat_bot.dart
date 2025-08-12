@@ -345,7 +345,7 @@ class _ChatBotPageState extends State<ChatBotPage> with TickerProviderStateMixin
         children: [
           // Header
           CurvedAppBar(
-            title: 'Medical Assistant',
+            title: 'Medical Assistence',
             subtitle: isInitialized ? 'Ready to help' : 'Connecting...',
             isProfileAvailable: false,
             showIcon: true,

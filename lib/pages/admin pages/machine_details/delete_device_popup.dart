@@ -84,10 +84,10 @@ class _DeleteDevicePopupState extends State<DeleteDevicePopup>
         widget.onDeleteSuccess();
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Row(
+            content: const Row(
               children: [
                 Icon(Icons.check_circle, color: Colors.white),
-                const SizedBox(width: 8),
+                SizedBox(width: 8),
                 Text('Device deleted successfully!'),
               ],
             ),
@@ -105,7 +105,7 @@ class _DeleteDevicePopupState extends State<DeleteDevicePopup>
         SnackBar(
           content: Row(
             children: [
-              Icon(Icons.error, color: Colors.white),
+              const Icon(Icons.error, color: Colors.white),
               const SizedBox(width: 8),
               Expanded(child: Text('Error: ${e.toString()}')),
             ],
