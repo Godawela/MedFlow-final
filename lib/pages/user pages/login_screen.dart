@@ -138,7 +138,7 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
         _showSnackBar('Google Sign-In successful!', Colors.green.shade600);
         
         if (mounted) {
-          AutoRouter.of(context).push(const HomeRoute());
+          AutoRouter.of(context).push(const BottomNavigationRoute());
         }
       }
     } catch (e) {
