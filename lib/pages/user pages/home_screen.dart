@@ -89,7 +89,7 @@ class HomeScreen extends StatelessWidget {
                       
                       const SizedBox(height: 24),
                       
-                      // Smaller Get Started Container
+                      // Get Started Container
                       Container(
                         width: double.infinity,
                         padding: const EdgeInsets.all(16),

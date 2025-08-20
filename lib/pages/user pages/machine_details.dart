@@ -321,6 +321,13 @@ class _MachineDetailPageState extends State<MachineDetailPage> with TickerProvid
                                   ),
                                   
                                   const SizedBox(height: 24),
+
+                                   if (machineDetails!['reference'] != null)
+                                    _buildDetailCard(
+                                      'Device Ref No',
+                                      machineDetails!['reference'],
+                                      Icons.badge_rounded,
+                                    ),
                                   
                                   // Device details
                                   if (machineDetails!['category'] != null)
@@ -337,12 +344,7 @@ class _MachineDetailPageState extends State<MachineDetailPage> with TickerProvid
                                       Icons.description_rounded,
                                     ),
                                   
-                                  if (machineDetails!['reference'] != null)
-                                    _buildDetailCard(
-                                      'Reference',
-                                      machineDetails!['reference'],
-                                      Icons.badge_rounded,
-                                    ),
+                                 
                                   
                                   if (machineDetails!['linkOfResource'] != null) ...[
                                     const SizedBox(height: 16),

@@ -19,7 +19,8 @@ class _AddDevicePageState extends State<AddDevicePage> {
   final TextEditingController _nameController = TextEditingController();
   final TextEditingController _descriptionController = TextEditingController();
   final TextEditingController _referenceController = TextEditingController();
-  final TextEditingController _linkOfResourceController = TextEditingController();
+  final TextEditingController _linkOfResourceController =
+      TextEditingController();
 
   bool isLoading = false;
   String? errorMessage;
@@ -35,7 +36,8 @@ class _AddDevicePageState extends State<AddDevicePage> {
 
   Future<void> _fetchCategories() async {
     try {
-      final response = await http.get(Uri.parse('https://medflow-phi.vercel.app/api/category'));
+      final response = await http
+          .get(Uri.parse('https://medflow-phi.vercel.app/api/category'));
 
       if (response.statusCode == 200) {
         final List<dynamic> data = jsonDecode(response.body);
@@ -97,7 +99,8 @@ class _AddDevicePageState extends State<AddDevicePage> {
         Navigator.pop(context, true);
       } else {
         setState(() {
-          errorMessage = 'Failed to add device. Status code: ${response.statusCode}';
+          errorMessage =
+              'Failed to add device. Status code: ${response.statusCode}';
         });
       }
     } catch (e) {
@@ -176,24 +179,25 @@ class _AddDevicePageState extends State<AddDevicePage> {
                 decoration: BoxDecoration(
                   gradient: LinearGradient(
                     colors: [
-              Colors.deepPurple.shade400,
-                                            Colors.deepPurple.shade600,
+                      Colors.deepPurple.shade400,
+                      Colors.deepPurple.shade600,
                     ],
                     begin: Alignment.topLeft,
                     end: Alignment.bottomRight,
                   ),
                   borderRadius: BorderRadius.circular(16),
-                  border: Border.all(color: Theme.of(context).primaryColor.withOpacity(0.2)),
+                  border: Border.all(
+                      color: Theme.of(context).primaryColor.withOpacity(0.2)),
                 ),
-                child:const Column(
+                child: const Column(
                   children: [
                     Icon(
                       Icons.add_circle_outline,
                       size: 48,
                       color: Colors.white,
                     ),
-                     SizedBox(height: 12),
-                   Text(
+                    SizedBox(height: 12),
+                    Text(
                       'Create New Device',
                       style: TextStyle(
                         fontSize: 24,
@@ -201,7 +205,7 @@ class _AddDevicePageState extends State<AddDevicePage> {
                         color: Colors.white,
                       ),
                     ),
-                     SizedBox(height: 8),
+                    SizedBox(height: 8),
                     Text(
                       'Fill in the details below to add a new device to your inventory',
                       textAlign: TextAlign.center,
@@ -244,18 +248,32 @@ class _AddDevicePageState extends State<AddDevicePage> {
                       ),
                       const SizedBox(height: 24),
 
+                      // Reference Field
+                      TextFormField(
+                        controller: _referenceController,
+                        decoration:
+                            _buildInputDecoration('Device Ref No', Icons.tag),
+                        validator: (value) =>
+                            value!.isEmpty ? 'Please enter a reference' : null,
+                      ),
+                      const SizedBox(height: 20),
+
                       // Device Name Field
                       TextFormField(
                         controller: _nameController,
-                        decoration: _buildInputDecoration('Device Name', Icons.devices),
-                        validator: (value) => value!.isEmpty ? 'Please enter a device name' : null,
+                        decoration:
+                            _buildInputDecoration('Device Name', Icons.devices),
+                        validator: (value) => value!.isEmpty
+                            ? 'Please enter a device name'
+                            : null,
                       ),
                       const SizedBox(height: 20),
 
                       // Category Dropdown
                       DropdownButtonFormField<String>(
                         value: _selectedCategory,
-                        decoration: _buildInputDecoration('Category', Icons.category),
+                        decoration:
+                            _buildInputDecoration('Category', Icons.category),
                         items: _categories.map((category) {
                           return DropdownMenuItem<String>(
                             value: category['name'],
@@ -267,7 +285,8 @@ class _AddDevicePageState extends State<AddDevicePage> {
                             _selectedCategory = value;
                           });
                         },
-                        validator: (value) => value == null ? 'Please select a category' : null,
+                        validator: (value) =>
+                            value == null ? 'Please select a category' : null,
                         icon: const Icon(Icons.keyboard_arrow_down),
                         dropdownColor: Colors.white,
                       ),
@@ -276,25 +295,23 @@ class _AddDevicePageState extends State<AddDevicePage> {
                       // Description Field
                       TextFormField(
                         controller: _descriptionController,
-                        decoration: _buildInputDecoration('Description', Icons.description),
+                        decoration: _buildInputDecoration(
+                            'Description', Icons.description),
                         maxLines: 3,
-                        validator: (value) => value!.isEmpty ? 'Please enter a description' : null,
-                      ),
-                      const SizedBox(height: 20),
-
-                      // Reference Field
-                      TextFormField(
-                        controller: _referenceController,
-                        decoration: _buildInputDecoration('Reference', Icons.tag),
-                        validator: (value) => value!.isEmpty ? 'Please enter a reference' : null,
+                        validator: (value) => value!.isEmpty
+                            ? 'Please enter a description'
+                            : null,
                       ),
                       const SizedBox(height: 20),
 
                       // Link Field
                       TextFormField(
                         controller: _linkOfResourceController,
-                        decoration: _buildInputDecoration('Resource Link', Icons.link),
-                        validator: (value) => value!.isEmpty ? 'Please enter a resource link' : null,
+                        decoration:
+                            _buildInputDecoration('Resource Link', Icons.link),
+                        validator: (value) => value!.isEmpty
+                            ? 'Please enter a resource link'
+                            : null,
                       ),
                     ],
                   ),
@@ -343,18 +360,20 @@ class _AddDevicePageState extends State<AddDevicePage> {
                       borderRadius: BorderRadius.circular(12),
                     ),
                     elevation: 2,
-                    shadowColor: Theme.of(context).primaryColor.withOpacity(0.3),
+                    shadowColor:
+                        Theme.of(context).primaryColor.withOpacity(0.3),
                   ),
                   child: isLoading
                       ? const Row(
                           mainAxisAlignment: MainAxisAlignment.center,
-                          children:  [
+                          children: [
                             SizedBox(
                               width: 20,
                               height: 20,
                               child: CircularProgressIndicator(
                                 strokeWidth: 2,
-                                valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                                valueColor:
+                                    AlwaysStoppedAnimation<Color>(Colors.white),
                               ),
                             ),
                             SizedBox(width: 12),

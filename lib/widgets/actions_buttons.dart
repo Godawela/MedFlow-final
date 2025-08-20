@@ -47,7 +47,7 @@ class ActionButtons extends StatelessWidget {
         buildActionButton('Machines', () async {
           final role = await fetchUserRole(); 
 
-          if (role == 'admin') {
+          if (role == 'Admin') {
             Navigator.push(
               context,
               MaterialPageRoute(builder: (context) => const MachinePageAdmin()),
@@ -63,7 +63,7 @@ class ActionButtons extends StatelessWidget {
            buildActionButton('Symptom', () async {
           final role = await fetchUserRole(); 
 
-          if (role == 'admin') {
+          if (role == 'Admin') {
             Navigator.push(
               context,
               MaterialPageRoute(builder: (context) => const SymptomPageAdmin()),
