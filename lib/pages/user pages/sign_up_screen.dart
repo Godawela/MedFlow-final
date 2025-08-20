@@ -96,7 +96,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                 const SizedBox(height: 32),
                 const AuthForm(),
                 const SizedBox(height: 24),
-                _buildDividerWithText('Or continue with'),
+                _buildDividerWithText('or continue with'),
                 const SizedBox(height: 16),
                 _buildSocialButtons(),
                 const SizedBox(height: 24),

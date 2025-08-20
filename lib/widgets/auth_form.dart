@@ -6,6 +6,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:med/routes/router.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 class AuthForm extends StatefulWidget {
   const AuthForm({super.key});
@@ -39,8 +40,9 @@ class _AuthFormState extends State<AuthForm> {
       // Send additional user data (name + role) to MongoDB
       await sendToMongoDB(userCredential.user!.uid, email, name, role);
 
-      // Navigate to bottom nav bar if sign-up is successful
-      AutoRouter.of(context).push(const BottomNavigationRoute());
+      // Show success message instead of navigating directly
+      _showSuccessDialog();
+      
     } catch (e) {
       debugPrint('Error during sign-up: $e');
       showErrorSnackBar('Error during sign-up: $e');
@@ -53,7 +55,7 @@ class _AuthFormState extends State<AuthForm> {
 
   // Function to send data to your MongoDB backend API
   Future<void> sendToMongoDB(String uid, String email, String name, String role) async {
-    final url = Uri.parse('https://medflow-phi.vercel.app/api/users'); // Change this to your backend endpoint
+    final url = Uri.parse('https://medflow-phi.vercel.app/api/users');
 
     try {
       final response = await http.post(
@@ -79,12 +81,71 @@ class _AuthFormState extends State<AuthForm> {
     }
   }
 
+  // Show success dialog after registration
+  void _showSuccessDialog() {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+          ),
+          title: Row(
+            children: [
+              Icon(
+                Icons.check_circle,
+                color: Colors.green.shade600,
+                size: 28,
+              ),
+              const SizedBox(width: 12),
+              Text(
+                'Registration Successful!',
+                style: GoogleFonts.inter(
+                  fontWeight: FontWeight.bold,
+                  fontSize: 18,
+                ),
+              ),
+            ],
+          ),
+          content: Text(
+            'Your account has been created successfully. Please wait for admin approval before you can log in. You will receive an email confirmation once approved.',
+            style: GoogleFonts.inter(
+              fontSize: 14,
+              height: 1.5,
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+                // Navigate to login screen
+                AutoRouter.of(context).replace(const LoginRoute());
+              },
+              child: Text(
+                'Go to Login',
+                style: GoogleFonts.inter(
+                  fontWeight: FontWeight.w600,
+                  color: Colors.deepPurple.shade600,
+                ),
+              ),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
   // Function to show error messages in a SnackBar
   void showErrorSnackBar(String message) {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text(message),
         backgroundColor: Colors.red,
+        behavior: SnackBarBehavior.floating,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(10),
+        ),
       ),
     );
   }
@@ -180,7 +241,7 @@ class _AuthFormState extends State<AuthForm> {
       onPressed: isLoading ? null : _handleSignUp,
       style: ElevatedButton.styleFrom(
         backgroundColor: theme.primaryColor,
-        foregroundColor: Colors.white, // Add this line for text color
+        foregroundColor: Colors.white,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(12),
         ),
@@ -193,7 +254,7 @@ class _AuthFormState extends State<AuthForm> {
               style: TextStyle(
                 fontSize: 16,
                 fontWeight: FontWeight.w600,
-                color: Colors.white, // Explicit white color as fallback
+                color: Colors.white,
               ),
             ),
     ),

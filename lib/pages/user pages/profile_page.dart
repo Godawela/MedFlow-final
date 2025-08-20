@@ -3,6 +3,7 @@
 import 'package:auto_route/auto_route.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:google_sign_in/google_sign_in.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 
@@ -207,6 +208,7 @@ class _ProfilePageState extends State<ProfilePage> {
                           onPressed: () async {
                             Navigator.of(context).pop();
                             await FirebaseAuth.instance.signOut();
+                            await GoogleSignIn().signOut();
                             context.router.navigate(const LoginRoute());
                           },
                           style: ElevatedButton.styleFrom(

@@ -1,9 +1,12 @@
+import 'dart:convert';
+
 import 'package:auto_route/auto_route.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/gestures.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:http/http.dart' as http;
 import 'package:med/routes/router.dart';
 import 'package:med/widgets/social_login_button.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -68,6 +71,55 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
     }
   }
 
+  Future<bool> checkUserVerified(String uid) async {
+    try {
+      final url = Uri.parse('https://medflow-phi.vercel.app/api/users/$uid');
+      final response = await http.get(url);
+
+      if (response.statusCode == 200) {
+        final data = json.decode(response.body);
+        return data['verified'] == true;
+      }
+      return false;
+    } catch (e) {
+      debugPrint('Error checking verification status: $e');
+      return false;
+    }
+  }
+
+  Future<bool> checkUserExists(String uid) async {
+    try {
+      final url = Uri.parse('https://medflow-phi.vercel.app/api/users/$uid');
+      final response = await http.get(url);
+      return response.statusCode == 200;
+    } catch (e) {
+      debugPrint('Error checking if user exists: $e');
+      return false;
+    }
+  }
+
+  Future<void> createUserInBackend(User user) async {
+    try {
+      final url = Uri.parse('https://medflow-phi.vercel.app/api/users');
+      final response = await http.post(
+        url,
+        headers: {'Content-Type': 'application/json'},
+        body: json.encode({
+          'uid': user.uid,
+          'email': user.email,
+          'name': user.displayName ?? 'Google User',
+          'role': 'student',
+        }),
+      );
+
+      if (response.statusCode != 200) {
+        debugPrint('Error creating user in backend: ${response.body}');
+      }
+    } catch (e) {
+      debugPrint('Error creating user in backend: $e');
+    }
+  }
+
   Future<void> handleAuth() async {
     if (_emailController.text.isEmpty || _passwordController.text.isEmpty) {
       _showSnackBar('Please fill in all fields', Colors.red.shade400);
@@ -88,12 +140,23 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
         String? token = await userCredential.user!.getIdToken();
         String uid = userCredential.user!.uid;
 
+        // Check verification status from backend before allowing login
+        bool isVerified = await checkUserVerified(uid);
+        if (!isVerified) {
+          _showSnackBar(
+            'Your account is not verified by admin yet. Please wait for approval.',
+            Colors.red.shade400,
+          );
+          return; // stop login flow
+        }
+
+        // If verified --> proceed with login
         SharedPreferences prefs = await SharedPreferences.getInstance();
         await prefs.setString('authToken', token ?? '');
         await prefs.setString('uid', uid);
 
         _showSnackBar('Sign-in successful!', Colors.green.shade600);
-        
+
         if (mounted) {
           AutoRouter.of(context).push(const BottomNavigationRoute());
         }
@@ -130,6 +193,29 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
       if (userCredential.user != null && mounted) {
         String? token = await userCredential.user!.getIdToken();
         String uid = userCredential.user!.uid;
+
+        // Check if user exists in backend
+        bool userExists = await checkUserExists(uid);
+        
+        if (!userExists) {
+          // Create user in backend first
+          await createUserInBackend(userCredential.user!);
+          _showSnackBar(
+            'Account created! Please wait for admin approval before you can log in.',
+            Colors.orange.shade600,
+          );
+          return;
+        }
+
+        // Check verification status
+        bool isVerified = await checkUserVerified(uid);
+        if (!isVerified) {
+          _showSnackBar(
+            'Your account is not verified by admin yet. Please wait for approval.',
+            Colors.red.shade400,
+          );
+          return;
+        }
 
         SharedPreferences prefs = await SharedPreferences.getInstance();
         await prefs.setString('authToken', token ?? '');
@@ -353,7 +439,7 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
                         Padding(
                           padding: const EdgeInsets.symmetric(horizontal: 16),
                           child: Text(
-                            'Or continue with',
+                            'or continue with',
                             style: GoogleFonts.inter(
                               color: Colors.grey.shade500,
                               fontSize: 14,
