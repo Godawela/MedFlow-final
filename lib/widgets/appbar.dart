@@ -86,13 +86,18 @@ class CurvedAppBar extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     if (title != null)
-                      Text(
+                      SizedBox(
+                      width: MediaQuery.of(context).size.width * 0.5,
+                      child: Text(
                         title!,
                         style: const TextStyle(
-                          color: Colors.white,
-                          fontWeight: FontWeight.bold,
-                          fontSize: 16,
+                        color: Colors.white,
+                        fontWeight: FontWeight.bold,
+                        fontSize: 18,
                         ),
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                      ),
                       ),
                     if (subtitle != null)
                       Text(
