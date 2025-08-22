@@ -667,7 +667,7 @@ class _QuickTipsManagementPageState extends State<QuickTipsManagementPage>
                                   borderRadius: BorderRadius.circular(16),
                                   boxShadow: [
                                     BoxShadow(
-                                      color: Colors.deepPurple.withOpacity(0.3),
+                                      color: Colors.deepPurple.withValues(alpha:0.3),
                                       blurRadius: 12,
                                       offset: const Offset(0, 6),
                                     ),
@@ -681,7 +681,7 @@ class _QuickTipsManagementPageState extends State<QuickTipsManagementPage>
                                         Container(
                                           padding: const EdgeInsets.all(8),
                                           decoration: BoxDecoration(
-                                            color: Colors.white.withOpacity(0.2),
+                                            color: Colors.white.withValues(alpha:0.2),
                                             borderRadius: BorderRadius.circular(12),
                                           ),
                                           child: const Icon(
@@ -835,7 +835,7 @@ class _QuickTipsManagementPageState extends State<QuickTipsManagementPage>
                                                     borderRadius: BorderRadius.circular(16),
                                                     boxShadow: [
                                                       BoxShadow(
-                                                        color: Colors.black.withOpacity(0.05),
+                                                        color: Colors.black.withValues(alpha:0.05),
                                                         blurRadius: 8,
                                                         offset: const Offset(0, 2),
                                                       ),

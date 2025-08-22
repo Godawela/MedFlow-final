@@ -38,7 +38,7 @@ class CategoryHeaderCard extends StatelessWidget {
         borderRadius: BorderRadius.circular(20),
         boxShadow: [
           BoxShadow(
-            color: Colors.deepPurple.withOpacity(0.3),
+            color: Colors.deepPurple.withValues(alpha:0.3),
             blurRadius: 12,
             offset: const Offset(0, 6),
           ),
@@ -58,7 +58,7 @@ class CategoryHeaderCard extends StatelessWidget {
               categoryDescription!,
               style: GoogleFonts.inter(
                 fontSize: 16,
-                color: Colors.white.withOpacity(0.9),
+                color: Colors.white.withValues(alpha:0.9),
                 height: 1.5,
               ),
             ),

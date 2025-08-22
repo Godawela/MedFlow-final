@@ -187,7 +187,7 @@ class _AddDevicePageState extends State<AddDevicePage> {
                   ),
                   borderRadius: BorderRadius.circular(16),
                   border: Border.all(
-                      color: Theme.of(context).primaryColor.withOpacity(0.2)),
+                      color: Theme.of(context).primaryColor.withValues(alpha:0.2)),
                 ),
                 child: const Column(
                   children: [
@@ -227,7 +227,7 @@ class _AddDevicePageState extends State<AddDevicePage> {
                   borderRadius: BorderRadius.circular(16),
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.black.withOpacity(0.05),
+                      color: Colors.black.withValues(alpha:0.05),
                       blurRadius: 10,
                       offset: const Offset(0, 2),
                     ),
@@ -361,7 +361,7 @@ class _AddDevicePageState extends State<AddDevicePage> {
                     ),
                     elevation: 2,
                     shadowColor:
-                        Theme.of(context).primaryColor.withOpacity(0.3),
+                        Theme.of(context).primaryColor.withValues(alpha:0.3),
                   ),
                   child: isLoading
                       ? const Row(

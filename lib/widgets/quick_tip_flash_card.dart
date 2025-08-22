@@ -223,7 +223,7 @@ class _QuickTipsFlashcardsState extends State<QuickTipsFlashcards>
                 borderRadius: BorderRadius.circular(12),
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.black.withOpacity(0.05),
+                    color: Colors.black.withValues(alpha:0.05),
                     blurRadius: 10,
                     offset: const Offset(0, 2),
                   ),
@@ -271,7 +271,7 @@ class _QuickTipsFlashcardsState extends State<QuickTipsFlashcards>
                 borderRadius: BorderRadius.circular(12),
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.black.withOpacity(0.05),
+                    color: Colors.black.withValues(alpha:0.05),
                     blurRadius: 10,
                     offset: const Offset(0, 2),
                   ),
@@ -358,7 +358,7 @@ class _QuickTipsFlashcardsState extends State<QuickTipsFlashcards>
               shape: BoxShape.circle,
               boxShadow: [
                 BoxShadow(
-                  color: Colors.black.withOpacity(0.1),
+                  color: Colors.black.withValues(alpha:0.1),
                   blurRadius: 20,
                   offset: const Offset(0, 10),
                 ),
@@ -502,12 +502,12 @@ class _QuickTipsFlashcardsState extends State<QuickTipsFlashcards>
                       borderRadius: BorderRadius.circular(24),
                       boxShadow: [
                         BoxShadow(
-                          color: colors[0].withOpacity(0.3),
+                          color: colors[0].withValues(alpha:0.3),
                           blurRadius: 30,
                           offset: const Offset(0, 15),
                         ),
                         BoxShadow(
-                          color: Colors.black.withOpacity(0.1),
+                          color: Colors.black.withValues(alpha:0.1),
                           blurRadius: 10,
                           offset: const Offset(0, 5),
                         ),
@@ -550,11 +550,11 @@ class _QuickTipsFlashcardsState extends State<QuickTipsFlashcards>
             width: 80,
             height: 80,
             decoration: BoxDecoration(
-              color: Colors.white.withOpacity(0.2),
+              color: Colors.white.withValues(alpha:0.2),
               shape: BoxShape.circle,
               boxShadow: [
                 BoxShadow(
-                  color: Colors.black.withOpacity(0.1),
+                  color: Colors.black.withValues(alpha:0.1),
                   blurRadius: 20,
                   offset: const Offset(0, 10),
                 ),
@@ -583,7 +583,7 @@ class _QuickTipsFlashcardsState extends State<QuickTipsFlashcards>
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
             decoration: BoxDecoration(
-              color: Colors.white.withOpacity(0.2),
+              color: Colors.white.withValues(alpha:0.2),
               borderRadius: BorderRadius.circular(20),
             ),
             child: Row(
@@ -615,10 +615,10 @@ class _QuickTipsFlashcardsState extends State<QuickTipsFlashcards>
               return Container(
                 padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
                 decoration: BoxDecoration(
-                  color: Colors.white.withOpacity(0.2),
+                  color: Colors.white.withValues(alpha:0.2),
                   borderRadius: BorderRadius.circular(25),
                   border: Border.all(
-                    color: Colors.white.withOpacity(0.3),
+                    color: Colors.white.withValues(alpha:0.3),
                     width: 1,
                   ),
                 ),
@@ -793,7 +793,7 @@ class _QuickTipsFlashcardsState extends State<QuickTipsFlashcards>
           boxShadow: isEnabled
               ? [
                   BoxShadow(
-                    color: Colors.black.withOpacity(0.05),
+                    color: Colors.black.withValues(alpha:0.05),
                     blurRadius: 10,
                     offset: const Offset(0, 2),
                   ),

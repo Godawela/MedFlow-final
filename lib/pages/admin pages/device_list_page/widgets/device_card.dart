@@ -35,7 +35,7 @@ class DeviceCard extends StatelessWidget {
               borderRadius: BorderRadius.circular(20),
               boxShadow: [
                 BoxShadow(
-                  color: colors[0].withOpacity(0.3),
+                  color: colors[0].withValues(alpha:0.3),
                   blurRadius: 8,
                   offset: const Offset(0, 4),
                 ),
@@ -53,7 +53,7 @@ class DeviceCard extends StatelessWidget {
                       Container(
                         padding: const EdgeInsets.all(12),
                         decoration: BoxDecoration(
-                          color: Colors.white.withOpacity(0.2),
+                          color: Colors.white.withValues(alpha:0.2),
                           borderRadius: BorderRadius.circular(12),
                         ),
                         child: Icon(
@@ -81,7 +81,7 @@ class DeviceCard extends StatelessWidget {
                                 device['reference'],
                                 style: GoogleFonts.inter(
                                   fontSize: 14,
-                                  color: Colors.white.withOpacity(0.9),
+                                  color: Colors.white.withValues(alpha:0.9),
                                 ),
                               ),
                           ],

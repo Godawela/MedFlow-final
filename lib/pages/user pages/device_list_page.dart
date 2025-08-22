@@ -200,7 +200,7 @@ class _DeviceListPageState extends State<DeviceListPage>
                             shape: BoxShape.circle,
                             boxShadow: [
                               BoxShadow(
-                                color: Colors.black.withOpacity(0.1),
+                                color: Colors.black.withValues(alpha:0.1),
                                 blurRadius: 20,
                                 offset: const Offset(0, 10),
                               )
@@ -312,7 +312,7 @@ class _DeviceListPageState extends State<DeviceListPage>
                                       boxShadow: [
                                         BoxShadow(
                                           color: Colors.deepPurple
-                                              .withOpacity(0.3),
+                                              .withValues(alpha:0.3),
                                           blurRadius: 12,
                                           offset: const Offset(0, 6),
                                         ),
@@ -329,7 +329,7 @@ class _DeviceListPageState extends State<DeviceListPage>
                                               height: 100,
                                               decoration: BoxDecoration(
                                                 color: Colors.white
-                                                    .withOpacity(0.2),
+                                                    .withValues(alpha:0.2),
                                                 borderRadius:
                                                     BorderRadius.circular(12),
                                               ),
@@ -424,7 +424,7 @@ class _DeviceListPageState extends State<DeviceListPage>
                                             style: GoogleFonts.inter(
                                               fontSize: 16,
                                               color:
-                                                  Colors.white.withOpacity(0.9),
+                                                  Colors.white.withValues(alpha:0.9),
                                               height: 1.5,
                                             ),
                                           ),
@@ -536,7 +536,7 @@ class _DeviceListPageState extends State<DeviceListPage>
                                                         boxShadow: [
                                                           BoxShadow(
                                                             color: colors[0]
-                                                                .withOpacity(
+                                                                .withValues(alpha:
                                                                     0.3),
                                                             blurRadius: 8,
                                                             offset:
@@ -581,7 +581,7 @@ class _DeviceListPageState extends State<DeviceListPage>
                                                                       BoxDecoration(
                                                                     color: Colors
                                                                         .white
-                                                                        .withOpacity(
+                                                                        .withValues(alpha:
                                                                             0.2),
                                                                     borderRadius:
                                                                         BorderRadius.circular(
@@ -628,7 +628,7 @@ class _DeviceListPageState extends State<DeviceListPage>
                                                                             fontSize:
                                                                                 14,
                                                                             color:
-                                                                                Colors.white.withOpacity(0.9),
+                                                                                Colors.white.withValues(alpha:0.9),
                                                                           ),
                                                                         ),
                                                                     ],

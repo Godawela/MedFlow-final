@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'dart:io';
+import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 
 class CategoryService {
@@ -122,17 +123,17 @@ class CategoryService {
   }
 
 static String? getImageUrl(String? imagePath) {
-  print('=== getImageUrl DEBUG ===');
-  print('Input imagePath: $imagePath');
+  debugPrint('=== getImageUrl DEBUG ===');
+  debugPrint('Input imagePath: $imagePath');
   
   if (imagePath == null || imagePath.isEmpty) {
-    print('Image path is null or empty');
+    debugPrint('Image path is null or empty');
     return null;
   }
   
   // Check if it's already a full URL (like Cloudinary URLs)
   if (imagePath.startsWith('http://') || imagePath.startsWith('https://')) {
-    print('Image path is already a full URL, returning as-is: $imagePath');
+    debugPrint('Image path is already a full URL, returning as-is: $imagePath');
     return imagePath; // Return as-is since it's already a complete URL
   }
   
@@ -143,7 +144,7 @@ static String? getImageUrl(String? imagePath) {
   }
   
   String constructedUrl = '$baseUrl/upload/$cleanImagePath';
-  print('Constructed URL for relative path: $constructedUrl');
+  debugPrint('Constructed URL for relative path: $constructedUrl');
   return constructedUrl;
 }
 
@@ -152,16 +153,16 @@ static String? getImageUrl(String? imagePath) {
 // Additional debugging helper class
 class ImageUrlDebugger {
   static void debugImageUrl(String? imagePath) {
-    print('=== IMAGE URL DEBUG ===');
-    print('Original path: $imagePath');
-    print('Is null or empty: ${imagePath == null || imagePath.isEmpty}');
+    debugPrint('=== IMAGE URL DEBUG ===');
+    debugPrint('Original path: $imagePath');
+    debugPrint('Is null or empty: ${imagePath == null || imagePath.isEmpty}');
     
     if (imagePath != null && imagePath.isNotEmpty) {
-      print('Starts with http://: ${imagePath.startsWith('http://')}');
-      print('Starts with https://: ${imagePath.startsWith('https://')}');
-      print('Contains cloudinary: ${imagePath.contains('cloudinary.com')}');
-      print('Final URL: ${CategoryService.getImageUrl(imagePath)}');
+      debugPrint('Starts with http://: ${imagePath.startsWith('http://')}');
+      debugPrint('Starts with https://: ${imagePath.startsWith('https://')}');
+      debugPrint('Contains cloudinary: ${imagePath.contains('cloudinary.com')}');
+      debugPrint('Final URL: ${CategoryService.getImageUrl(imagePath)}');
     }
-    print('======================');
+    debugPrint('======================');
   }
 }

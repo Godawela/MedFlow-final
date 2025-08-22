@@ -9,7 +9,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:http/http.dart' as http;
 import 'package:med/pages/admin%20pages/device_list_page/device_list_page_admin.dart';
-import 'package:med/pages/admin%20pages/quickTipManagementPage.dart';
+import 'package:med/pages/admin%20pages/quick_tip_management_page.dart';
 import 'dart:convert';
 
 import 'package:med/routes/router.dart';
@@ -174,7 +174,7 @@ class _MachinePageAdminState extends State<MachinePageAdmin>
                             shape: BoxShape.circle,
                             boxShadow: [
                               BoxShadow(
-                                color: Colors.black.withOpacity(0.1),
+                                color: Colors.black.withValues(alpha:0.1),
                                 blurRadius: 20,
                                 offset: const Offset(0, 10),
                               ),
@@ -288,7 +288,7 @@ class _MachinePageAdminState extends State<MachinePageAdmin>
                                         boxShadow: [
                                           BoxShadow(
                                             color: Colors.deepPurple
-                                                .withOpacity(0.3),
+                                                .withValues(alpha:0.3),
                                             blurRadius: 12,
                                             offset: const Offset(0, 6),
                                           ),
@@ -300,7 +300,7 @@ class _MachinePageAdminState extends State<MachinePageAdmin>
                                             padding: const EdgeInsets.all(16),
                                             decoration: BoxDecoration(
                                               color:
-                                                  Colors.white.withOpacity(0.2),
+                                                  Colors.white.withValues(alpha:0.2),
                                               shape: BoxShape.circle,
                                             ),
                                             child: const CircleAvatar(
@@ -318,7 +318,7 @@ class _MachinePageAdminState extends State<MachinePageAdmin>
                                             style: GoogleFonts.inter(
                                               fontSize: 16,
                                               color:
-                                                  Colors.white.withOpacity(0.9),
+                                                  Colors.white.withValues(alpha:0.9),
                                               fontWeight: FontWeight.w500,
                                             ),
                                             textAlign: TextAlign.center,
@@ -444,7 +444,7 @@ class _MachinePageAdminState extends State<MachinePageAdmin>
                                                     boxShadow: [
                                                       BoxShadow(
                                                         color: colors[0]
-                                                            .withOpacity(0.3),
+                                                            .withValues(alpha:0.3),
                                                         blurRadius: 8,
                                                         offset:
                                                             const Offset(0, 4),
@@ -487,7 +487,7 @@ class _MachinePageAdminState extends State<MachinePageAdmin>
                                                                   BoxDecoration(
                                                                 color: Colors
                                                                     .white
-                                                                    .withOpacity(
+                                                                    .withValues(alpha:
                                                                         0.2),
                                                                 borderRadius:
                                                                     BorderRadius
@@ -545,7 +545,7 @@ class _MachinePageAdminState extends State<MachinePageAdmin>
                                                                   BoxDecoration(
                                                                 color: Colors
                                                                     .white
-                                                                    .withOpacity(
+                                                                    .withValues(alpha:
                                                                         0.2),
                                                                 borderRadius:
                                                                     BorderRadius
@@ -561,8 +561,8 @@ class _MachinePageAdminState extends State<MachinePageAdmin>
                                                                       11, // Reduced from 12
                                                                   color: Colors
                                                                       .white
-                                                                      .withOpacity(
-                                                                          0.9),
+                                                                      .withValues(
+                                                                          alpha: 0.9),
                                                                   fontWeight:
                                                                       FontWeight
                                                                           .w500,

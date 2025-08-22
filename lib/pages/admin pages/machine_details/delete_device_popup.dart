@@ -1,6 +1,8 @@
 // delete_device_popup.dart
 // Reusable confirmation popup for deleting devices
 
+// ignore_for_file: library_private_types_in_public_api
+
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -140,7 +142,7 @@ class _DeleteDevicePopupState extends State<DeleteDevicePopup>
                 borderRadius: BorderRadius.circular(20),
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.black.withOpacity(0.15),
+                    color: Colors.black.withValues(alpha:0.15),
                     blurRadius: 20,
                     offset: const Offset(0, 10),
                   ),

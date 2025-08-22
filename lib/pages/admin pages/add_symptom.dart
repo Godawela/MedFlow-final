@@ -151,7 +151,7 @@ class _AddSymptomPageState extends State<AddSymptomPage> {
                     end: Alignment.bottomRight,
                   ),
                   borderRadius: BorderRadius.circular(16),
-                  border: Border.all(color: Colors.purple.withOpacity(0.2)),
+                  border: Border.all(color: Colors.purple.withValues(alpha:0.2)),
                 ),
                 child:const Column(
                   children: [
@@ -191,7 +191,7 @@ class _AddSymptomPageState extends State<AddSymptomPage> {
                   borderRadius: BorderRadius.circular(16),
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.black.withOpacity(0.05),
+                      color: Colors.black.withValues(alpha:0.05),
                       blurRadius: 10,
                       offset: const Offset(0, 2),
                     ),
@@ -291,7 +291,7 @@ class _AddSymptomPageState extends State<AddSymptomPage> {
                       borderRadius: BorderRadius.circular(12),
                     ),
                     elevation: 2,
-                    shadowColor: Colors.purple.withOpacity(0.3),
+                    shadowColor: Colors.purple.withValues(alpha:0.3),
                   ),
                   child: isLoading
                       ? const Row(

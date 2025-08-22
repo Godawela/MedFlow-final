@@ -120,7 +120,7 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
                         ),
                         filled: true,
                         fillColor: isDarkMode
-                            ? Colors.grey.shade900.withOpacity(0.5)
+                            ? Colors.grey.shade900.withValues(alpha:0.5)
                             : Colors.grey.shade50,
                         contentPadding: const EdgeInsets.symmetric(
                           vertical: 16,

@@ -1,3 +1,5 @@
+// ignore_for_file: library_private_types_in_public_api
+
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
@@ -215,7 +217,7 @@ class _UpdateDevicePopupState extends State<UpdateDevicePopup>
                 borderRadius: BorderRadius.circular(20),
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.black.withOpacity(0.1),
+                    color: Colors.black.withValues(alpha:0.1),
                     blurRadius: 20,
                     offset: const Offset(0, 10),
                   ),
@@ -246,7 +248,7 @@ class _UpdateDevicePopupState extends State<UpdateDevicePopup>
                         Container(
                           padding: const EdgeInsets.all(8),
                           decoration: BoxDecoration(
-                            color: Colors.white.withOpacity(0.2),
+                            color: Colors.white.withValues(alpha:0.2),
                             borderRadius: BorderRadius.circular(10),
                           ),
                           child: const Icon(
@@ -271,7 +273,7 @@ class _UpdateDevicePopupState extends State<UpdateDevicePopup>
                           icon: const Icon(Icons.close_rounded,
                               color: Colors.white),
                           style: IconButton.styleFrom(
-                            backgroundColor: Colors.white.withOpacity(0.2),
+                            backgroundColor: Colors.white.withValues(alpha:0.2),
                           ),
                         ),
                       ],

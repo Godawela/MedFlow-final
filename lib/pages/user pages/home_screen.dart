@@ -51,7 +51,7 @@ class HomeScreen extends StatelessWidget {
                           ),
                           boxShadow: [
                             BoxShadow(
-                              color: const Color(0xFF4B00E0).withOpacity(0.3),
+                              color: const Color(0xFF4B00E0).withValues(alpha:0.3),
                               blurRadius: 20,
                               offset: const Offset(0, 8),
                             ),
@@ -78,7 +78,7 @@ class HomeScreen extends StatelessWidget {
                           borderRadius: BorderRadius.circular(16),
                           boxShadow: [
                             BoxShadow(
-                              color: Colors.black.withOpacity(0.08),
+                              color: Colors.black.withValues(alpha:0.08),
                               blurRadius: 20,
                               offset: const Offset(0, 4),
                             ),
@@ -102,7 +102,7 @@ class HomeScreen extends StatelessWidget {
                           borderRadius: BorderRadius.circular(16),
                           boxShadow: [
                             BoxShadow(
-                              color: const Color(0xFF4B00E0).withOpacity(0.3),
+                              color: const Color(0xFF4B00E0).withValues(alpha:0.3),
                               blurRadius: 20,
                               offset: const Offset(0, 8),
                             ),
@@ -130,7 +130,7 @@ class HomeScreen extends StatelessWidget {
                               'Choose an option below to continue',
                               style: TextStyle(
                                 fontSize: 14,
-                                color: Colors.white.withOpacity(0.9),
+                                color: Colors.white.withValues(alpha:0.9),
                                 fontFamily: 'Inter',
                               ),
                               textAlign: TextAlign.center,
@@ -150,7 +150,7 @@ class HomeScreen extends StatelessWidget {
                           borderRadius: BorderRadius.circular(20),
                           boxShadow: [
                             BoxShadow(
-                              color: Colors.black.withOpacity(0.08),
+                              color: Colors.black.withValues(alpha:0.08),
                               blurRadius: 20,
                               offset: const Offset(0, 4),
                             ),
@@ -167,12 +167,12 @@ class HomeScreen extends StatelessWidget {
                         decoration: BoxDecoration(
                           borderRadius: BorderRadius.circular(12),
                           border: Border.all(
-                            color: const Color(0xFF8E2DE2).withOpacity(0.3),
+                            color: const Color(0xFF8E2DE2).withValues(alpha:0.3),
                             width: 2,
                           ),
                           boxShadow: [
                             BoxShadow(
-                              color: const Color(0xFF8E2DE2).withOpacity(0.1),
+                              color: const Color(0xFF8E2DE2).withValues(alpha:0.1),
                               blurRadius: 12,
                               offset: const Offset(0, 4),
                             ),

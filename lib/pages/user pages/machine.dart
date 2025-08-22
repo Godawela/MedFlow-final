@@ -156,7 +156,7 @@ class _MachinePageState extends State<MachinePage>
                             shape: BoxShape.circle,
                             boxShadow: [
                               BoxShadow(
-                                color: Colors.black.withOpacity(0.1),
+                                color: Colors.black.withValues(alpha:0.1),
                                 blurRadius: 20,
                                 offset: const Offset(0, 10),
                               ),
@@ -307,7 +307,7 @@ class _MachinePageState extends State<MachinePage>
                                             boxShadow: [
                                               BoxShadow(
                                                 color: Colors.deepPurple
-                                                    .withOpacity(0.3),
+                                                    .withValues(alpha:0.3),
                                                 blurRadius: 12,
                                                 offset: const Offset(0, 6),
                                               ),
@@ -319,7 +319,7 @@ class _MachinePageState extends State<MachinePage>
                                                 padding: const EdgeInsets.all(16),
                                                 decoration: BoxDecoration(
                                                   color:
-                                                      Colors.white.withOpacity(0.2),
+                                                      Colors.white.withValues(alpha:0.2),
                                                   shape: BoxShape.circle,
                                                 ),
                                                 child: const CircleAvatar(
@@ -337,7 +337,7 @@ class _MachinePageState extends State<MachinePage>
                                                 style: GoogleFonts.inter(
                                                   fontSize: 16,
                                                   color:
-                                                      Colors.white.withOpacity(0.9),
+                                                      Colors.white.withValues(alpha:0.9),
                                                   fontWeight: FontWeight.w500,
                                                 ),
                                                 textAlign: TextAlign.center,
@@ -420,7 +420,7 @@ class _MachinePageState extends State<MachinePage>
                                                         boxShadow: [
                                                           BoxShadow(
                                                             color: colors[0]
-                                                                .withOpacity(0.3),
+                                                                .withValues(alpha:0.3),
                                                             blurRadius: 8,
                                                             offset: const Offset(0, 4),
                                                           ),
@@ -453,7 +453,7 @@ class _MachinePageState extends State<MachinePage>
                                                                       const EdgeInsets.all(12),
                                                                   decoration: BoxDecoration(
                                                                     color: Colors.white
-                                                                        .withOpacity(0.2),
+                                                                        .withValues(alpha:0.2),
                                                                     borderRadius:
                                                                         BorderRadius.circular(16),
                                                                   ),
@@ -488,7 +488,7 @@ class _MachinePageState extends State<MachinePage>
                                                                   ),
                                                                   decoration: BoxDecoration(
                                                                     color: Colors.white
-                                                                        .withOpacity(0.2),
+                                                                        .withValues(alpha:0.2),
                                                                     borderRadius:
                                                                         BorderRadius.circular(8),
                                                                   ),
@@ -497,7 +497,7 @@ class _MachinePageState extends State<MachinePage>
                                                                     style: GoogleFonts.inter(
                                                                       fontSize: 11,
                                                                       color: Colors.white
-                                                                          .withOpacity(0.9),
+                                                                          .withValues(alpha:0.9),
                                                                       fontWeight:
                                                                           FontWeight.w500,
                                                                     ),
@@ -565,7 +565,7 @@ class _MachinePageState extends State<MachinePage>
                   shape: BoxShape.circle,
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.blue.withOpacity(0.3),
+                      color: Colors.blue.withValues(alpha:0.3),
                       blurRadius: 8,
                       offset: const Offset(0, 4),
                     ),

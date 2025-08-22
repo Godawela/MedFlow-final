@@ -158,7 +158,7 @@ class _SymptomPageAdminState extends State<SymptomPageAdmin>
                             shape: BoxShape.circle,
                             boxShadow: [
                               BoxShadow(
-                                color: Colors.black.withOpacity(0.1),
+                                color: Colors.black.withValues(alpha:0.1),
                                 blurRadius: 20,
                                 offset: const Offset(0, 10),
                               ),
@@ -272,7 +272,7 @@ class _SymptomPageAdminState extends State<SymptomPageAdmin>
                                         boxShadow: [
                                           BoxShadow(
                                             color: Colors.deepPurple
-                                                .withOpacity(0.3),
+                                                .withValues(alpha:0.3),
                                             blurRadius: 12,
                                             offset: const Offset(0, 6),
                                           ),
@@ -284,7 +284,7 @@ class _SymptomPageAdminState extends State<SymptomPageAdmin>
                                             padding: const EdgeInsets.all(16),
                                             decoration: BoxDecoration(
                                               color:
-                                                  Colors.white.withOpacity(0.2),
+                                                  Colors.white.withValues(alpha:0.2),
                                               shape: BoxShape.circle,
                                             ),
                                             child: const CircleAvatar(
@@ -302,7 +302,7 @@ class _SymptomPageAdminState extends State<SymptomPageAdmin>
                                             style: GoogleFonts.inter(
                                               fontSize: 16,
                                               color:
-                                                  Colors.white.withOpacity(0.9),
+                                                  Colors.white.withValues(alpha:0.9),
                                               fontWeight: FontWeight.w500,
                                             ),
                                             textAlign: TextAlign.center,
@@ -389,7 +389,7 @@ class _SymptomPageAdminState extends State<SymptomPageAdmin>
                                                     boxShadow: [
                                                       BoxShadow(
                                                         color: colors[0]
-                                                            .withOpacity(0.3),
+                                                            .withValues(alpha:0.3),
                                                         blurRadius: 8,
                                                         offset:
                                                             const Offset(0, 4),
@@ -431,7 +431,7 @@ class _SymptomPageAdminState extends State<SymptomPageAdmin>
                                                                   BoxDecoration(
                                                                 color: Colors
                                                                     .white
-                                                                    .withOpacity(
+                                                                    .withValues(alpha:
                                                                         0.2),
                                                                 borderRadius:
                                                                     BorderRadius
@@ -482,7 +482,7 @@ class _SymptomPageAdminState extends State<SymptomPageAdmin>
                                                                   BoxDecoration(
                                                                 color: Colors
                                                                     .white
-                                                                    .withOpacity(
+                                                                    .withValues(alpha:
                                                                         0.2),
                                                                 borderRadius:
                                                                     BorderRadius
@@ -497,7 +497,7 @@ class _SymptomPageAdminState extends State<SymptomPageAdmin>
                                                                   fontSize: 11,
                                                                   color: Colors
                                                                       .white
-                                                                      .withOpacity(
+                                                                      .withValues(alpha:
                                                                           0.9),
                                                                   fontWeight:
                                                                       FontWeight

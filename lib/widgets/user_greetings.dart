@@ -24,23 +24,23 @@ void initState() {
   Future<void> fetchUserRole() async {
   try {
     final user = FirebaseAuth.instance.currentUser;
-    print('Current user: $user');
+    debugPrint('Current user: $user');
     
     final uid = user?.uid;
-    print('UID: $uid');
+    debugPrint('UID: $uid');
 
     if (uid == null) {
-      print('UID is null — Firebase not ready yet?');
+      debugPrint('UID is null — Firebase not ready yet?');
       setState(() => role = 'Guest');
       return;
     }
 
     final url = 'https://medflow-phi.vercel.app/api/users/$uid/role';
-    print('Requesting: $url');
+    debugPrint('Requesting: $url');
 
     final response = await http.get(Uri.parse(url));
-    print('Status code: ${response.statusCode}');
-    print('Body: ${response.body}');
+    debugPrint('Status code: ${response.statusCode}');
+    debugPrint('Body: ${response.body}');
 
     if (response.statusCode == 200) {
       final data = json.decode(response.body);
@@ -51,7 +51,7 @@ void initState() {
       setState(() => role = 'Student');
     }
   } catch (e) {
-    print('Exception: $e');
+    debugPrint('Exception: $e');
     setState(() => role = 'Error');
   }
 }

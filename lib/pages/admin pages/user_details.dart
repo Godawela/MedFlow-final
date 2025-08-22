@@ -207,7 +207,7 @@ class _UserManagementScreenState extends State<UserManagementScreen> {
                       borderRadius: BorderRadius.circular(16),
                       boxShadow: [
                         BoxShadow(
-                          color: Colors.black.withOpacity(0.08),
+                          color: Colors.black.withValues(alpha:0.08),
                           blurRadius: 20,
                           offset: const Offset(0, 4),
                         ),
@@ -248,7 +248,7 @@ class _UserManagementScreenState extends State<UserManagementScreen> {
                                 vertical: 6,
                               ),
                               decoration: BoxDecoration(
-                                color: const Color(0xFF4B00E0).withOpacity(0.1),
+                                color: const Color(0xFF4B00E0).withValues(alpha:0.1),
                                 borderRadius: BorderRadius.circular(20),
                               ),
                               child: Text(
@@ -301,7 +301,7 @@ class _UserManagementScreenState extends State<UserManagementScreen> {
                         borderRadius: BorderRadius.circular(16),
                         boxShadow: [
                           BoxShadow(
-                            color: Colors.black.withOpacity(0.08),
+                            color: Colors.black.withValues(alpha:0.08),
                             blurRadius: 20,
                             offset: const Offset(0, 4),
                           ),
@@ -378,8 +378,8 @@ class _UserManagementScreenState extends State<UserManagementScreen> {
         borderRadius: BorderRadius.circular(12),
         border: Border.all(
           color: isVerified 
-              ? Colors.green.withOpacity(0.3)
-              : Colors.orange.withOpacity(0.3),
+              ? Colors.green.withValues(alpha:0.3)
+              : Colors.orange.withValues(alpha:0.3),
           width: 1,
         ),
       ),
@@ -391,7 +391,7 @@ class _UserManagementScreenState extends State<UserManagementScreen> {
               // User Avatar
               CircleAvatar(
                 radius: 24,
-                backgroundColor: const Color(0xFF4B00E0).withOpacity(0.1),
+                backgroundColor: const Color(0xFF4B00E0).withValues(alpha:0.1),
                 child: Text(
                   name.isNotEmpty ? name[0].toUpperCase() : 'U',
                   style: GoogleFonts.inter(
@@ -436,8 +436,8 @@ class _UserManagementScreenState extends State<UserManagementScreen> {
                 ),
                 decoration: BoxDecoration(
                   color: isVerified 
-                      ? Colors.green.withOpacity(0.1)
-                      : Colors.orange.withOpacity(0.1),
+                      ? Colors.green.withValues(alpha:0.1)
+                      : Colors.orange.withValues(alpha:0.1),
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: Text(

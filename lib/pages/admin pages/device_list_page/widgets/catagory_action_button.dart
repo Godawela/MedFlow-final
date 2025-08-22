@@ -27,7 +27,7 @@ class CategoryActionButtons extends StatelessWidget {
               ),
             ),
             style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.white.withOpacity(0.2),
+              backgroundColor: Colors.white.withValues(alpha:0.2),
               foregroundColor: Colors.white,
               elevation: 0,
               padding: const EdgeInsets.symmetric(
@@ -37,7 +37,7 @@ class CategoryActionButtons extends StatelessWidget {
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(10),
                 side: BorderSide(
-                  color: Colors.white.withOpacity(0.3),
+                  color: Colors.white.withValues(alpha:0.3),
                 ),
               ),
             ),
@@ -56,7 +56,7 @@ class CategoryActionButtons extends StatelessWidget {
               ),
             ),
             style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.red.shade500.withOpacity(0.9),
+              backgroundColor: Colors.red.shade500.withValues(alpha:0.9),
               foregroundColor: Colors.white,
               elevation: 0,
               padding: const EdgeInsets.symmetric(

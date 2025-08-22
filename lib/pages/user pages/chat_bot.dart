@@ -222,7 +222,7 @@ class _ChatBotPageState extends State<ChatBotPage> with TickerProviderStateMixin
                   ),
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.black.withOpacity(0.1),
+                      color: Colors.black.withValues(alpha:0.1),
                       blurRadius: 8,
                       offset: const Offset(0, 2),
                     ),
@@ -306,7 +306,7 @@ class _ChatBotPageState extends State<ChatBotPage> with TickerProviderStateMixin
           ),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.1),
+              color: Colors.black.withValues(alpha:0.1),
               blurRadius: 8,
               offset: const Offset(0, 2),
             ),
@@ -377,7 +377,7 @@ class _ChatBotPageState extends State<ChatBotPage> with TickerProviderStateMixin
           color: Colors.white,
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.1),
+              color: Colors.black.withValues(alpha:0.1),
               blurRadius: 10,
               offset: const Offset(0, -2),
             ),
@@ -428,7 +428,7 @@ class _ChatBotPageState extends State<ChatBotPage> with TickerProviderStateMixin
                 shape: BoxShape.circle,
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.deepPurple.withOpacity(0.3),
+                    color: Colors.deepPurple.withValues(alpha:0.3),
                     blurRadius: 8,
                     offset: const Offset(0, 2),
                   ),
@@ -437,7 +437,7 @@ class _ChatBotPageState extends State<ChatBotPage> with TickerProviderStateMixin
               child: IconButton(
                 icon: const Icon(Icons.send_rounded, color: Colors.white),
                 onPressed: () => sendMessage(_messageController.text),
-                splashColor: Colors.white.withOpacity(0.3),
+                splashColor: Colors.white.withValues(alpha:0.3),
               ),
             ),
           ],

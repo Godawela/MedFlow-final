@@ -154,7 +154,7 @@ class _SymptomPageState extends State<SymptomPage> with TickerProviderStateMixin
                             shape: BoxShape.circle,
                             boxShadow: [
                               BoxShadow(
-                                color: Colors.black.withOpacity(0.1),
+                                color: Colors.black.withValues(alpha:0.1),
                                 blurRadius: 20,
                                 offset: const Offset(0, 10),
                               ),
@@ -267,7 +267,7 @@ class _SymptomPageState extends State<SymptomPage> with TickerProviderStateMixin
                                         borderRadius: BorderRadius.circular(20),
                                         boxShadow: [
                                           BoxShadow(
-                                            color: Colors.deepPurple.withOpacity(0.3),
+                                            color: Colors.deepPurple.withValues(alpha:0.3),
                                             blurRadius: 12,
                                             offset: const Offset(0, 6),
                                           ),
@@ -278,7 +278,7 @@ class _SymptomPageState extends State<SymptomPage> with TickerProviderStateMixin
                                           Container(
                                             padding: const EdgeInsets.all(16),
                                             decoration: BoxDecoration(
-                                              color: Colors.white.withOpacity(0.2),
+                                              color: Colors.white.withValues(alpha:0.2),
                                               shape: BoxShape.circle,
                                             ),
                                             child: const CircleAvatar(
@@ -294,7 +294,7 @@ class _SymptomPageState extends State<SymptomPage> with TickerProviderStateMixin
                                             'Select a symptom to explore possible conditions and treatments',
                                             style: GoogleFonts.inter(
                                               fontSize: 16,
-                                              color: Colors.white.withOpacity(0.9),
+                                              color: Colors.white.withValues(alpha:0.9),
                                               fontWeight: FontWeight.w500,
                                             ),
                                             textAlign: TextAlign.center,
@@ -371,7 +371,7 @@ class _SymptomPageState extends State<SymptomPage> with TickerProviderStateMixin
                                                     borderRadius: BorderRadius.circular(20),
                                                     boxShadow: [
                                                       BoxShadow(
-                                                        color: colors[0].withOpacity(0.3),
+                                                        color: colors[0].withValues(alpha:0.3),
                                                         blurRadius: 8,
                                                         offset: const Offset(0, 4),
                                                       ),
@@ -399,7 +399,7 @@ class _SymptomPageState extends State<SymptomPage> with TickerProviderStateMixin
                                                             Container(
                                                               padding: const EdgeInsets.all(12),
                                                               decoration: BoxDecoration(
-                                                                color: Colors.white.withOpacity(0.2),
+                                                                color: Colors.white.withValues(alpha:0.2),
                                                                 borderRadius: BorderRadius.circular(16),
                                                               ),
                                                               child: Icon(
@@ -429,14 +429,14 @@ class _SymptomPageState extends State<SymptomPage> with TickerProviderStateMixin
                                                                 vertical: 3,
                                                               ),
                                                               decoration: BoxDecoration(
-                                                                color: Colors.white.withOpacity(0.2),
+                                                                color: Colors.white.withValues(alpha:0.2),
                                                                 borderRadius: BorderRadius.circular(8),
                                                               ),
                                                               child: Text(
                                                                 'View Details',
                                                                 style: GoogleFonts.inter(
                                                                   fontSize: 11,
-                                                                  color: Colors.white.withOpacity(0.9),
+                                                                  color: Colors.white.withValues(alpha:0.9),
                                                                   fontWeight: FontWeight.w500,
                                                                 ),
                                                               ),

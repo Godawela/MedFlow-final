@@ -381,7 +381,7 @@ Widget build(BuildContext context) {
                           shape: BoxShape.circle,
                           boxShadow: [
                             BoxShadow(
-                              color: Colors.black.withOpacity(0.1),
+                              color: Colors.black.withValues(alpha:0.1),
                               blurRadius: 20,
                               offset: const Offset(0, 10),
                         )],
@@ -495,7 +495,7 @@ Widget build(BuildContext context) {
                                           borderRadius: BorderRadius.circular(20),
                                           boxShadow: [
                                             BoxShadow(
-                                              color: Colors.deepPurple.withOpacity(0.3),
+                                              color: Colors.deepPurple.withValues(alpha:0.3),
                                               blurRadius: 12,
                                               offset: const Offset(0, 6),
                                             ),
@@ -506,7 +506,7 @@ Widget build(BuildContext context) {
                                             Container(
                                               padding: const EdgeInsets.all(16),
                                               decoration: BoxDecoration(
-                                                color: Colors.white.withOpacity(0.2),
+                                                color: Colors.white.withValues(alpha:0.2),
                                                 borderRadius: BorderRadius.circular(16),
                                               ),
                                               child: Icon(
@@ -568,7 +568,7 @@ Widget build(BuildContext context) {
                                                         style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
                                                       ),
                                                       style: ElevatedButton.styleFrom(
-                                                        backgroundColor: Colors.white.withOpacity(0.2),
+                                                        backgroundColor: Colors.white.withValues(alpha:0.2),
                                                         foregroundColor: Colors.white,
                                                         padding: const EdgeInsets.symmetric(vertical: 12),
                                                         shape: RoundedRectangleBorder(
@@ -592,7 +592,7 @@ Widget build(BuildContext context) {
                                                         style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
                                                       ),
                                                       style: ElevatedButton.styleFrom(
-                                                        backgroundColor: Colors.white.withOpacity(0.2),
+                                                        backgroundColor: Colors.white.withValues(alpha:0.2),
                                                         foregroundColor: Colors.white,
                                                         padding: const EdgeInsets.symmetric(vertical: 12),
                                                         shape: RoundedRectangleBorder(

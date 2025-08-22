@@ -176,7 +176,7 @@ class _MachineDetailPageState extends State<MachineDetailPage> with TickerProvid
                             shape: BoxShape.circle,
                             boxShadow: [
                               BoxShadow(
-                                color: Colors.black.withOpacity(0.1),
+                                color: Colors.black.withValues(alpha:0.1),
                                 blurRadius: 20,
                                 offset: const Offset(0, 10),
                           )],
@@ -286,7 +286,7 @@ class _MachineDetailPageState extends State<MachineDetailPage> with TickerProvid
                                       borderRadius: BorderRadius.circular(20),
                                       boxShadow: [
                                         BoxShadow(
-                                          color: Colors.deepPurple.withOpacity(0.3),
+                                          color: Colors.deepPurple.withValues(alpha:0.3),
                                           blurRadius: 12,
                                           offset: const Offset(0, 6),
                                         ),
@@ -297,7 +297,7 @@ class _MachineDetailPageState extends State<MachineDetailPage> with TickerProvid
                                         Container(
                                           padding: const EdgeInsets.all(16),
                                           decoration: BoxDecoration(
-                                            color: Colors.white.withOpacity(0.2),
+                                            color: Colors.white.withValues(alpha:0.2),
                                             borderRadius: BorderRadius.circular(16),
                                           ),
                                           child: const Icon(

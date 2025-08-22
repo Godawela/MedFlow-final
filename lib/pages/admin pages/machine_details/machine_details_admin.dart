@@ -213,7 +213,7 @@ class _MachineDetailPageAdminState extends State<MachineDetailPageAdmin>
                             shape: BoxShape.circle,
                             boxShadow: [
                               BoxShadow(
-                                color: Colors.black.withOpacity(0.1),
+                                color: Colors.black.withValues(alpha:0.1),
                                 blurRadius: 20,
                                 offset: const Offset(0, 10),
                               )
@@ -325,7 +325,7 @@ class _MachineDetailPageAdminState extends State<MachineDetailPageAdmin>
                                       boxShadow: [
                                         BoxShadow(
                                           color: Colors.deepPurple
-                                              .withOpacity(0.3),
+                                              .withValues(alpha:0.3),
                                           blurRadius: 12,
                                           offset: const Offset(0, 6),
                                         ),
@@ -337,7 +337,7 @@ class _MachineDetailPageAdminState extends State<MachineDetailPageAdmin>
                                           padding: const EdgeInsets.all(16),
                                           decoration: BoxDecoration(
                                             color:
-                                                Colors.white.withOpacity(0.2),
+                                                Colors.white.withValues(alpha:0.2),
                                             borderRadius:
                                                 BorderRadius.circular(16),
                                           ),
