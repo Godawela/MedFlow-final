@@ -1,9 +1,11 @@
 // ignore_for_file: use_build_context_synchronously, library_private_types_in_public_api
 
+import 'dart:io';
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:http/http.dart' as http;
-import 'dart:convert';
+import 'package:med/widgets/image_upload_widget.dart';
 
 @RoutePage()
 class AddSymptomPage extends StatefulWidget {
@@ -13,12 +15,14 @@ class AddSymptomPage extends StatefulWidget {
   _AddSymptomPageState createState() => _AddSymptomPageState();
 }
 
-class _AddSymptomPageState extends State<AddSymptomPage> {
+class _AddSymptomPageState extends State<AddSymptomPage>
+    with TickerProviderStateMixin {
   final _formKey = GlobalKey<FormState>();
   final TextEditingController _nameController = TextEditingController();
   final TextEditingController _descriptionController = TextEditingController();
   final TextEditingController _linkOfResourceController =
       TextEditingController();
+  File? _selectedImage;
 
   bool isLoading = false;
   String? errorMessage;
@@ -32,17 +36,49 @@ class _AddSymptomPageState extends State<AddSymptomPage> {
     });
 
     final url = Uri.parse('https://medflow-phi.vercel.app/api/symptoms');
-    final body = json.encode({
-      'name': _nameController.text.trim(),
-      'description': _descriptionController.text.trim(),
-      'resourceLink': _linkOfResourceController.text.trim(),
-    });
+    final request = http.MultipartRequest('POST', url);
+
+    // Add text fields
+    request.fields['name'] = _nameController.text.trim();
+    request.fields['description'] = _descriptionController.text.trim();
+    request.fields['linkOfResource'] = _linkOfResourceController.text.trim();
+
+    debugPrint('Request fields: ${request.fields}');
+
+    // Add image if selected
+    if (_selectedImage != null) {
+      debugPrint('Selected image path: ${_selectedImage!.path}');
+
+      final imageStream = http.ByteStream(_selectedImage!.openRead());
+      final imageLength = await _selectedImage!.length();
+
+      debugPrint('Image length: $imageLength bytes');
+
+      final multipartFile = http.MultipartFile(
+        'image', // Make sure this matches your multer field name
+        imageStream,
+        imageLength,
+        filename: 'category_${DateTime.now().millisecondsSinceEpoch}.jpg',
+      );
+
+      request.files.add(multipartFile);
+      debugPrint('Added file to request: ${multipartFile.filename}');
+    } else {
+      debugPrint('No image selected');
+    }
+
+    debugPrint('Sending request...');
+    final response = await request.send();
+    final responseBody = await response.stream.bytesToString();
+
+    debugPrint('Response status: ${response.statusCode}');
+    debugPrint('Response body: $responseBody');
 
     try {
       final response = await http.post(
         url,
         headers: {'Content-Type': 'application/json'},
-        body: body,
+        body: request,
       );
 
       if (response.statusCode == 201 || response.statusCode == 200) {
@@ -59,6 +95,9 @@ class _AddSymptomPageState extends State<AddSymptomPage> {
         _nameController.clear();
         _descriptionController.clear();
         _linkOfResourceController.clear();
+        setState(() {
+          _selectedImage = null;
+        });
 
         // Navigate back
         Navigator.pop(context, true);
@@ -151,17 +190,18 @@ class _AddSymptomPageState extends State<AddSymptomPage> {
                     end: Alignment.bottomRight,
                   ),
                   borderRadius: BorderRadius.circular(16),
-                  border: Border.all(color: Colors.purple.withValues(alpha:0.2)),
+                  border:
+                      Border.all(color: Colors.purple.withValues(alpha: 0.2)),
                 ),
-                child:const Column(
+                child: const Column(
                   children: [
-                     Icon(
+                    Icon(
                       Icons.medical_services_outlined,
                       size: 48,
                       color: Colors.white,
                     ),
-                     SizedBox(height: 12),
-                     Text(
+                    SizedBox(height: 12),
+                    Text(
                       'Add Medical Symptom',
                       style: TextStyle(
                         fontSize: 24,
@@ -169,7 +209,7 @@ class _AddSymptomPageState extends State<AddSymptomPage> {
                         color: Colors.white,
                       ),
                     ),
-                     SizedBox(height: 8),
+                    SizedBox(height: 8),
                     Text(
                       'Document a new symptom with detailed information and resources',
                       textAlign: TextAlign.center,
@@ -191,7 +231,7 @@ class _AddSymptomPageState extends State<AddSymptomPage> {
                   borderRadius: BorderRadius.circular(16),
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.black.withValues(alpha:0.05),
+                      color: Colors.black.withValues(alpha: 0.05),
                       blurRadius: 10,
                       offset: const Offset(0, 2),
                     ),
@@ -222,6 +262,28 @@ class _AddSymptomPageState extends State<AddSymptomPage> {
                             : null,
                       ),
                       const SizedBox(height: 20),
+
+                      // Image Upload Section
+                      Text(
+                        'Category Image',
+                        style: GoogleFonts.inter(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w600,
+                          color: Colors.grey.shade700,
+                        ),
+                      ),
+                      const SizedBox(height: 12),
+
+                      ImageUploadWidget(
+                        selectedImage: _selectedImage,
+                        onImageSelected: (File? image) {
+                          setState(() {
+                            _selectedImage = image;
+                          });
+                        },
+                      ),
+
+                      const SizedBox(height: 24),
 
                       // Description Field
                       TextFormField(
@@ -291,7 +353,7 @@ class _AddSymptomPageState extends State<AddSymptomPage> {
                       borderRadius: BorderRadius.circular(12),
                     ),
                     elevation: 2,
-                    shadowColor: Colors.purple.withValues(alpha:0.3),
+                    shadowColor: Colors.purple.withValues(alpha: 0.3),
                   ),
                   child: isLoading
                       ? const Row(
@@ -338,6 +400,7 @@ class _AddSymptomPageState extends State<AddSymptomPage> {
     _nameController.dispose();
     _descriptionController.dispose();
     _linkOfResourceController.dispose();
+
     super.dispose();
   }
 }

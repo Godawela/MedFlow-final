@@ -4,7 +4,7 @@ import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:http/http.dart' as http;
-import 'package:image_picker/image_picker.dart';
+import 'package:med/widgets/image_upload_widget.dart';
 import 'dart:convert';
 import 'dart:io';
 
@@ -18,22 +18,21 @@ class AddCategoryPage extends StatefulWidget {
   _AddCategoryPageState createState() => _AddCategoryPageState();
 }
 
-class _AddCategoryPageState extends State<AddCategoryPage> with TickerProviderStateMixin {
+class _AddCategoryPageState extends State<AddCategoryPage>
+    with TickerProviderStateMixin {
   final _formKey = GlobalKey<FormState>();
   final TextEditingController _nameController = TextEditingController();
   final TextEditingController _descriptionController = TextEditingController();
-  final ImagePicker _picker = ImagePicker();
-  
+
   bool isLoading = false;
   File? _selectedImage;
-  
+
   late AnimationController _animationController;
   late AnimationController _buttonAnimationController;
   late AnimationController _imageAnimationController;
   late Animation<double> _fadeAnimation;
   late Animation<Offset> _slideAnimation;
   late Animation<double> _scaleAnimation;
-  late Animation<double> _imageScaleAnimation;
 
   @override
   void initState() {
@@ -50,24 +49,23 @@ class _AddCategoryPageState extends State<AddCategoryPage> with TickerProviderSt
       duration: const Duration(milliseconds: 300),
       vsync: this,
     );
-    
+
     _fadeAnimation = Tween<double>(begin: 0, end: 1).animate(
       CurvedAnimation(parent: _animationController, curve: Curves.easeOut),
     );
-    
+
     _slideAnimation = Tween<Offset>(
       begin: const Offset(0, 0.3),
       end: Offset.zero,
-    ).animate(CurvedAnimation(parent: _animationController, curve: Curves.easeOut));
+    ).animate(
+        CurvedAnimation(parent: _animationController, curve: Curves.easeOut));
 
     _scaleAnimation = Tween<double>(begin: 0.95, end: 1.0).animate(
       CurvedAnimation(parent: _animationController, curve: Curves.easeOut),
     );
 
-    _imageScaleAnimation = Tween<double>(begin: 0.8, end: 1.0).animate(
-      CurvedAnimation(parent: _imageAnimationController, curve: Curves.elasticOut),
-    );
-    
+  
+
     _animationController.forward();
   }
 
@@ -75,169 +73,18 @@ class _AddCategoryPageState extends State<AddCategoryPage> with TickerProviderSt
   void dispose() {
     _animationController.dispose();
     _buttonAnimationController.dispose();
-    _imageAnimationController.dispose();
     _nameController.dispose();
     _descriptionController.dispose();
     super.dispose();
   }
 
-  Future<void> _pickImage() async {
-    try {
-      final XFile? image = await _picker.pickImage(
-        source: ImageSource.gallery,
-        maxWidth: 1024,
-        maxHeight: 1024,
-        imageQuality: 85,
-      );
-      
-      if (image != null) {
-        setState(() {
-          _selectedImage = File(image.path);
-        });
-        _imageAnimationController.forward();
-      }
-    } catch (e) {
-      _showErrorSnackBar('Failed to pick image: $e');
-    }
-  }
 
-  Future<void> _takePhoto() async {
-    try {
-      final XFile? image = await _picker.pickImage(
-        source: ImageSource.camera,
-        maxWidth: 1024,
-        maxHeight: 1024,
-        imageQuality: 85,
-      );
-      
-      if (image != null) {
-        setState(() {
-          _selectedImage = File(image.path);
-        });
-        _imageAnimationController.forward();
-      }
-    } catch (e) {
-      _showErrorSnackBar('Failed to take photo: $e');
-    }
-  }
 
-  void _showImageSourceDialog() {
-    showModalBottomSheet(
-      context: context,
-      backgroundColor: Colors.transparent,
-      builder: (BuildContext context) {
-        return Container(
-          margin: const EdgeInsets.all(16),
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(20),
-          ),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Container(
-                margin: const EdgeInsets.only(top: 8),
-                width: 40,
-                height: 4,
-                decoration: BoxDecoration(
-                  color: Colors.grey.shade300,
-                  borderRadius: BorderRadius.circular(2),
-                ),
-              ),
-              Padding(
-                padding: const EdgeInsets.all(20),
-                child: Column(
-                  children: [
-                    Text(
-                      'Select Image Source',
-                      style: GoogleFonts.inter(
-                        fontSize: 18,
-                        fontWeight: FontWeight.w600,
-                        color: Colors.grey.shade800,
-                      ),
-                    ),
-                    const SizedBox(height: 20),
-                    Row(
-                      children: [
-                        Expanded(
-                          child: _buildImageSourceOption(
-                            icon: Icons.photo_library_rounded,
-                            label: 'Gallery',
-                            onTap: () {
-                              Navigator.pop(context);
-                              _pickImage();
-                            },
-                          ),
-                        ),
-                        const SizedBox(width: 16),
-                        Expanded(
-                          child: _buildImageSourceOption(
-                            icon: Icons.camera_alt_rounded,
-                            label: 'Camera',
-                            onTap: () {
-                              Navigator.pop(context);
-                              _takePhoto();
-                            },
-                          ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 20),
-                  ],
-                ),
-              ),
-            ],
-          ),
-        );
-      },
-    );
-  }
+ 
 
-  Widget _buildImageSourceOption({
-    required IconData icon,
-    required String label,
-    required VoidCallback onTap,
-  }) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        padding: const EdgeInsets.all(20),
-        decoration: BoxDecoration(
-          color: Colors.deepPurple.shade50,
-          borderRadius: BorderRadius.circular(16),
-          border: Border.all(
-            color: Colors.deepPurple.shade200,
-            width: 1,
-          ),
-        ),
-        child: Column(
-          children: [
-            Container(
-              padding: const EdgeInsets.all(12),
-              decoration: BoxDecoration(
-                color: Colors.deepPurple.shade100,
-                shape: BoxShape.circle,
-              ),
-              child: Icon(
-                icon,
-                color: Colors.deepPurple.shade600,
-                size: 28,
-              ),
-            ),
-            const SizedBox(height: 12),
-            Text(
-              label,
-              style: GoogleFonts.inter(
-                fontSize: 14,
-                fontWeight: FontWeight.w600,
-                color: Colors.deepPurple.shade700,
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
+
+
+
 
   Future<void> addCategory() async {
     if (!_formKey.currentState!.validate()) return;
@@ -250,7 +97,7 @@ class _AddCategoryPageState extends State<AddCategoryPage> with TickerProviderSt
     try {
       final url = Uri.parse('https://medflow-phi.vercel.app/api/category');
       final request = http.MultipartRequest('POST', url);
-      
+
       // Add text fields
       request.fields['name'] = _nameController.text.trim();
       request.fields['description'] = _descriptionController.text.trim();
@@ -260,19 +107,19 @@ class _AddCategoryPageState extends State<AddCategoryPage> with TickerProviderSt
       // Add image if selected
       if (_selectedImage != null) {
         debugPrint('Selected image path: ${_selectedImage!.path}');
-        
+
         final imageStream = http.ByteStream(_selectedImage!.openRead());
         final imageLength = await _selectedImage!.length();
-        
+
         debugPrint('Image length: $imageLength bytes');
-        
+
         final multipartFile = http.MultipartFile(
           'image', // Make sure this matches your multer field name
           imageStream,
           imageLength,
           filename: 'category_${DateTime.now().millisecondsSinceEpoch}.jpg',
         );
-        
+
         request.files.add(multipartFile);
         debugPrint('Added file to request: ${multipartFile.filename}');
       } else {
@@ -294,7 +141,7 @@ class _AddCategoryPageState extends State<AddCategoryPage> with TickerProviderSt
           _selectedImage = null;
         });
         _imageAnimationController.reset();
-        
+
         Future.delayed(const Duration(seconds: 1), () {
           if (mounted) {
             Navigator.pop(context);
@@ -302,7 +149,8 @@ class _AddCategoryPageState extends State<AddCategoryPage> with TickerProviderSt
         });
       } else {
         final errorData = json.decode(responseBody);
-        _showErrorSnackBar('Failed to add category: ${errorData['error'] ?? 'Unknown error'}');
+        _showErrorSnackBar(
+            'Failed to add category: ${errorData['error'] ?? 'Unknown error'}');
       }
     } catch (e) {
       debugPrint('Exception occurred: $e');
@@ -323,10 +171,11 @@ class _AddCategoryPageState extends State<AddCategoryPage> with TickerProviderSt
             Container(
               padding: const EdgeInsets.all(8),
               decoration: BoxDecoration(
-                color: Colors.white.withValues(alpha:0.2),
+                color: Colors.white.withValues(alpha: 0.2),
                 shape: BoxShape.circle,
               ),
-              child: const Icon(Icons.error_outline_rounded, color: Colors.white, size: 20),
+              child: const Icon(Icons.error_outline_rounded,
+                  color: Colors.white, size: 20),
             ),
             const SizedBox(width: 12),
             Expanded(
@@ -400,7 +249,7 @@ class _AddCategoryPageState extends State<AddCategoryPage> with TickerProviderSt
                             borderRadius: BorderRadius.circular(20),
                             boxShadow: [
                               BoxShadow(
-                                color: Colors.deepPurple.withValues(alpha:0.3),
+                                color: Colors.deepPurple.withValues(alpha: 0.3),
                                 blurRadius: 12,
                                 offset: const Offset(0, 6),
                               ),
@@ -411,7 +260,7 @@ class _AddCategoryPageState extends State<AddCategoryPage> with TickerProviderSt
                               Container(
                                 padding: const EdgeInsets.all(16),
                                 decoration: BoxDecoration(
-                                  color: Colors.white.withValues(alpha:0.2),
+                                  color: Colors.white.withValues(alpha: 0.2),
                                   shape: BoxShape.circle,
                                 ),
                                 child: const Icon(
@@ -434,7 +283,7 @@ class _AddCategoryPageState extends State<AddCategoryPage> with TickerProviderSt
                                 'Add a new device category to organize your medical equipment',
                                 style: GoogleFonts.inter(
                                   fontSize: 16,
-                                  color: Colors.white.withValues(alpha:0.9),
+                                  color: Colors.white.withValues(alpha: 0.9),
                                   fontWeight: FontWeight.w500,
                                 ),
                                 textAlign: TextAlign.center,
@@ -442,9 +291,9 @@ class _AddCategoryPageState extends State<AddCategoryPage> with TickerProviderSt
                             ],
                           ),
                         ),
-                        
+
                         const SizedBox(height: 32),
-                        
+
                         // Form Section
                         Container(
                           width: double.infinity,
@@ -454,7 +303,7 @@ class _AddCategoryPageState extends State<AddCategoryPage> with TickerProviderSt
                             borderRadius: BorderRadius.circular(24),
                             boxShadow: [
                               BoxShadow(
-                                color: Colors.black.withValues(alpha:0.08),
+                                color: Colors.black.withValues(alpha: 0.08),
                                 blurRadius: 20,
                                 offset: const Offset(0, 8),
                               ),
@@ -474,7 +323,7 @@ class _AddCategoryPageState extends State<AddCategoryPage> with TickerProviderSt
                                   ),
                                 ),
                                 const SizedBox(height: 24),
-                                
+
                                 // Image Upload Section
                                 Text(
                                   'Category Image',
@@ -485,119 +334,18 @@ class _AddCategoryPageState extends State<AddCategoryPage> with TickerProviderSt
                                   ),
                                 ),
                                 const SizedBox(height: 12),
-                                
-                                AnimatedBuilder(
-                                  animation: _imageAnimationController,
-                                  builder: (context, child) {
-                                    return ScaleTransition(
-                                      scale: _imageScaleAnimation,
-                                      child: GestureDetector(
-                                        onTap: _showImageSourceDialog,
-                                        child: Container(
-                                          width: double.infinity,
-                                          height: 200,
-                                          decoration: BoxDecoration(
-                                            color: _selectedImage != null
-                                                ? Colors.transparent
-                                                : Colors.grey.shade50,
-                                            borderRadius: BorderRadius.circular(16),
-                                            border: Border.all(
-                                              color: _selectedImage != null
-                                                  ? Colors.deepPurple.shade200
-                                                  : Colors.grey.shade200,
-                                              width: 2,
-                                              style: _selectedImage != null
-                                                  ? BorderStyle.solid
-                                                  : BorderStyle.solid,
-                                            ),
-                                          ),
-                                          child: _selectedImage != null
-                                              ? Stack(
-                                                  children: [
-                                                    ClipRRect(
-                                                      borderRadius: BorderRadius.circular(14),
-                                                      child: Image.file(
-                                                        _selectedImage!,
-                                                        width: double.infinity,
-                                                        height: double.infinity,
-                                                        fit: BoxFit.cover,
-                                                      ),
-                                                    ),
-                                                    Positioned(
-                                                      top: 8,
-                                                      right: 8,
-                                                      child: GestureDetector(
-                                                        onTap: () {
-                                                          setState(() {
-                                                            _selectedImage = null;
-                                                          });
-                                                          _imageAnimationController.reset();
-                                                        },
-                                                        child: Container(
-                                                          padding: const EdgeInsets.all(8),
-                                                          decoration: BoxDecoration(
-                                                            color: Colors.red.shade500,
-                                                            shape: BoxShape.circle,
-                                                            boxShadow: [
-                                                              BoxShadow(
-                                                                color: Colors.black.withValues(alpha:0.2),
-                                                                blurRadius: 4,
-                                                                offset: const Offset(0, 2),
-                                                              ),
-                                                            ],
-                                                          ),
-                                                          child: const Icon(
-                                                            Icons.close,
-                                                            color: Colors.white,
-                                                            size: 20,
-                                                          ),
-                                                        ),
-                                                      ),
-                                                    ),
-                                                  ],
-                                                )
-                                              : Column(
-                                                  mainAxisAlignment: MainAxisAlignment.center,
-                                                  children: [
-                                                    Container(
-                                                      padding: const EdgeInsets.all(20),
-                                                      decoration: BoxDecoration(
-                                                        color: Colors.deepPurple.shade50,
-                                                        shape: BoxShape.circle,
-                                                      ),
-                                                      child: Icon(
-                                                        Icons.add_photo_alternate_rounded,
-                                                        size: 40,
-                                                        color: Colors.deepPurple.shade400,
-                                                      ),
-                                                    ),
-                                                    const SizedBox(height: 16),
-                                                    Text(
-                                                      'Tap to add image',
-                                                      style: GoogleFonts.inter(
-                                                        fontSize: 16,
-                                                        fontWeight: FontWeight.w600,
-                                                        color: Colors.grey.shade600,
-                                                      ),
-                                                    ),
-                                                    const SizedBox(height: 4),
-                                                    Text(
-                                                      'Upload from gallery or take a photo',
-                                                      style: GoogleFonts.inter(
-                                                        fontSize: 12,
-                                                        color: Colors.grey.shade500,
-                                                      ),
-                                                    ),
-                                                  ],
-                                                ),
-                                        ),
-                                      ),
-                                    );
+
+                                ImageUploadWidget(
+                                  selectedImage: _selectedImage,
+                                  onImageSelected: (File? image) {
+                                    setState(() {
+                                      _selectedImage = image;
+                                    });
                                   },
                                 ),
-                                
+
                                 const SizedBox(height: 24),
-                                
+
                                 // Category Name Field
                                 Text(
                                   'Category Name',
@@ -649,7 +397,8 @@ class _AddCategoryPageState extends State<AddCategoryPage> with TickerProviderSt
                                     focusedBorder: OutlineInputBorder(
                                       borderRadius: BorderRadius.circular(16),
                                       borderSide: BorderSide(
-                                        color: Colors.deepPurple.withValues(alpha:0.3),
+                                        color: Colors.deepPurple
+                                            .withValues(alpha: 0.3),
                                         width: 2,
                                       ),
                                     ),
@@ -675,9 +424,9 @@ class _AddCategoryPageState extends State<AddCategoryPage> with TickerProviderSt
                                     return null;
                                   },
                                 ),
-                                
+
                                 const SizedBox(height: 24),
-                                
+
                                 // Description Field
                                 Text(
                                   'Description',
@@ -696,7 +445,8 @@ class _AddCategoryPageState extends State<AddCategoryPage> with TickerProviderSt
                                   ),
                                   maxLines: 4,
                                   decoration: InputDecoration(
-                                    hintText: 'Describe this category and what devices it includes...',
+                                    hintText:
+                                        'Describe this category and what devices it includes...',
                                     hintStyle: GoogleFonts.inter(
                                       color: Colors.grey.shade400,
                                       fontSize: 14,
@@ -730,7 +480,8 @@ class _AddCategoryPageState extends State<AddCategoryPage> with TickerProviderSt
                                     focusedBorder: OutlineInputBorder(
                                       borderRadius: BorderRadius.circular(16),
                                       borderSide: BorderSide(
-                                        color: Colors.deepPurple.withValues(alpha:0.3),
+                                        color: Colors.deepPurple
+                                            .withValues(alpha: 0.3),
                                         width: 2,
                                       ),
                                     ),
@@ -756,9 +507,9 @@ class _AddCategoryPageState extends State<AddCategoryPage> with TickerProviderSt
                                     return null;
                                   },
                                 ),
-                                
+
                                 const SizedBox(height: 32),
-                                
+
                                 // Submit Button
                                 SizedBox(
                                   width: double.infinity,
@@ -767,49 +518,67 @@ class _AddCategoryPageState extends State<AddCategoryPage> with TickerProviderSt
                                     animation: _buttonAnimationController,
                                     builder: (context, child) {
                                       return Transform.scale(
-                                        scale: 1.0 - (_buttonAnimationController.value * 0.02),
+                                        scale: 1.0 -
+                                            (_buttonAnimationController.value *
+                                                0.02),
                                         child: Container(
                                           decoration: BoxDecoration(
                                             gradient: LinearGradient(
                                               begin: Alignment.topLeft,
                                               end: Alignment.bottomRight,
                                               colors: isLoading
-                                                  ? [Colors.grey.shade300, Colors.grey.shade400]
+                                                  ? [
+                                                      Colors.grey.shade300,
+                                                      Colors.grey.shade400
+                                                    ]
                                                   : [
-                                                      Colors.deepPurple.shade400,
-                                                      Colors.deepPurple.shade600,
+                                                      Colors
+                                                          .deepPurple.shade400,
+                                                      Colors
+                                                          .deepPurple.shade600,
                                                     ],
                                             ),
-                                            borderRadius: BorderRadius.circular(16),
+                                            borderRadius:
+                                                BorderRadius.circular(16),
                                             boxShadow: isLoading
                                                 ? []
                                                 : [
                                                     BoxShadow(
-                                                      color: Colors.deepPurple.shade400,
+                                                      color: Colors
+                                                          .deepPurple.shade400,
                                                       blurRadius: 8,
-                                                      offset: const Offset(0, 4),
+                                                      offset:
+                                                          const Offset(0, 4),
                                                     ),
                                                   ],
                                           ),
                                           child: ElevatedButton(
-                                            onPressed: isLoading ? null : addCategory,
+                                            onPressed:
+                                                isLoading ? null : addCategory,
                                             style: ElevatedButton.styleFrom(
-                                              backgroundColor: Colors.transparent,
+                                              backgroundColor:
+                                                  Colors.transparent,
                                               shadowColor: Colors.transparent,
                                               shape: RoundedRectangleBorder(
-                                                borderRadius: BorderRadius.circular(16),
+                                                borderRadius:
+                                                    BorderRadius.circular(16),
                                               ),
                                             ),
                                             child: isLoading
                                                 ? Row(
-                                                    mainAxisAlignment: MainAxisAlignment.center,
+                                                    mainAxisAlignment:
+                                                        MainAxisAlignment
+                                                            .center,
                                                     children: [
                                                       const SizedBox(
                                                         width: 20,
                                                         height: 20,
-                                                        child: CircularProgressIndicator(
+                                                        child:
+                                                            CircularProgressIndicator(
                                                           strokeWidth: 2,
-                                                          valueColor: AlwaysStoppedAnimation<Color>(
+                                                          valueColor:
+                                                              AlwaysStoppedAnimation<
+                                                                  Color>(
                                                             Colors.white,
                                                           ),
                                                         ),
@@ -817,16 +586,20 @@ class _AddCategoryPageState extends State<AddCategoryPage> with TickerProviderSt
                                                       const SizedBox(width: 12),
                                                       Text(
                                                         'Creating Category...',
-                                                        style: GoogleFonts.inter(
+                                                        style:
+                                                            GoogleFonts.inter(
                                                           fontSize: 16,
-                                                          fontWeight: FontWeight.w600,
+                                                          fontWeight:
+                                                              FontWeight.w600,
                                                           color: Colors.white,
                                                         ),
                                                       ),
                                                     ],
                                                   )
                                                 : Row(
-                                                    mainAxisAlignment: MainAxisAlignment.center,
+                                                    mainAxisAlignment:
+                                                        MainAxisAlignment
+                                                            .center,
                                                     children: [
                                                       const Icon(
                                                         Icons.add_rounded,
@@ -836,9 +609,11 @@ class _AddCategoryPageState extends State<AddCategoryPage> with TickerProviderSt
                                                       const SizedBox(width: 8),
                                                       Text(
                                                         'Create Category',
-                                                        style: GoogleFonts.inter(
+                                                        style:
+                                                            GoogleFonts.inter(
                                                           fontSize: 16,
-                                                          fontWeight: FontWeight.w600,
+                                                          fontWeight:
+                                                              FontWeight.w600,
                                                           color: Colors.white,
                                                         ),
                                                       ),
@@ -854,7 +629,7 @@ class _AddCategoryPageState extends State<AddCategoryPage> with TickerProviderSt
                             ),
                           ),
                         ),
-                        
+
                         const SizedBox(height: 20),
                       ],
                     ),
