@@ -350,7 +350,7 @@ class _ProfilePageState extends State<ProfilePage> {
                                         child: const Icon(
                                           Icons.person,
                                           color: Colors.white,
-                                          size: 20,
+                                          size: 15,
                                         ),
                                       ),
                                       const SizedBox(width: 12),

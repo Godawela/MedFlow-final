@@ -89,29 +89,6 @@ class _SymptomPageState extends State<SymptomPage> with TickerProviderStateMixin
     }
   }
 
-  // Get icon for symptom
-  IconData getSymptomIcon(String symptom) {
-    switch (symptom.toLowerCase()) {
-      case 'headache':
-        return Icons.sick_rounded;
-      case 'fever':
-        return Icons.thermostat_rounded;
-      case 'cough':
-        return Icons.air_rounded;
-      case 'pain':
-        return Icons.broken_image;
-      case 'nausea':
-        return Icons.sick_outlined;
-      case 'fatigue':
-        return Icons.bedtime_rounded;
-      case 'dizziness':
-        return Icons.rotate_right_rounded;
-      case 'rash':
-        return Icons.texture_rounded;
-      default:
-        return Icons.medical_services_rounded;
-    }
-  }
 
   // Get color for symptom
   List<Color> getSymptomColors(int index) {
@@ -275,19 +252,7 @@ class _SymptomPageState extends State<SymptomPage> with TickerProviderStateMixin
                                       ),
                                       child: Column(
                                         children: [
-                                          Container(
-                                            padding: const EdgeInsets.all(16),
-                                            decoration: BoxDecoration(
-                                              color: Colors.white.withValues(alpha:0.2),
-                                              shape: BoxShape.circle,
-                                            ),
-                                            child: const CircleAvatar(
-                                              radius: 32,
-                                              backgroundImage: AssetImage('assets/images/logo.png'),
-                                              backgroundColor: Colors.white,
-                                            ),
-                                          ),
-                                          const SizedBox(height: 16),
+                                         
                                           const UserGreeting(),
                                           const SizedBox(height: 12),
                                           Text(
@@ -353,8 +318,8 @@ class _SymptomPageState extends State<SymptomPage> with TickerProviderStateMixin
                                         itemBuilder: (context, index) {
                                           final symptom = symptoms[index]['name'];
                                           final colors = getSymptomColors(index);
-                                          final icon = getSymptomIcon(symptom);
-                                          
+                                          const icon = Icons.sick_rounded;
+
                                           return TweenAnimationBuilder<double>(
                                             duration: Duration(milliseconds: 300 + (index * 100)),
                                             tween: Tween(begin: 0.0, end: 1.0),

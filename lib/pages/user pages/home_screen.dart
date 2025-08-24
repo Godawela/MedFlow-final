@@ -21,6 +21,7 @@ class HomeScreen extends StatelessWidget {
             isProfileAvailable: false,
             showIcon: true,
             isBack: false,
+            fontSize: 20,
           ),
           
           // Main content below the app bar with negative margin to overlap

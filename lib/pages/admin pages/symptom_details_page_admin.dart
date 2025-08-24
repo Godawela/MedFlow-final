@@ -8,19 +8,19 @@ import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:med/widgets/appbar.dart';
-import 'package:med/widgets/image_upload_widget.dart'; // Import your image upload widget
+import 'package:med/widgets/image_upload_widget.dart'; 
 import 'package:url_launcher/url_launcher.dart';
 
 class SymptomDetailPageAdmin extends StatefulWidget {
   final String symptomName;
-
   const SymptomDetailPageAdmin({super.key, required this.symptomName});
 
   @override
   State<SymptomDetailPageAdmin> createState() => _SymptomDetailPageAdminState();
 }
 
-class _SymptomDetailPageAdminState extends State<SymptomDetailPageAdmin> with TickerProviderStateMixin {
+class _SymptomDetailPageAdminState extends State<SymptomDetailPageAdmin>
+    with TickerProviderStateMixin {
   Map<String, dynamic>? symptomDetails;
   bool isLoading = true;
   bool isEditing = false;
@@ -29,12 +29,12 @@ class _SymptomDetailPageAdminState extends State<SymptomDetailPageAdmin> with Ti
   late AnimationController _animationController;
   late Animation<double> _fadeAnimation;
   Timer? _refreshTimer;
-  
+
   // Controllers for editing
   final TextEditingController _nameController = TextEditingController();
   final TextEditingController _descriptionController = TextEditingController();
   final TextEditingController _resourceLinkController = TextEditingController();
-  
+
   // Image handling
   File? _selectedImage;
   String? _currentImageUrl;
@@ -50,10 +50,10 @@ class _SymptomDetailPageAdminState extends State<SymptomDetailPageAdmin> with Ti
     _fadeAnimation = Tween<double>(begin: 0, end: 1).animate(
       CurvedAnimation(parent: _animationController, curve: Curves.easeOut),
     );
-    
+
     fetchSymptomDetails();
     _refreshTimer = Timer.periodic(const Duration(seconds: 10), (timer) {
-      if (!isEditing) { // Don't refresh while editing
+      if (!isEditing) {
         fetchSymptomDetails();
       }
     });
@@ -72,17 +72,16 @@ class _SymptomDetailPageAdminState extends State<SymptomDetailPageAdmin> with Ti
   Future<void> fetchSymptomDetails() async {
     try {
       final response = await http.get(
-        Uri.parse('https://medflow-phi.vercel.app/api/symptoms/name/${widget.symptomName}'),
+        Uri.parse(
+            'https://medflow-phi.vercel.app/api/symptoms/name/${widget.symptomName}'),
       );
 
       if (response.statusCode == 200) {
         final Map<String, dynamic> detail = json.decode(response.body);
-        
         if (detail.isNotEmpty) {
           setState(() {
             symptomDetails = detail;
             isLoading = false;
-            // Initialize controllers with current data
             _nameController.text = detail['name'] ?? '';
             _descriptionController.text = detail['description'] ?? '';
             _resourceLinkController.text = detail['resourceLink'] ?? '';
@@ -111,104 +110,83 @@ class _SymptomDetailPageAdminState extends State<SymptomDetailPageAdmin> with Ti
     }
   }
 
-  // Add better logging to your updateSymptom method
-Future<void> updateSymptom() async {
-  if (symptomDetails == null) return;
-  
-  print('=== UPDATE SYMPTOM DEBUG ===');
-  print('Symptom ID: ${symptomDetails!['_id']}');
-  print('Name: ${_nameController.text.trim()}');
-  print('Description: ${_descriptionController.text.trim()}');
-  print('ResourceLink: ${_resourceLinkController.text.trim()}');
-  print('Remove current image: $_removeCurrentImage');
-  print('Selected new image: ${_selectedImage?.path}');
-  print('Current image URL: $_currentImageUrl');
-  
-  setState(() {
-    isUpdating = true;
-  });
+  // updateSymptom
+  Future<void> updateSymptom() async {
+    if (symptomDetails == null) return;
+    setState(() {
+      isUpdating = true;
+    });
 
-  try {
-    final url = Uri.parse('https://medflow-phi.vercel.app/api/symptoms/${symptomDetails!['_id']}');
-    final request = http.MultipartRequest('PATCH', url);
+    try {
+      final url = Uri.parse(
+          'https://medflow-phi.vercel.app/api/symptoms/${symptomDetails!['_id']}');
+      final request = http.MultipartRequest('PATCH', url);
+      request.fields['name'] = _nameController.text.trim();
+      request.fields['description'] = _descriptionController.text.trim();
+      request.fields['resourceLink'] = _resourceLinkController.text.trim();
 
-    // Add text fields
-    request.fields['name'] = _nameController.text.trim();
-    request.fields['description'] = _descriptionController.text.trim();
-    request.fields['resourceLink'] = _resourceLinkController.text.trim();
-    
-    print('Request fields: ${request.fields}');
-    
-    // Handle image updates
-    if (_removeCurrentImage) {
-      request.fields['removeImage'] = 'true';
-      print('Added removeImage flag');
-    } else if (_selectedImage != null) {
-      // Add new image
-      final imageStream = http.ByteStream(_selectedImage!.openRead());
-      final imageLength = await _selectedImage!.length();
-      
-      final multipartFile = http.MultipartFile(
-        'image', 
-        imageStream,
-        imageLength,
-        filename: 'symptom_${DateTime.now().millisecondsSinceEpoch}.jpg',
-      );
-      
-      request.files.add(multipartFile);
-      print('Added new image file: ${multipartFile.filename}');
-    }
+      // Handle image updates
+      if (_removeCurrentImage) {
+        request.fields['removeImage'] = 'true';
+      } else if (_selectedImage != null) {
+        // Add new image
+        final imageStream = http.ByteStream(_selectedImage!.openRead());
+        final imageLength = await _selectedImage!.length();
 
-    print('Sending request to: $url');
-    final response = await request.send();
-    final responseBody = await response.stream.bytesToString();
-    
-    print('Response status: ${response.statusCode}');
-    print('Response body: $responseBody');
+        final multipartFile = http.MultipartFile(
+          'image',
+          imageStream,
+          imageLength,
+          filename: 'symptom_${DateTime.now().millisecondsSinceEpoch}.jpg',
+        );
+        request.files.add(multipartFile);
+      }
+      final response = await request.send();
+      final responseBody = await response.stream.bytesToString();
 
-    if (response.statusCode == 200) {
-      final updatedSymptom = json.decode(responseBody);
+      if (response.statusCode == 200) {
+        final updatedSymptom = json.decode(responseBody);
+        setState(() {
+          symptomDetails = updatedSymptom;
+          isEditing = false;
+          isUpdating = false;
+          // Update image state
+          _currentImageUrl = updatedSymptom['image'];
+          _selectedImage = null;
+          _removeCurrentImage = false;
+        });
+
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: const Text('Symptom updated successfully!'),
+            backgroundColor: Colors.green.shade600,
+            behavior: SnackBarBehavior.floating,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(10),
+            ),
+          ),
+        );
+      } else {
+        throw Exception(
+            'Failed to update symptom: ${response.statusCode} - $responseBody');
+      }
+    } catch (e) {
       setState(() {
-        symptomDetails = updatedSymptom;
-        isEditing = false;
         isUpdating = false;
-        // Update image state
-        _currentImageUrl = updatedSymptom['image'];
-        _selectedImage = null;
-        _removeCurrentImage = false;
       });
-      
+
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: const Text('Symptom updated successfully!'),
-          backgroundColor: Colors.green.shade600,
+          content: Text('Error updating symptom: $e'),
+          backgroundColor: Colors.red.shade600,
           behavior: SnackBarBehavior.floating,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(10),
           ),
         ),
       );
-    } else {
-      throw Exception('Failed to update symptom: ${response.statusCode} - $responseBody');
     }
-  } catch (e) {
-    print('Update error: $e');
-    setState(() {
-      isUpdating = false;
-    });
-    
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text('Error updating symptom: $e'),
-        backgroundColor: Colors.red.shade600,
-        behavior: SnackBarBehavior.floating,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(10),
-        ),
-      ),
-    );
   }
-}
 
   Future<void> deleteSymptom() async {
     if (symptomDetails == null) return;
@@ -256,7 +234,8 @@ Future<void> updateSymptom() async {
     if (confirmDelete == true) {
       try {
         final response = await http.delete(
-          Uri.parse('https://medflow-phi.vercel.app/api/symptoms/${symptomDetails!['_id']}'),
+          Uri.parse(
+              'https://medflow-phi.vercel.app/api/symptoms/${symptomDetails!['_id']}'),
         );
 
         if (response.statusCode == 200) {
@@ -312,7 +291,8 @@ Future<void> updateSymptom() async {
     setState(() {
       _selectedImage = image;
       if (image != null) {
-        _removeCurrentImage = false; // If new image selected, don't remove current
+        _removeCurrentImage =
+            false; // If new image selected, don't remove current
       }
     });
   }
@@ -338,9 +318,11 @@ Future<void> updateSymptom() async {
             ),
           ),
           const SizedBox(height: 12),
-          
+
           // Show current image if exists and not being removed
-          if (_currentImageUrl != null && !_removeCurrentImage && _selectedImage == null) ...[
+          if (_currentImageUrl != null &&
+              !_removeCurrentImage &&
+              _selectedImage == null) ...[
             Container(
               width: double.infinity,
               height: 200,
@@ -361,7 +343,8 @@ Future<void> updateSymptom() async {
                         return Container(
                           color: Colors.grey.shade200,
                           child: const Center(
-                            child: Icon(Icons.broken_image, size: 50, color: Colors.grey),
+                            child: Icon(Icons.broken_image,
+                                size: 50, color: Colors.grey),
                           ),
                         );
                       },
@@ -376,7 +359,8 @@ Future<void> updateSymptom() async {
                         GestureDetector(
                           onTap: () {
                             setState(() {
-                              _selectedImage = null; // This will show the upload widget
+                              _selectedImage =
+                                  null; // This will show the upload widget
                             });
                           },
                           child: Container(
@@ -392,7 +376,8 @@ Future<void> updateSymptom() async {
                                 ),
                               ],
                             ),
-                            child: const Icon(Icons.edit, color: Colors.white, size: 20),
+                            child: const Icon(Icons.edit,
+                                color: Colors.white, size: 20),
                           ),
                         ),
                         const SizedBox(width: 8),
@@ -412,7 +397,8 @@ Future<void> updateSymptom() async {
                                 ),
                               ],
                             ),
-                            child: const Icon(Icons.close, color: Colors.white, size: 20),
+                            child: const Icon(Icons.close,
+                                color: Colors.white, size: 20),
                           ),
                         ),
                       ],
@@ -437,7 +423,7 @@ Future<void> updateSymptom() async {
               onImageSelected: _onImageSelected,
             ),
           ],
-          
+
           if (_removeCurrentImage && _selectedImage == null) ...[
             const SizedBox(height: 12),
             Container(
@@ -449,7 +435,8 @@ Future<void> updateSymptom() async {
               ),
               child: Row(
                 children: [
-                  Icon(Icons.warning_amber_rounded, color: Colors.orange.shade600, size: 20),
+                  Icon(Icons.warning_amber_rounded,
+                      color: Colors.orange.shade600, size: 20),
                   const SizedBox(width: 8),
                   Expanded(
                     child: Text(
@@ -469,7 +456,8 @@ Future<void> updateSymptom() async {
                     },
                     child: Text(
                       'Undo',
-                      style: TextStyle(color: Colors.orange.shade700, fontSize: 12),
+                      style: TextStyle(
+                          color: Colors.orange.shade700, fontSize: 12),
                     ),
                   ),
                 ],
@@ -508,9 +496,11 @@ Future<void> updateSymptom() async {
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          Icon(Icons.broken_image, size: 50, color: Colors.grey),
+                          Icon(Icons.broken_image,
+                              size: 50, color: Colors.grey),
                           SizedBox(height: 8),
-                          Text('Image failed to load', style: TextStyle(color: Colors.grey)),
+                          Text('Image failed to load',
+                              style: TextStyle(color: Colors.grey)),
                         ],
                       ),
                     ),
@@ -526,7 +516,8 @@ Future<void> updateSymptom() async {
     }
   }
 
-  Widget _buildEditableField(String label, TextEditingController controller, {int maxLines = 1}) {
+  Widget _buildEditableField(String label, TextEditingController controller,
+      {int maxLines = 1}) {
     return Card(
       elevation: 2,
       margin: const EdgeInsets.symmetric(vertical: 8),
@@ -557,7 +548,8 @@ Future<void> updateSymptom() async {
                 ),
                 focusedBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(10),
-                  borderSide: BorderSide(color: Colors.deepPurple.shade400, width: 2),
+                  borderSide:
+                      BorderSide(color: Colors.deepPurple.shade400, width: 2),
                 ),
                 filled: true,
                 fillColor: Colors.grey.shade50,
@@ -743,7 +735,8 @@ Future<void> updateSymptom() async {
                                 // MAIN CONTENT - Scrollable
                                 Expanded(
                                   child: SingleChildScrollView(
-                                    padding: const EdgeInsets.fromLTRB(20, 20, 20, 0),
+                                    padding: const EdgeInsets.fromLTRB(
+                                        20, 20, 20, 0),
                                     child: Column(
                                       children: [
                                         // Symptom header with action buttons
@@ -759,10 +752,12 @@ Future<void> updateSymptom() async {
                                                 Colors.deepPurple.shade600,
                                               ],
                                             ),
-                                            borderRadius: BorderRadius.circular(20),
+                                            borderRadius:
+                                                BorderRadius.circular(20),
                                             boxShadow: [
                                               BoxShadow(
-                                                color: Colors.deepPurple.withOpacity(0.3),
+                                                color: Colors.deepPurple
+                                                    .withOpacity(0.3),
                                                 blurRadius: 12,
                                                 offset: const Offset(0, 6),
                                               ),
@@ -770,267 +765,363 @@ Future<void> updateSymptom() async {
                                           ),
                                           child: Column(
                                             children: [
-                                             // Replace the header Container section (around line 450-500) with this:
-Container(
-  width: double.infinity,
-  padding: const EdgeInsets.all(20),
-  decoration: BoxDecoration(
-    gradient: LinearGradient(
-      begin: Alignment.topLeft,
-      end: Alignment.bottomRight,
-      colors: [
-        Colors.deepPurple.shade400,
-        Colors.deepPurple.shade600,
-      ],
-    ),
-    borderRadius: BorderRadius.circular(20),
-    boxShadow: [
-      BoxShadow(
-        color: Colors.deepPurple.withOpacity(0.3),
-        blurRadius: 12,
-        offset: const Offset(0, 6),
-      ),
-    ],
-  ),
-  child: Column(
-    children: [
-      // Show image if available, otherwise show icon
-      _currentImageUrl != null && !_removeCurrentImage
-          ? Container(
-              width: 80,
-              height: 80,
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(16),
-                border: Border.all(
-                  color: Colors.white.withOpacity(0.3),
-                  width: 2,
-                ),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withOpacity(0.2),
-                    blurRadius: 8,
-                    offset: const Offset(0, 4),
-                  ),
-                ],
-              ),
-              child: ClipRRect(
-                borderRadius: BorderRadius.circular(14),
-                child: Image.network(
-                  _currentImageUrl!,
-                  width: 80,
-                  height: 80,
-                  fit: BoxFit.cover,
-                  errorBuilder: (context, error, stackTrace) {
-                    // Show icon if image fails to load
-                    return Container(
-                      decoration: BoxDecoration(
-                        color: Colors.white.withOpacity(0.2),
-                        borderRadius: BorderRadius.circular(14),
-                      ),
-                      child: Icon(
-                        isEditing ? Icons.edit_rounded : Icons.health_and_safety_rounded,
-                        size: 40,
-                        color: Colors.white,
-                      ),
-                    );
-                  },
-                ),
-              ),
-            )
-          : Container(
-              padding: const EdgeInsets.all(16),
-              decoration: BoxDecoration(
-                color: Colors.white.withOpacity(0.2),
-                borderRadius: BorderRadius.circular(16),
-              ),
-              child: Icon(
-                isEditing ? Icons.edit_rounded : Icons.health_and_safety_rounded,
-                size: 40,
-                color: Colors.white,
-              ),
-            ),
-      const SizedBox(height: 16),
-      Text(
-        isEditing ? 'Editing Symptom' : (symptomDetails!['name'] ?? widget.symptomName),
-        style: GoogleFonts.inter(
-          fontSize: 24,
-          fontWeight: FontWeight.bold,
-          color: Colors.white,
-        ),
-        textAlign: TextAlign.center,
-      ),
-      const SizedBox(height: 20),
-      // Action buttons in header
-      if (isEditing) ...[
-        // Update and Cancel buttons
-        Row(
-          children: [
-            Expanded(
-              child: ElevatedButton.icon(
-                onPressed: isUpdating ? null : updateSymptom,
-                icon: isUpdating
-                    ? const SizedBox(
-                        width: 16,
-                        height: 16,
-                        child: CircularProgressIndicator(
-                          strokeWidth: 2,
-                          valueColor: AlwaysStoppedAnimation<Color>(Colors.green),
-                        ),
-                      )
-                    : const Icon(Icons.check_rounded, size: 18),
-                label: Text(
-                  isUpdating ? 'Saving...' : 'Save',
-                  style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
-                ),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.green.shade600,
-                  foregroundColor: Colors.white,
-                  padding: const EdgeInsets.symmetric(vertical: 12),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                ),
-              ),
-            ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: ElevatedButton.icon(
-                onPressed: _toggleEdit,
-                icon: const Icon(Icons.close_rounded, size: 18),
-                label: const Text(
-                  'Cancel',
-                  style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
-                ),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.white.withOpacity(0.2),
-                  foregroundColor: Colors.white,
-                  padding: const EdgeInsets.symmetric(vertical: 12),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                ),
-              ),
-            ),
-          ],
-        ),
-      ] else ...[
-        // Edit and Delete buttons
-        Row(
-          children: [
-            Expanded(
-              child: ElevatedButton.icon(
-                onPressed: _toggleEdit,
-                icon: const Icon(Icons.edit_rounded, size: 18),
-                label: const Text(
-                  'Edit',
-                  style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
-                ),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.white.withOpacity(0.2),
-                  foregroundColor: Colors.white,
-                  padding: const EdgeInsets.symmetric(vertical: 12),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                ),
-              ),
-            ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: ElevatedButton.icon(
-                onPressed: deleteSymptom,
-                icon: const Icon(Icons.delete_rounded, size: 18),
-                label: const Text(
-                  'Delete',
-                  style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
-                ),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.red.shade600,
-                  foregroundColor: Colors.white,
-                  padding: const EdgeInsets.symmetric(vertical: 12),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                ),
-              ),
-            ),
-          ],
-        ),
-      ],
-    ],
-  ),
-),
-                                        
-                                        const SizedBox(height: 24),
-                                        
-                                        // Content based on edit mode
-                                        if (isEditing) ...[
-                                          _buildEditableField('Name', _nameController),
-                                          _buildEditableField('Description', _descriptionController, maxLines: 5),
-                                          _buildEditableField('Resource Link', _resourceLinkController),
-                                          
-                                          const SizedBox(height: 16),
-                                          
-                                          // Image upload section
-                                          Card(
-                                            elevation: 2,
-                                            margin: const EdgeInsets.symmetric(vertical: 8),
-                                            shape: RoundedRectangleBorder(
-                                              borderRadius: BorderRadius.circular(15),
-                                            ),
-                                            child: Padding(
-                                              padding: const EdgeInsets.all(16),
-                                              child: _buildImageSection(),
-                                            ),
-                                          ),
-                                        ] else ...[
-                                          // Display mode
-                                          
-                                          // Show image first if available
-                                          _buildImageSection(),
-                                          
-                                          if (_currentImageUrl != null) const SizedBox(height: 16),
-                                          
-                                          if (symptomDetails!['description'] != null)
-                                            _buildDetailCard(
-                                              'Description',
-                                              symptomDetails!['description'],
-                                              Icons.description_rounded,
-                                            ),
-                                          
-                                          if (symptomDetails!['resourceLink'] != null && 
-                                              symptomDetails!['resourceLink'].toString().isNotEmpty) ...[
-                                            const SizedBox(height: 16),
-                                            Center(
-                                              child: ElevatedButton.icon(
-                                                onPressed: () {
-                                                  _launchURL(symptomDetails!['resourceLink']);
-                                                },
-                                                icon: const Icon(Icons.link_rounded),
-                                                label: const Text('View Resource'),
-                                                style: ElevatedButton.styleFrom(
-                                                  backgroundColor: Colors.purple,
-                                                  foregroundColor: Colors.white,
-                                                  padding: const EdgeInsets.symmetric(
-                                                    horizontal: 24,
-                                                    vertical: 16,
+                                              Container(
+                                                width: double.infinity,
+                                                padding:
+                                                    const EdgeInsets.all(20),
+                                                decoration: BoxDecoration(
+                                                  gradient: LinearGradient(
+                                                    begin: Alignment.topLeft,
+                                                    end: Alignment.bottomRight,
+                                                    colors: [
+                                                      Colors
+                                                          .deepPurple.shade400,
+                                                      Colors
+                                                          .deepPurple.shade600,
+                                                    ],
                                                   ),
-                                                  shape: RoundedRectangleBorder(
-                                                    borderRadius: BorderRadius.circular(15),
-                                                  ),
-                                                  elevation: 5,
+                                                  borderRadius:
+                                                      BorderRadius.circular(20),
+                                                  boxShadow: [
+                                                    BoxShadow(
+                                                      color: Colors.deepPurple
+                                                          .withOpacity(0.3),
+                                                      blurRadius: 12,
+                                                      offset:
+                                                          const Offset(0, 6),
+                                                    ),
+                                                  ],
+                                                ),
+                                                child: Column(
+                                                  children: [
+                                                  
+                                                    Text(
+                                                      isEditing
+                                                          ? 'Editing Symptom'
+                                                          : (symptomDetails![
+                                                                  'name'] ??
+                                                              widget
+                                                                  .symptomName),
+                                                      style: GoogleFonts.inter(
+                                                        fontSize: 24,
+                                                        fontWeight:
+                                                            FontWeight.bold,
+                                                        color: Colors.white,
+                                                      ),
+                                                      textAlign:
+                                                          TextAlign.center,
+                                                    ),
+                                                    const SizedBox(height: 20),
+                                                    // Action buttons in header
+                                                    if (isEditing) ...[
+                                                      // Update and Cancel buttons
+                                                      Row(
+                                                        children: [
+                                                          Expanded(
+                                                            child:
+                                                                ElevatedButton
+                                                                    .icon(
+                                                              onPressed: isUpdating
+                                                                  ? null
+                                                                  : updateSymptom,
+                                                              icon: isUpdating
+                                                                  ? const SizedBox(
+                                                                      width: 16,
+                                                                      height:
+                                                                          16,
+                                                                      child:
+                                                                          CircularProgressIndicator(
+                                                                        strokeWidth:
+                                                                            2,
+                                                                        valueColor:
+                                                                            AlwaysStoppedAnimation<Color>(Colors.green),
+                                                                      ),
+                                                                    )
+                                                                  : const Icon(
+                                                                      Icons
+                                                                          .check_rounded,
+                                                                      size: 18),
+                                                              label: Text(
+                                                                isUpdating
+                                                                    ? 'Saving...'
+                                                                    : 'Save',
+                                                                style: const TextStyle(
+                                                                    fontSize:
+                                                                        14,
+                                                                    fontWeight:
+                                                                        FontWeight
+                                                                            .bold),
+                                                              ),
+                                                              style:
+                                                                  ElevatedButton
+                                                                      .styleFrom(
+                                                                backgroundColor:
+                                                                    Colors.green
+                                                                        .shade600,
+                                                                foregroundColor:
+                                                                    Colors
+                                                                        .white,
+                                                                padding:
+                                                                    const EdgeInsets
+                                                                        .symmetric(
+                                                                        vertical:
+                                                                            12),
+                                                                shape:
+                                                                    RoundedRectangleBorder(
+                                                                  borderRadius:
+                                                                      BorderRadius
+                                                                          .circular(
+                                                                              10),
+                                                                ),
+                                                              ),
+                                                            ),
+                                                          ),
+                                                          const SizedBox(
+                                                              width: 12),
+                                                          Expanded(
+                                                            child:
+                                                                ElevatedButton
+                                                                    .icon(
+                                                              onPressed:
+                                                                  _toggleEdit,
+                                                              icon: const Icon(
+                                                                  Icons
+                                                                      .close_rounded,
+                                                                  size: 18),
+                                                              label: const Text(
+                                                                'Cancel',
+                                                                style: TextStyle(
+                                                                    fontSize:
+                                                                        14,
+                                                                    fontWeight:
+                                                                        FontWeight
+                                                                            .bold),
+                                                              ),
+                                                              style:
+                                                                  ElevatedButton
+                                                                      .styleFrom(
+                                                                backgroundColor:
+                                                                    Colors.white
+                                                                        .withOpacity(
+                                                                            0.2),
+                                                                foregroundColor:
+                                                                    Colors
+                                                                        .white,
+                                                                padding:
+                                                                    const EdgeInsets
+                                                                        .symmetric(
+                                                                        vertical:
+                                                                            12),
+                                                                shape:
+                                                                    RoundedRectangleBorder(
+                                                                  borderRadius:
+                                                                      BorderRadius
+                                                                          .circular(
+                                                                              10),
+                                                                ),
+                                                              ),
+                                                            ),
+                                                          ),
+                                                        ],
+                                                      ),
+                                                    ] else ...[
+                                                      // Edit and Delete buttons
+                                                      Row(
+                                                        children: [
+                                                          Expanded(
+                                                            child:
+                                                                ElevatedButton
+                                                                    .icon(
+                                                              onPressed:
+                                                                  _toggleEdit,
+                                                              icon: const Icon(
+                                                                  Icons
+                                                                      .edit_rounded,
+                                                                  size: 18),
+                                                              label: const Text(
+                                                                'Edit',
+                                                                style: TextStyle(
+                                                                    fontSize:
+                                                                        14,
+                                                                    fontWeight:
+                                                                        FontWeight
+                                                                            .bold),
+                                                              ),
+                                                              style:
+                                                                  ElevatedButton
+                                                                      .styleFrom(
+                                                                backgroundColor:
+                                                                    Colors.white
+                                                                        .withOpacity(
+                                                                            0.2),
+                                                                foregroundColor:
+                                                                    Colors
+                                                                        .white,
+                                                                padding:
+                                                                    const EdgeInsets
+                                                                        .symmetric(
+                                                                        vertical:
+                                                                            12),
+                                                                shape:
+                                                                    RoundedRectangleBorder(
+                                                                  borderRadius:
+                                                                      BorderRadius
+                                                                          .circular(
+                                                                              10),
+                                                                ),
+                                                              ),
+                                                            ),
+                                                          ),
+                                                          const SizedBox(
+                                                              width: 12),
+                                                          Expanded(
+                                                            child:
+                                                                ElevatedButton
+                                                                    .icon(
+                                                              onPressed:
+                                                                  deleteSymptom,
+                                                              icon: const Icon(
+                                                                  Icons
+                                                                      .delete_rounded,
+                                                                  size: 18),
+                                                              label: const Text(
+                                                                'Delete',
+                                                                style: TextStyle(
+                                                                    fontSize:
+                                                                        14,
+                                                                    fontWeight:
+                                                                        FontWeight
+                                                                            .bold),
+                                                              ),
+                                                              style:
+                                                                  ElevatedButton
+                                                                      .styleFrom(
+                                                                backgroundColor:
+                                                                    Colors.red
+                                                                        .shade600,
+                                                                foregroundColor:
+                                                                    Colors
+                                                                        .white,
+                                                                padding:
+                                                                    const EdgeInsets
+                                                                        .symmetric(
+                                                                        vertical:
+                                                                            12),
+                                                                shape:
+                                                                    RoundedRectangleBorder(
+                                                                  borderRadius:
+                                                                      BorderRadius
+                                                                          .circular(
+                                                                              10),
+                                                                ),
+                                                              ),
+                                                            ),
+                                                          ),
+                                                        ],
+                                                      ),
+                                                    ],
+                                                  ],
                                                 ),
                                               ),
-                                            ),
-                                          ],
-                                        ],
-                                        
-                                        const SizedBox(height: 20),
+
+                                              const SizedBox(height: 24),
+
+                                              // Content based on edit mode
+                                              if (isEditing) ...[
+                                                _buildEditableField(
+                                                    'Name', _nameController),
+                                                _buildEditableField(
+                                                    'Description',
+                                                    _descriptionController,
+                                                    maxLines: 5),
+                                                _buildEditableField(
+                                                    'Resource Link',
+                                                    _resourceLinkController),
+
+                                                const SizedBox(height: 16),
+                                                // Image upload section
+                                                Card(
+                                                  elevation: 2,
+                                                  margin: const EdgeInsets
+                                                      .symmetric(vertical: 8),
+                                                  shape: RoundedRectangleBorder(
+                                                    borderRadius:
+                                                        BorderRadius.circular(
+                                                            15),
+                                                  ),
+                                                  child: Padding(
+                                                    padding:
+                                                        const EdgeInsets.all(
+                                                            16),
+                                                    child: _buildImageSection(),
+                                                  ),
+                                                ),
+                                              ] else ...[
+                                                // Show image first if available
+                                                _buildImageSection(),
+                                                if (_currentImageUrl != null)
+                                                  const SizedBox(height: 16),
+
+                                                if (symptomDetails![
+                                                        'description'] !=
+                                                    null)
+                                                  _buildDetailCard(
+                                                    'Description',
+                                                    symptomDetails![
+                                                        'description'],
+                                                    Icons.description_rounded,
+                                                  ),
+
+                                                if (symptomDetails![
+                                                            'resourceLink'] !=
+                                                        null &&
+                                                    symptomDetails![
+                                                            'resourceLink']
+                                                        .toString()
+                                                        .isNotEmpty) ...[
+                                                  const SizedBox(height: 16),
+                                                  Center(
+                                                    child: ElevatedButton.icon(
+                                                      onPressed: () {
+                                                        _launchURL(
+                                                            symptomDetails![
+                                                                'resourceLink']);
+                                                      },
+                                                      icon: const Icon(
+                                                          Icons.link_rounded),
+                                                      label: const Text(
+                                                          'View Resource'),
+                                                      style: ElevatedButton
+                                                          .styleFrom(
+                                                        backgroundColor:
+                                                            Colors.purple,
+                                                        foregroundColor:
+                                                            Colors.white,
+                                                        padding:
+                                                            const EdgeInsets
+                                                                .symmetric(
+                                                          horizontal: 24,
+                                                          vertical: 16,
+                                                        ),
+                                                        shape:
+                                                            RoundedRectangleBorder(
+                                                          borderRadius:
+                                                              BorderRadius
+                                                                  .circular(15),
+                                                        ),
+                                                        elevation: 5,
+                                                      ),
+                                                    ),
+                                                  ),
+                                                ],
+                                              ],
+
+                                              const SizedBox(height: 20),
+                                            ],
+                                          ),
+                                        ),
                                       ],
                                     ),
-                                  ),
-                                      ],
-                                ),
                                   ),
                                 ),
                               ],

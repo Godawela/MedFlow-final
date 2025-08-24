@@ -24,8 +24,7 @@ class _SymptomDetailPageState extends State<SymptomDetailPage> with TickerProvid
   String? error;
   late AnimationController _animationController;
   late Animation<double> _fadeAnimation;
-      Timer? _refreshTimer;
-
+  Timer? _refreshTimer;
 
   @override
   void initState() {
@@ -97,54 +96,148 @@ class _SymptomDetailPageState extends State<SymptomDetailPage> with TickerProvid
     }
   }
 
-  Widget _buildDetailCard(String title, String content, IconData icon) {
-    return Card(
-      elevation: 4,
-      margin: const EdgeInsets.symmetric(vertical: 8),
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(15),
-      ),
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              children: [
-                Container(
-                  padding: const EdgeInsets.all(8),
+  Widget _buildImageSection() {
+    if (symptomDetails!['image'] != null) {
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'Symptom Image',
+            style: GoogleFonts.inter(
+              fontSize: 16,
+              fontWeight: FontWeight.w600,
+              color: Colors.white,
+            ),
+          ),
+          const SizedBox(height: 12),
+          ClipRRect(
+            borderRadius: BorderRadius.circular(16),
+            child: Image.network(
+              symptomDetails!['image'],
+              width: double.infinity,
+              height: 200,
+              fit: BoxFit.cover,
+              loadingBuilder: (context, child, loadingProgress) {
+                if (loadingProgress == null) return child;
+                return Container(
+                  height: 200,
                   decoration: BoxDecoration(
-                    color: Colors.deepPurple.shade100,
-                    borderRadius: BorderRadius.circular(10),
+                    color: Colors.white.withValues(alpha: 0.1),
+                    borderRadius: BorderRadius.circular(16),
                   ),
-                  child: Icon(
-                    icon,
-                    color: Colors.deepPurple.shade700,
-                    size: 24,
+                  child: Center(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        CircularProgressIndicator(
+                          strokeWidth: 2,
+                          valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                        ),
+                        const SizedBox(height: 8),
+                        Text(
+                          'Loading image...',
+                          style: TextStyle(color: Colors.white, fontSize: 12),
+                        ),
+                      ],
+                    ),
                   ),
-                ),
-                const SizedBox(width: 12),
-                Text(
-                  title,
-                  style: GoogleFonts.inter(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.deepPurple.shade800,
+                );
+              },
+              errorBuilder: (context, error, stackTrace) {
+                return Container(
+                  height: 200,
+                  decoration: BoxDecoration(
+                    color: Colors.white.withValues(alpha: 0.1),
+                    borderRadius: BorderRadius.circular(16),
+                    border: Border.all(
+                      color: Colors.white.withValues(alpha: 0.3),
+                      width: 1,
+                    ),
                   ),
-                ),
-              ],
+                  child: const Center(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(
+                          Icons.broken_image, 
+                          size: 50, 
+                          color: Colors.white,
+                        ),
+                        SizedBox(height: 8),
+                        Text(
+                          'Image failed to load', 
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 12,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                );
+              },
             ),
-            const SizedBox(height: 12),
-            Text(
-              content,
-              style: GoogleFonts.inter(
-                fontSize: 16,
-                color: Colors.grey.shade800,
-                height: 1.5,
+          ),
+        ],
+      );
+    } else {
+      return const SizedBox.shrink(); // Don't show anything if no image
+    }
+  }
+
+  Widget _buildDetailCard(String title, String content, IconData icon) {
+    return Container(
+      margin: const EdgeInsets.symmetric(vertical: 8),
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.white.withValues(alpha: 0.9),
+        borderRadius: BorderRadius.circular(15),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.1),
+            blurRadius: 8,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: Colors.white.withValues(alpha: 0.8),
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: Icon(
+                  icon,
+                  color: Colors.deepPurple.shade700,
+                  size: 24,
+                ),
               ),
+              const SizedBox(width: 12),
+              Text(
+                title,
+                style: GoogleFonts.inter(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.deepPurple.shade800,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 12),
+          Text(
+            content,
+            style: GoogleFonts.inter(
+              fontSize: 16,
+              color: Colors.grey.shade800,
+              height: 1.5,
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
@@ -177,7 +270,8 @@ class _SymptomDetailPageState extends State<SymptomDetailPage> with TickerProvid
                                 color: Colors.black.withValues(alpha:0.1),
                                 blurRadius: 20,
                                 offset: const Offset(0, 10),
-                          )],
+                              )
+                            ],
                           ),
                           child: CircularProgressIndicator(
                             strokeWidth: 3,
@@ -268,7 +362,7 @@ class _SymptomDetailPageState extends State<SymptomDetailPage> with TickerProvid
                               padding: const EdgeInsets.all(20),
                               child: Column(
                                 children: [
-                                  // Symptom header
+                                  // Main container covering all content
                                   Container(
                                     width: double.infinity,
                                     padding: const EdgeInsets.all(20),
@@ -292,19 +386,7 @@ class _SymptomDetailPageState extends State<SymptomDetailPage> with TickerProvid
                                     ),
                                     child: Column(
                                       children: [
-                                        Container(
-                                          padding: const EdgeInsets.all(16),
-                                          decoration: BoxDecoration(
-                                            color: Colors.white.withValues(alpha:0.2),
-                                            borderRadius: BorderRadius.circular(16),
-                                          ),
-                                          child: const Icon(
-                                            Icons.health_and_safety_rounded,
-                                            size: 40,
-                                            color: Colors.white,
-                                          ),
-                                        ),
-                                        const SizedBox(height: 16),
+                                        // Symptom name
                                         Text(
                                           widget.symptomName,
                                           style: GoogleFonts.inter(
@@ -314,47 +396,50 @@ class _SymptomDetailPageState extends State<SymptomDetailPage> with TickerProvid
                                           ),
                                           textAlign: TextAlign.center,
                                         ),
+                                        
+                                        // Show image if available
+                                        if (symptomDetails!['image'] != null) ...[
+                                          const SizedBox(height: 20),
+                                          _buildImageSection(),
+                                        ],
+                                        
+                                        // Description card
+                                        if (symptomDetails!['description'] != null) ...[
+                                          const SizedBox(height: 20),
+                                          _buildDetailCard(
+                                            'Description',
+                                            symptomDetails!['description'],
+                                            Icons.description_rounded,
+                                          ),
+                                        ],
+                                        
+                                        // Resource button
+                                        if (symptomDetails!['resourceLink'] != null && 
+                                            symptomDetails!['resourceLink'].toString().isNotEmpty) ...[
+                                          const SizedBox(height: 16),
+                                          ElevatedButton.icon(
+                                            onPressed: () {
+                                              _launchURL(symptomDetails!['resourceLink']);
+                                            },
+                                            icon: const Icon(Icons.link_rounded),
+                                            label: const Text('View Resource'),
+                                            style: ElevatedButton.styleFrom(
+                                              backgroundColor: Colors.white,
+                                              foregroundColor: Colors.deepPurple.shade600,
+                                              padding: const EdgeInsets.symmetric(
+                                                horizontal: 24,
+                                                vertical: 16,
+                                              ),
+                                              shape: RoundedRectangleBorder(
+                                                borderRadius: BorderRadius.circular(15),
+                                              ),
+                                              elevation: 5,
+                                            ),
+                                          ),
+                                        ],
                                       ],
                                     ),
                                   ),
-                                  
-                                  const SizedBox(height: 24),
-                                  
-                                  // Symptom details
-                                
-                                  
-                                  if (symptomDetails!['description'] != null)
-                                    _buildDetailCard(
-                                      'Description',
-                                      symptomDetails!['description'],
-                                      Icons.description_rounded,
-                                    ),
-                                  
-                                  if (symptomDetails!['resourceLink'] != null && 
-                                      symptomDetails!['resourceLink'].toString().isNotEmpty) ...[
-                                    const SizedBox(height: 16),
-                                    Center(
-                                      child: ElevatedButton.icon(
-                                        onPressed: () {
-                                          _launchURL(symptomDetails!['resourceLink']);
-                                        },
-                                        icon: const Icon(Icons.link_rounded),
-                                        label: const Text('View Resource'),
-                                        style: ElevatedButton.styleFrom(
-                                          backgroundColor: Colors.deepPurple.shade500,
-                                          foregroundColor: Colors.white,
-                                          padding: const EdgeInsets.symmetric(
-                                            horizontal: 24,
-                                            vertical: 16,
-                                          ),
-                                          shape: RoundedRectangleBorder(
-                                            borderRadius: BorderRadius.circular(15),
-                                          ),
-                                          elevation: 5,
-                                        ),
-                                      ),
-                                    ),
-                                  ],
                                   
                                   const SizedBox(height: 20),
                                 ],

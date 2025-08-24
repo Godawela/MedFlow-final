@@ -12,6 +12,7 @@ class CurvedAppBar extends StatelessWidget {
   final bool? isBack;
   final VoidCallback? backFunction;
   final List<PopupMenuButton<String>> actions;
+  final double fontSize ;
 
   const CurvedAppBar({
     super.key,
@@ -25,6 +26,7 @@ class CurvedAppBar extends StatelessWidget {
     this.backgroundColor,
     this.isBack,
     this.backFunction, 
+    this.fontSize = 18,
     this.actions = const [],
   }) : assert(
           isProfileAvailable == false || profileImage != null,
@@ -90,10 +92,10 @@ class CurvedAppBar extends StatelessWidget {
                       width: MediaQuery.of(context).size.width * 0.5,
                       child: Text(
                         title!,
-                        style: const TextStyle(
+                        style:  TextStyle(
                         color: Colors.white,
                         fontWeight: FontWeight.bold,
-                        fontSize: 18,
+                        fontSize: fontSize,
                         ),
                         maxLines: 2,
                         overflow: TextOverflow.ellipsis,

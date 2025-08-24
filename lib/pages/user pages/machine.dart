@@ -315,21 +315,7 @@ class _MachinePageState extends State<MachinePage>
                                           ),
                                           child: Column(
                                             children: [
-                                              Container(
-                                                padding: const EdgeInsets.all(16),
-                                                decoration: BoxDecoration(
-                                                  color:
-                                                      Colors.white.withValues(alpha:0.2),
-                                                  shape: BoxShape.circle,
-                                                ),
-                                                child: const CircleAvatar(
-                                                  radius: 32,
-                                                  backgroundImage: AssetImage(
-                                                      'assets/images/logo.png'),
-                                                  backgroundColor: Colors.white,
-                                                ),
-                                              ),
-                                              const SizedBox(height: 16),
+                                            
                                               const UserGreeting(),
                                               const SizedBox(height: 12),
                                               Text(
