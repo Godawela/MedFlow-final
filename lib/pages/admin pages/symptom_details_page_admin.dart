@@ -1,12 +1,14 @@
 // ignore_for_file: use_build_context_synchronously
 
 import 'dart:async';
+import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:med/widgets/appbar.dart';
+import 'package:med/widgets/image_upload_widget.dart'; // Import your image upload widget
 import 'package:url_launcher/url_launcher.dart';
 
 class SymptomDetailPageAdmin extends StatefulWidget {
@@ -26,13 +28,17 @@ class _SymptomDetailPageAdminState extends State<SymptomDetailPageAdmin> with Ti
   String? error;
   late AnimationController _animationController;
   late Animation<double> _fadeAnimation;
+  Timer? _refreshTimer;
   
   // Controllers for editing
   final TextEditingController _nameController = TextEditingController();
   final TextEditingController _descriptionController = TextEditingController();
   final TextEditingController _resourceLinkController = TextEditingController();
-    Timer? _refreshTimer;
-
+  
+  // Image handling
+  File? _selectedImage;
+  String? _currentImageUrl;
+  bool _removeCurrentImage = false;
 
   @override
   void initState() {
@@ -46,8 +52,10 @@ class _SymptomDetailPageAdminState extends State<SymptomDetailPageAdmin> with Ti
     );
     
     fetchSymptomDetails();
-     _refreshTimer = Timer.periodic(const Duration(seconds: 10), (timer) {
-      fetchSymptomDetails();
+    _refreshTimer = Timer.periodic(const Duration(seconds: 10), (timer) {
+      if (!isEditing) { // Don't refresh while editing
+        fetchSymptomDetails();
+      }
     });
   }
 
@@ -57,8 +65,7 @@ class _SymptomDetailPageAdminState extends State<SymptomDetailPageAdmin> with Ti
     _nameController.dispose();
     _descriptionController.dispose();
     _resourceLinkController.dispose();
-        _refreshTimer?.cancel();
-
+    _refreshTimer?.cancel();
     super.dispose();
   }
 
@@ -79,6 +86,9 @@ class _SymptomDetailPageAdminState extends State<SymptomDetailPageAdmin> with Ti
             _nameController.text = detail['name'] ?? '';
             _descriptionController.text = detail['description'] ?? '';
             _resourceLinkController.text = detail['resourceLink'] ?? '';
+            _currentImageUrl = detail['image']; // Store current image URL
+            _selectedImage = null; // Reset selected image
+            _removeCurrentImage = false; // Reset remove flag
           });
           _animationController.forward();
         } else {
@@ -109,26 +119,45 @@ class _SymptomDetailPageAdminState extends State<SymptomDetailPageAdmin> with Ti
     });
 
     try {
-      final Map<String, dynamic> updatedData = {
-        'name': _nameController.text.trim(),
-        'description': _descriptionController.text.trim(),
-        'resourceLink': _resourceLinkController.text.trim(),
-      };
+      final url = Uri.parse('https://medflow-phi.vercel.app/api/symptoms/${symptomDetails!['_id']}');
+      final request = http.MultipartRequest('PATCH', url);
 
-      final response = await http.patch(
-        Uri.parse('https://medflow-phi.vercel.app/api/symptoms/${symptomDetails!['_id']}'),
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: json.encode(updatedData),
-      );
+      // Add text fields
+      request.fields['name'] = _nameController.text.trim();
+      request.fields['description'] = _descriptionController.text.trim();
+      request.fields['resourceLink'] = _resourceLinkController.text.trim();
+      
+      // Handle image updates
+      if (_removeCurrentImage) {
+        request.fields['removeImage'] = 'true';
+      } else if (_selectedImage != null) {
+        // Add new image
+        final imageStream = http.ByteStream(_selectedImage!.openRead());
+        final imageLength = await _selectedImage!.length();
+        
+        final multipartFile = http.MultipartFile(
+          'image', 
+          imageStream,
+          imageLength,
+          filename: 'symptom_${DateTime.now().millisecondsSinceEpoch}.jpg',
+        );
+        
+        request.files.add(multipartFile);
+      }
+
+      final response = await request.send();
+      final responseBody = await response.stream.bytesToString();
 
       if (response.statusCode == 200) {
-        final updatedSymptom = json.decode(response.body);
+        final updatedSymptom = json.decode(responseBody);
         setState(() {
           symptomDetails = updatedSymptom;
           isEditing = false;
           isUpdating = false;
+          // Update image state
+          _currentImageUrl = updatedSymptom['image'];
+          _selectedImage = null;
+          _removeCurrentImage = false;
         });
         
         ScaffoldMessenger.of(context).showSnackBar(
@@ -142,7 +171,7 @@ class _SymptomDetailPageAdminState extends State<SymptomDetailPageAdmin> with Ti
           ),
         );
       } else {
-        throw Exception('Failed to update symptom: ${response.statusCode}');
+        throw Exception('Failed to update symptom: ${response.statusCode} - $responseBody');
       }
     } catch (e) {
       setState(() {
@@ -239,10 +268,12 @@ class _SymptomDetailPageAdminState extends State<SymptomDetailPageAdmin> with Ti
     setState(() {
       isEditing = !isEditing;
       if (!isEditing) {
-        // Reset controllers if canceling edit
+        // Reset controllers and image state if canceling edit
         _nameController.text = symptomDetails!['name'] ?? '';
         _descriptionController.text = symptomDetails!['description'] ?? '';
         _resourceLinkController.text = symptomDetails!['resourceLink'] ?? '';
+        _selectedImage = null;
+        _removeCurrentImage = false;
       }
     });
   }
@@ -255,6 +286,224 @@ class _SymptomDetailPageAdminState extends State<SymptomDetailPageAdmin> with Ti
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Could not launch $url')),
       );
+    }
+  }
+
+  void _onImageSelected(File? image) {
+    setState(() {
+      _selectedImage = image;
+      if (image != null) {
+        _removeCurrentImage = false; // If new image selected, don't remove current
+      }
+    });
+  }
+
+  void _removeCurrentImageAction() {
+    setState(() {
+      _removeCurrentImage = true;
+      _selectedImage = null;
+    });
+  }
+
+  Widget _buildImageSection() {
+    if (isEditing) {
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'Symptom Image',
+            style: GoogleFonts.inter(
+              fontSize: 16,
+              fontWeight: FontWeight.w600,
+              color: Colors.deepPurple,
+            ),
+          ),
+          const SizedBox(height: 12),
+          
+          // Show current image if exists and not being removed
+          if (_currentImageUrl != null && !_removeCurrentImage && _selectedImage == null) ...[
+            Container(
+              width: double.infinity,
+              height: 200,
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(16),
+                border: Border.all(color: Colors.deepPurple.shade200, width: 2),
+              ),
+              child: Stack(
+                children: [
+                  ClipRRect(
+                    borderRadius: BorderRadius.circular(14),
+                    child: Image.network(
+                      _currentImageUrl!,
+                      width: double.infinity,
+                      height: double.infinity,
+                      fit: BoxFit.cover,
+                      errorBuilder: (context, error, stackTrace) {
+                        return Container(
+                          color: Colors.grey.shade200,
+                          child: const Center(
+                            child: Icon(Icons.broken_image, size: 50, color: Colors.grey),
+                          ),
+                        );
+                      },
+                    ),
+                  ),
+                  Positioned(
+                    top: 8,
+                    right: 8,
+                    child: Row(
+                      children: [
+                        // Replace image button
+                        GestureDetector(
+                          onTap: () {
+                            setState(() {
+                              _selectedImage = null; // This will show the upload widget
+                            });
+                          },
+                          child: Container(
+                            padding: const EdgeInsets.all(8),
+                            decoration: BoxDecoration(
+                              color: Colors.blue.shade500,
+                              shape: BoxShape.circle,
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.black.withOpacity(0.2),
+                                  blurRadius: 4,
+                                  offset: const Offset(0, 2),
+                                ),
+                              ],
+                            ),
+                            child: const Icon(Icons.edit, color: Colors.white, size: 20),
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        // Remove image button
+                        GestureDetector(
+                          onTap: _removeCurrentImageAction,
+                          child: Container(
+                            padding: const EdgeInsets.all(8),
+                            decoration: BoxDecoration(
+                              color: Colors.red.shade500,
+                              shape: BoxShape.circle,
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.black.withOpacity(0.2),
+                                  blurRadius: 4,
+                                  offset: const Offset(0, 2),
+                                ),
+                              ],
+                            ),
+                            child: const Icon(Icons.close, color: Colors.white, size: 20),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 12),
+            Text(
+              'Current image - Tap edit to replace or remove',
+              style: GoogleFonts.inter(
+                fontSize: 12,
+                color: Colors.grey.shade600,
+                fontStyle: FontStyle.italic,
+              ),
+            ),
+          ] else ...[
+            // Show image upload widget for new image or when current is removed
+            ImageUploadWidget(
+              selectedImage: _selectedImage,
+              onImageSelected: _onImageSelected,
+            ),
+          ],
+          
+          if (_removeCurrentImage && _selectedImage == null) ...[
+            const SizedBox(height: 12),
+            Container(
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: Colors.orange.shade50,
+                borderRadius: BorderRadius.circular(8),
+                border: Border.all(color: Colors.orange.shade200),
+              ),
+              child: Row(
+                children: [
+                  Icon(Icons.warning_amber_rounded, color: Colors.orange.shade600, size: 20),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      'Current image will be removed when you save',
+                      style: GoogleFonts.inter(
+                        fontSize: 12,
+                        color: Colors.orange.shade700,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                  ),
+                  TextButton(
+                    onPressed: () {
+                      setState(() {
+                        _removeCurrentImage = false;
+                      });
+                    },
+                    child: Text(
+                      'Undo',
+                      style: TextStyle(color: Colors.orange.shade700, fontSize: 12),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ],
+      );
+    } else {
+      // Display mode - show current image if exists
+      if (_currentImageUrl != null) {
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'Symptom Image',
+              style: GoogleFonts.inter(
+                fontSize: 16,
+                fontWeight: FontWeight.w600,
+                color: Colors.white,
+              ),
+            ),
+            const SizedBox(height: 12),
+            ClipRRect(
+              borderRadius: BorderRadius.circular(16),
+              child: Image.network(
+                _currentImageUrl!,
+                width: double.infinity,
+                height: 200,
+                fit: BoxFit.cover,
+                errorBuilder: (context, error, stackTrace) {
+                  return Container(
+                    height: 200,
+                    color: Colors.grey.shade200,
+                    child: const Center(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(Icons.broken_image, size: 50, color: Colors.grey),
+                          SizedBox(height: 8),
+                          Text('Image failed to load', style: TextStyle(color: Colors.grey)),
+                        ],
+                      ),
+                    ),
+                  );
+                },
+              ),
+            ),
+          ],
+        );
+      } else {
+        return const SizedBox.shrink(); // Don't show anything if no image
+      }
     }
   }
 
@@ -354,336 +603,425 @@ class _SymptomDetailPageAdminState extends State<SymptomDetailPageAdmin> with Ti
     );
   }
 
-// Replace the build method in your SymptomDetailPage with this fixed version
-
-@override
-Widget build(BuildContext context) {
-  return Scaffold(
-    backgroundColor: Colors.grey.shade50,
-    body: Column(
-      children: [
-        CurvedAppBar(
-          title: isEditing ? 'Edit Symptom' : widget.symptomName,
-          isProfileAvailable: false,
-          showIcon: true,
-          isBack: true,
-        ),
-        Expanded(
-          child: isLoading
-              ? Center(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Container(
-                        padding: const EdgeInsets.all(20),
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          shape: BoxShape.circle,
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.black.withValues(alpha:0.1),
-                              blurRadius: 20,
-                              offset: const Offset(0, 10),
-                        )],
-                        ),
-                        child: CircularProgressIndicator(
-                          strokeWidth: 3,
-                          valueColor: AlwaysStoppedAnimation<Color>(
-                            Colors.deepPurple.shade400,
-                          ),
-                        ),
-                      ),
-                      const SizedBox(height: 24),
-                      Text(
-                        'Loading symptom details...',
-                        style: GoogleFonts.inter(
-                          fontSize: 16,
-                          color: Colors.grey.shade600,
-                          fontWeight: FontWeight.w500,
-                        ),
-                      ),
-                    ],
-                  ),
-                )
-              : error != null
-                  ? Center(
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Container(
-                            padding: const EdgeInsets.all(20),
-                            decoration: BoxDecoration(
-                              color: Colors.red.shade50,
-                              shape: BoxShape.circle,
-                            ),
-                            child: Icon(
-                              Icons.error_outline_rounded,
-                              size: 48,
-                              color: Colors.red.shade400,
-                            ),
-                          ),
-                          const SizedBox(height: 16),
-                          Text(
-                            'Oops! Something went wrong',
-                            style: GoogleFonts.inter(
-                              fontSize: 18,
-                              fontWeight: FontWeight.bold,
-                              color: Colors.red.shade700,
-                            ),
-                          ),
-                          const SizedBox(height: 8),
-                          Text(
-                            error!,
-                            style: GoogleFonts.inter(
-                              fontSize: 14,
-                              color: Colors.red.shade600,
-                            ),
-                            textAlign: TextAlign.center,
-                          ),
-                          const SizedBox(height: 24),
-                          ElevatedButton.icon(
-                            onPressed: () {
-                              setState(() {
-                                isLoading = true;
-                                error = null;
-                              });
-                              fetchSymptomDetails();
-                            },
-                            icon: const Icon(Icons.refresh_rounded),
-                            label: const Text('Try Again'),
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: Colors.red.shade500,
-                              foregroundColor: Colors.white,
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 24,
-                                vertical: 12,
-                              ),
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(12),
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                    )
-                  : AnimatedBuilder(
-                      animation: _animationController,
-                      builder: (context, child) {
-                        return FadeTransition(
-                          opacity: _fadeAnimation,
-                          child: Column(
-                            children: [
-                              // MAIN CONTENT - Scrollable
-                              Expanded(
-                                child: SingleChildScrollView(
-                                  padding: const EdgeInsets.fromLTRB(20, 20, 20, 0), // Remove bottom padding
-                                  child: Column(
-                                    children: [
-                                      // Symptom header with action buttons
-                                      Container(
-                                        width: double.infinity,
-                                        padding: const EdgeInsets.all(20),
-                                        decoration: BoxDecoration(
-                                          gradient: LinearGradient(
-                                            begin: Alignment.topLeft,
-                                            end: Alignment.bottomRight,
-                                            colors: [
-                                              Colors.deepPurple.shade400,
-                                              Colors.deepPurple.shade600,
-                                            ],
-                                          ),
-                                          borderRadius: BorderRadius.circular(20),
-                                          boxShadow: [
-                                            BoxShadow(
-                                              color: Colors.deepPurple.withValues(alpha:0.3),
-                                              blurRadius: 12,
-                                              offset: const Offset(0, 6),
-                                            ),
-                                          ],
-                                        ),
-                                        child: Column(
-                                          children: [
-                                            Container(
-                                              padding: const EdgeInsets.all(16),
-                                              decoration: BoxDecoration(
-                                                color: Colors.white.withValues(alpha:0.2),
-                                                borderRadius: BorderRadius.circular(16),
-                                              ),
-                                              child: Icon(
-                                                isEditing ? Icons.edit_rounded : Icons.health_and_safety_rounded,
-                                                size: 40,
-                                                color: Colors.white,
-                                              ),
-                                            ),
-                                            const SizedBox(height: 16),
-                                            Text(
-                                              isEditing ? 'Editing Symptom' : (symptomDetails!['name'] ?? widget.symptomName),
-                                              style: GoogleFonts.inter(
-                                                fontSize: 24,
-                                                fontWeight: FontWeight.bold,
-                                                color: Colors.white,
-                                              ),
-                                              textAlign: TextAlign.center,
-                                            ),
-                                            const SizedBox(height: 20),
-                                            // Action buttons in header
-                                            if (isEditing) ...[
-                                              // Update and Cancel buttons
-                                              Row(
-                                                children: [
-                                                  Expanded(
-                                                    child: ElevatedButton.icon(
-                                                      onPressed: isUpdating ? null : updateSymptom,
-                                                      icon: isUpdating
-                                                          ? const SizedBox(
-                                                              width: 16,
-                                                              height: 16,
-                                                              child: CircularProgressIndicator(
-                                                                strokeWidth: 2,
-                                                                valueColor: AlwaysStoppedAnimation<Color>(Colors.green),
-                                                              ),
-                                                            )
-                                                          : const Icon(Icons.check_rounded, size: 18),
-                                                      label: Text(
-                                                        isUpdating ? 'Saving...' : 'Save',
-                                                        style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
-                                                      ),
-                                                      style: ElevatedButton.styleFrom(
-                                                        backgroundColor: Colors.green.shade600,
-                                                        foregroundColor: Colors.white,
-                                                        padding: const EdgeInsets.symmetric(vertical: 12),
-                                                        shape: RoundedRectangleBorder(
-                                                          borderRadius: BorderRadius.circular(10),
-                                                        ),
-                                                      ),
-                                                    ),
-                                                  ),
-                                                  const SizedBox(width: 12),
-                                                  Expanded(
-                                                    child: ElevatedButton.icon(
-                                                      onPressed: _toggleEdit,
-                                                      icon: const Icon(Icons.close_rounded, size: 18),
-                                                      label: const Text(
-                                                        'Cancel',
-                                                        style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
-                                                      ),
-                                                      style: ElevatedButton.styleFrom(
-                                                        backgroundColor: Colors.white.withValues(alpha:0.2),
-                                                        foregroundColor: Colors.white,
-                                                        padding: const EdgeInsets.symmetric(vertical: 12),
-                                                        shape: RoundedRectangleBorder(
-                                                          borderRadius: BorderRadius.circular(10),
-                                                        ),
-                                                      ),
-                                                    ),
-                                                  ),
-                                                ],
-                                              ),
-                                            ] else ...[
-                                              // Edit and Delete buttons
-                                              Row(
-                                                children: [
-                                                  Expanded(
-                                                    child: ElevatedButton.icon(
-                                                      onPressed: _toggleEdit,
-                                                      icon: const Icon(Icons.edit_rounded, size: 18),
-                                                      label: const Text(
-                                                        'Edit',
-                                                        style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
-                                                      ),
-                                                      style: ElevatedButton.styleFrom(
-                                                        backgroundColor: Colors.white.withValues(alpha:0.2),
-                                                        foregroundColor: Colors.white,
-                                                        padding: const EdgeInsets.symmetric(vertical: 12),
-                                                        shape: RoundedRectangleBorder(
-                                                          borderRadius: BorderRadius.circular(10),
-                                                        ),
-                                                      ),
-                                                    ),
-                                                  ),
-                                                  const SizedBox(width: 12),
-                                                  Expanded(
-                                                    child: ElevatedButton.icon(
-                                                      onPressed: deleteSymptom,
-                                                      icon: const Icon(Icons.delete_rounded, size: 18),
-                                                      label: const Text(
-                                                        'Delete',
-                                                        style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
-                                                      ),
-                                                      style: ElevatedButton.styleFrom(
-                                                        backgroundColor: Colors.red.shade600,
-                                                        foregroundColor: Colors.white,
-                                                        padding: const EdgeInsets.symmetric(vertical: 12),
-                                                        shape: RoundedRectangleBorder(
-                                                          borderRadius: BorderRadius.circular(10),
-                                                        ),
-                                                      ),
-                                                    ),
-                                                  ),
-                                                ],
-                                              ),
-                                            ],
-                                          ],
-                                        ),
-                                      ),
-                                      
-                                      const SizedBox(height: 24),
-                                      
-                                      // Content based on edit mode
-                                      if (isEditing) ...[
-                                        _buildEditableField('Name', _nameController),
-                                        _buildEditableField('Description', _descriptionController, maxLines: 5),
-                                        _buildEditableField('Resource Link', _resourceLinkController),
-                                      ] else ...[
-                                        // Display mode
-                                        if (symptomDetails!['description'] != null)
-                                          _buildDetailCard(
-                                            'Description',
-                                            symptomDetails!['description'],
-                                            Icons.description_rounded,
-                                          ),
-                                        
-                                        if (symptomDetails!['resourceLink'] != null && 
-                                            symptomDetails!['resourceLink'].toString().isNotEmpty) ...[
-                                          const SizedBox(height: 16),
-                                          Center(
-                                            child: ElevatedButton.icon(
-                                              onPressed: () {
-                                                _launchURL(symptomDetails!['resourceLink']);
-                                              },
-                                              icon: const Icon(Icons.link_rounded),
-                                              label: const Text('View Resource'),
-                                              style: ElevatedButton.styleFrom(
-                                                backgroundColor: Colors.deepPurple.shade500,
-                                                foregroundColor: Colors.white,
-                                                padding: const EdgeInsets.symmetric(
-                                                  horizontal: 24,
-                                                  vertical: 16,
-                                                ),
-                                                shape: RoundedRectangleBorder(
-                                                  borderRadius: BorderRadius.circular(15),
-                                                ),
-                                                elevation: 5,
-                                              ),
-                                            ),
-                                          ),
-                                        ],
-                                      ],
-                                      
-                                      const SizedBox(height: 20),
-                                    ],
-                                  ),
-                                ),
-                              ),
-
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: Colors.grey.shade50,
+      body: Column(
+        children: [
+          CurvedAppBar(
+            title: isEditing ? 'Edit Symptom' : widget.symptomName,
+            isProfileAvailable: false,
+            showIcon: true,
+            isBack: true,
+          ),
+          Expanded(
+            child: isLoading
+                ? Center(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Container(
+                          padding: const EdgeInsets.all(20),
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            shape: BoxShape.circle,
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.black.withOpacity(0.1),
+                                blurRadius: 20,
+                                offset: const Offset(0, 10),
+                              )
                             ],
                           ),
-                        );
-                      },
+                          child: CircularProgressIndicator(
+                            strokeWidth: 3,
+                            valueColor: AlwaysStoppedAnimation<Color>(
+                              Colors.deepPurple.shade400,
+                            ),
+                          ),
+                        ),
+                        const SizedBox(height: 24),
+                        Text(
+                          'Loading symptom details...',
+                          style: GoogleFonts.inter(
+                            fontSize: 16,
+                            color: Colors.grey.shade600,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                      ],
                     ),
-        ),
+                  )
+                : error != null
+                    ? Center(
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Container(
+                              padding: const EdgeInsets.all(20),
+                              decoration: BoxDecoration(
+                                color: Colors.red.shade50,
+                                shape: BoxShape.circle,
+                              ),
+                              child: Icon(
+                                Icons.error_outline_rounded,
+                                size: 48,
+                                color: Colors.red.shade400,
+                              ),
+                            ),
+                            const SizedBox(height: 16),
+                            Text(
+                              'Oops! Something went wrong',
+                              style: GoogleFonts.inter(
+                                fontSize: 18,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.red.shade700,
+                              ),
+                            ),
+                            const SizedBox(height: 8),
+                            Text(
+                              error!,
+                              style: GoogleFonts.inter(
+                                fontSize: 14,
+                                color: Colors.red.shade600,
+                              ),
+                              textAlign: TextAlign.center,
+                            ),
+                            const SizedBox(height: 24),
+                            ElevatedButton.icon(
+                              onPressed: () {
+                                setState(() {
+                                  isLoading = true;
+                                  error = null;
+                                });
+                                fetchSymptomDetails();
+                              },
+                              icon: const Icon(Icons.refresh_rounded),
+                              label: const Text('Try Again'),
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: Colors.red.shade500,
+                                foregroundColor: Colors.white,
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 24,
+                                  vertical: 12,
+                                ),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      )
+                    : AnimatedBuilder(
+                        animation: _animationController,
+                        builder: (context, child) {
+                          return FadeTransition(
+                            opacity: _fadeAnimation,
+                            child: Column(
+                              children: [
+                                // MAIN CONTENT - Scrollable
+                                Expanded(
+                                  child: SingleChildScrollView(
+                                    padding: const EdgeInsets.fromLTRB(20, 20, 20, 0),
+                                    child: Column(
+                                      children: [
+                                        // Symptom header with action buttons
+                                        Container(
+                                          width: double.infinity,
+                                          padding: const EdgeInsets.all(20),
+                                          decoration: BoxDecoration(
+                                            gradient: LinearGradient(
+                                              begin: Alignment.topLeft,
+                                              end: Alignment.bottomRight,
+                                              colors: [
+                                                Colors.deepPurple.shade400,
+                                                Colors.deepPurple.shade600,
+                                              ],
+                                            ),
+                                            borderRadius: BorderRadius.circular(20),
+                                            boxShadow: [
+                                              BoxShadow(
+                                                color: Colors.deepPurple.withOpacity(0.3),
+                                                blurRadius: 12,
+                                                offset: const Offset(0, 6),
+                                              ),
+                                            ],
+                                          ),
+                                          child: Column(
+                                            children: [
+                                             // Replace the header Container section (around line 450-500) with this:
+Container(
+  width: double.infinity,
+  padding: const EdgeInsets.all(20),
+  decoration: BoxDecoration(
+    gradient: LinearGradient(
+      begin: Alignment.topLeft,
+      end: Alignment.bottomRight,
+      colors: [
+        Colors.deepPurple.shade400,
+        Colors.deepPurple.shade600,
       ],
     ),
-  );
-}
+    borderRadius: BorderRadius.circular(20),
+    boxShadow: [
+      BoxShadow(
+        color: Colors.deepPurple.withOpacity(0.3),
+        blurRadius: 12,
+        offset: const Offset(0, 6),
+      ),
+    ],
+  ),
+  child: Column(
+    children: [
+      // Show image if available, otherwise show icon
+      _currentImageUrl != null && !_removeCurrentImage
+          ? Container(
+              width: 80,
+              height: 80,
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(16),
+                border: Border.all(
+                  color: Colors.white.withOpacity(0.3),
+                  width: 2,
+                ),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.2),
+                    blurRadius: 8,
+                    offset: const Offset(0, 4),
+                  ),
+                ],
+              ),
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(14),
+                child: Image.network(
+                  _currentImageUrl!,
+                  width: 80,
+                  height: 80,
+                  fit: BoxFit.cover,
+                  errorBuilder: (context, error, stackTrace) {
+                    // Show icon if image fails to load
+                    return Container(
+                      decoration: BoxDecoration(
+                        color: Colors.white.withOpacity(0.2),
+                        borderRadius: BorderRadius.circular(14),
+                      ),
+                      child: Icon(
+                        isEditing ? Icons.edit_rounded : Icons.health_and_safety_rounded,
+                        size: 40,
+                        color: Colors.white,
+                      ),
+                    );
+                  },
+                ),
+              ),
+            )
+          : Container(
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: Colors.white.withOpacity(0.2),
+                borderRadius: BorderRadius.circular(16),
+              ),
+              child: Icon(
+                isEditing ? Icons.edit_rounded : Icons.health_and_safety_rounded,
+                size: 40,
+                color: Colors.white,
+              ),
+            ),
+      const SizedBox(height: 16),
+      Text(
+        isEditing ? 'Editing Symptom' : (symptomDetails!['name'] ?? widget.symptomName),
+        style: GoogleFonts.inter(
+          fontSize: 24,
+          fontWeight: FontWeight.bold,
+          color: Colors.white,
+        ),
+        textAlign: TextAlign.center,
+      ),
+      const SizedBox(height: 20),
+      // Action buttons in header
+      if (isEditing) ...[
+        // Update and Cancel buttons
+        Row(
+          children: [
+            Expanded(
+              child: ElevatedButton.icon(
+                onPressed: isUpdating ? null : updateSymptom,
+                icon: isUpdating
+                    ? const SizedBox(
+                        width: 16,
+                        height: 16,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2,
+                          valueColor: AlwaysStoppedAnimation<Color>(Colors.green),
+                        ),
+                      )
+                    : const Icon(Icons.check_rounded, size: 18),
+                label: Text(
+                  isUpdating ? 'Saving...' : 'Save',
+                  style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
+                ),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.green.shade600,
+                  foregroundColor: Colors.white,
+                  padding: const EdgeInsets.symmetric(vertical: 12),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                ),
+              ),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: ElevatedButton.icon(
+                onPressed: _toggleEdit,
+                icon: const Icon(Icons.close_rounded, size: 18),
+                label: const Text(
+                  'Cancel',
+                  style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
+                ),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.white.withOpacity(0.2),
+                  foregroundColor: Colors.white,
+                  padding: const EdgeInsets.symmetric(vertical: 12),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ] else ...[
+        // Edit and Delete buttons
+        Row(
+          children: [
+            Expanded(
+              child: ElevatedButton.icon(
+                onPressed: _toggleEdit,
+                icon: const Icon(Icons.edit_rounded, size: 18),
+                label: const Text(
+                  'Edit',
+                  style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
+                ),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.white.withOpacity(0.2),
+                  foregroundColor: Colors.white,
+                  padding: const EdgeInsets.symmetric(vertical: 12),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                ),
+              ),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: ElevatedButton.icon(
+                onPressed: deleteSymptom,
+                icon: const Icon(Icons.delete_rounded, size: 18),
+                label: const Text(
+                  'Delete',
+                  style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
+                ),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.red.shade600,
+                  foregroundColor: Colors.white,
+                  padding: const EdgeInsets.symmetric(vertical: 12),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ],
+    ],
+  ),
+),
+                                        
+                                        const SizedBox(height: 24),
+                                        
+                                        // Content based on edit mode
+                                        if (isEditing) ...[
+                                          _buildEditableField('Name', _nameController),
+                                          _buildEditableField('Description', _descriptionController, maxLines: 5),
+                                          _buildEditableField('Resource Link', _resourceLinkController),
+                                          
+                                          const SizedBox(height: 16),
+                                          
+                                          // Image upload section
+                                          Card(
+                                            elevation: 2,
+                                            margin: const EdgeInsets.symmetric(vertical: 8),
+                                            shape: RoundedRectangleBorder(
+                                              borderRadius: BorderRadius.circular(15),
+                                            ),
+                                            child: Padding(
+                                              padding: const EdgeInsets.all(16),
+                                              child: _buildImageSection(),
+                                            ),
+                                          ),
+                                        ] else ...[
+                                          // Display mode
+                                          
+                                          // Show image first if available
+                                          _buildImageSection(),
+                                          
+                                          if (_currentImageUrl != null) const SizedBox(height: 16),
+                                          
+                                          if (symptomDetails!['description'] != null)
+                                            _buildDetailCard(
+                                              'Description',
+                                              symptomDetails!['description'],
+                                              Icons.description_rounded,
+                                            ),
+                                          
+                                          if (symptomDetails!['resourceLink'] != null && 
+                                              symptomDetails!['resourceLink'].toString().isNotEmpty) ...[
+                                            const SizedBox(height: 16),
+                                            Center(
+                                              child: ElevatedButton.icon(
+                                                onPressed: () {
+                                                  _launchURL(symptomDetails!['resourceLink']);
+                                                },
+                                                icon: const Icon(Icons.link_rounded),
+                                                label: const Text('View Resource'),
+                                                style: ElevatedButton.styleFrom(
+                                                  backgroundColor: Colors.purple,
+                                                  foregroundColor: Colors.white,
+                                                  padding: const EdgeInsets.symmetric(
+                                                    horizontal: 24,
+                                                    vertical: 16,
+                                                  ),
+                                                  shape: RoundedRectangleBorder(
+                                                    borderRadius: BorderRadius.circular(15),
+                                                  ),
+                                                  elevation: 5,
+                                                ),
+                                              ),
+                                            ),
+                                          ],
+                                        ],
+                                        
+                                        const SizedBox(height: 20),
+                                      ],
+                                    ),
+                                  ),
+                                      ],
+                                ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          );
+                        },
+                      ),
+          ),
+        ],
+      ),
+    );
+  }
 }
