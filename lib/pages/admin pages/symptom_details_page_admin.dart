@@ -111,85 +111,104 @@ class _SymptomDetailPageAdminState extends State<SymptomDetailPageAdmin> with Ti
     }
   }
 
-  Future<void> updateSymptom() async {
-    if (symptomDetails == null) return;
+  // Add better logging to your updateSymptom method
+Future<void> updateSymptom() async {
+  if (symptomDetails == null) return;
+  
+  print('=== UPDATE SYMPTOM DEBUG ===');
+  print('Symptom ID: ${symptomDetails!['_id']}');
+  print('Name: ${_nameController.text.trim()}');
+  print('Description: ${_descriptionController.text.trim()}');
+  print('ResourceLink: ${_resourceLinkController.text.trim()}');
+  print('Remove current image: $_removeCurrentImage');
+  print('Selected new image: ${_selectedImage?.path}');
+  print('Current image URL: $_currentImageUrl');
+  
+  setState(() {
+    isUpdating = true;
+  });
+
+  try {
+    final url = Uri.parse('https://medflow-phi.vercel.app/api/symptoms/${symptomDetails!['_id']}');
+    final request = http.MultipartRequest('PATCH', url);
+
+    // Add text fields
+    request.fields['name'] = _nameController.text.trim();
+    request.fields['description'] = _descriptionController.text.trim();
+    request.fields['resourceLink'] = _resourceLinkController.text.trim();
     
-    setState(() {
-      isUpdating = true;
-    });
-
-    try {
-      final url = Uri.parse('https://medflow-phi.vercel.app/api/symptoms/${symptomDetails!['_id']}');
-      final request = http.MultipartRequest('PATCH', url);
-
-      // Add text fields
-      request.fields['name'] = _nameController.text.trim();
-      request.fields['description'] = _descriptionController.text.trim();
-      request.fields['resourceLink'] = _resourceLinkController.text.trim();
+    print('Request fields: ${request.fields}');
+    
+    // Handle image updates
+    if (_removeCurrentImage) {
+      request.fields['removeImage'] = 'true';
+      print('Added removeImage flag');
+    } else if (_selectedImage != null) {
+      // Add new image
+      final imageStream = http.ByteStream(_selectedImage!.openRead());
+      final imageLength = await _selectedImage!.length();
       
-      // Handle image updates
-      if (_removeCurrentImage) {
-        request.fields['removeImage'] = 'true';
-      } else if (_selectedImage != null) {
-        // Add new image
-        final imageStream = http.ByteStream(_selectedImage!.openRead());
-        final imageLength = await _selectedImage!.length();
-        
-        final multipartFile = http.MultipartFile(
-          'image', 
-          imageStream,
-          imageLength,
-          filename: 'symptom_${DateTime.now().millisecondsSinceEpoch}.jpg',
-        );
-        
-        request.files.add(multipartFile);
-      }
+      final multipartFile = http.MultipartFile(
+        'image', 
+        imageStream,
+        imageLength,
+        filename: 'symptom_${DateTime.now().millisecondsSinceEpoch}.jpg',
+      );
+      
+      request.files.add(multipartFile);
+      print('Added new image file: ${multipartFile.filename}');
+    }
 
-      final response = await request.send();
-      final responseBody = await response.stream.bytesToString();
+    print('Sending request to: $url');
+    final response = await request.send();
+    final responseBody = await response.stream.bytesToString();
+    
+    print('Response status: ${response.statusCode}');
+    print('Response body: $responseBody');
 
-      if (response.statusCode == 200) {
-        final updatedSymptom = json.decode(responseBody);
-        setState(() {
-          symptomDetails = updatedSymptom;
-          isEditing = false;
-          isUpdating = false;
-          // Update image state
-          _currentImageUrl = updatedSymptom['image'];
-          _selectedImage = null;
-          _removeCurrentImage = false;
-        });
-        
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: const Text('Symptom updated successfully!'),
-            backgroundColor: Colors.green.shade600,
-            behavior: SnackBarBehavior.floating,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(10),
-            ),
-          ),
-        );
-      } else {
-        throw Exception('Failed to update symptom: ${response.statusCode} - $responseBody');
-      }
-    } catch (e) {
+    if (response.statusCode == 200) {
+      final updatedSymptom = json.decode(responseBody);
       setState(() {
+        symptomDetails = updatedSymptom;
+        isEditing = false;
         isUpdating = false;
+        // Update image state
+        _currentImageUrl = updatedSymptom['image'];
+        _selectedImage = null;
+        _removeCurrentImage = false;
       });
       
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('Error updating symptom: $e'),
-          backgroundColor: Colors.red.shade600,
+          content: const Text('Symptom updated successfully!'),
+          backgroundColor: Colors.green.shade600,
           behavior: SnackBarBehavior.floating,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(10),
           ),
         ),
       );
+    } else {
+      throw Exception('Failed to update symptom: ${response.statusCode} - $responseBody');
     }
+  } catch (e) {
+    print('Update error: $e');
+    setState(() {
+      isUpdating = false;
+    });
+    
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text('Error updating symptom: $e'),
+        backgroundColor: Colors.red.shade600,
+        behavior: SnackBarBehavior.floating,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(10),
+        ),
+      ),
+    );
   }
+}
 
   Future<void> deleteSymptom() async {
     if (symptomDetails == null) return;

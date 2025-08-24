@@ -27,96 +27,76 @@ class _AddSymptomPageState extends State<AddSymptomPage>
   bool isLoading = false;
   String? errorMessage;
 
-  Future<void> addSymptom() async {
-    if (!_formKey.currentState!.validate()) return;
+Future<void> addSymptom() async {
+  if (!_formKey.currentState!.validate()) return;
 
-    setState(() {
-      isLoading = true;
-      errorMessage = null;
-    });
+  setState(() {
+    isLoading = true;
+    errorMessage = null;
+  });
 
-    final url = Uri.parse('https://medflow-phi.vercel.app/api/symptoms');
-    final request = http.MultipartRequest('POST', url);
+  final url = Uri.parse('https://medflow-phi.vercel.app/api/symptoms');
+  final request = http.MultipartRequest('POST', url);
 
-    // Add text fields
-    request.fields['name'] = _nameController.text.trim();
-    request.fields['description'] = _descriptionController.text.trim();
-    request.fields['linkOfResource'] = _linkOfResourceController.text.trim();
+  // Add text fields
+  request.fields['name'] = _nameController.text.trim();
+  request.fields['description'] = _descriptionController.text.trim();
+  request.fields['resourceLink'] = _linkOfResourceController.text.trim();
 
-    debugPrint('Request fields: ${request.fields}');
+  // Add image if selected
+  if (_selectedImage != null) {
+    final imageStream = http.ByteStream(_selectedImage!.openRead());
+    final imageLength = await _selectedImage!.length();
 
-    // Add image if selected
-    if (_selectedImage != null) {
-      debugPrint('Selected image path: ${_selectedImage!.path}');
+    final multipartFile = http.MultipartFile(
+      'image',
+      imageStream,
+      imageLength,
+      filename: 'category_${DateTime.now().millisecondsSinceEpoch}.jpg',
+    );
 
-      final imageStream = http.ByteStream(_selectedImage!.openRead());
-      final imageLength = await _selectedImage!.length();
+    request.files.add(multipartFile);
+  }
 
-      debugPrint('Image length: $imageLength bytes');
-
-      final multipartFile = http.MultipartFile(
-        'image', // Make sure this matches your multer field name
-        imageStream,
-        imageLength,
-        filename: 'category_${DateTime.now().millisecondsSinceEpoch}.jpg',
-      );
-
-      request.files.add(multipartFile);
-      debugPrint('Added file to request: ${multipartFile.filename}');
-    } else {
-      debugPrint('No image selected');
-    }
-
-    debugPrint('Sending request...');
+  try {
     final response = await request.send();
     final responseBody = await response.stream.bytesToString();
 
-    debugPrint('Response status: ${response.statusCode}');
-    debugPrint('Response body: $responseBody');
-
-    try {
-      final response = await http.post(
-        url,
-        headers: {'Content-Type': 'application/json'},
-        body: request,
+    if (response.statusCode == 201 || response.statusCode == 200) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Symptom added successfully!'),
+          backgroundColor: Colors.green,
+          behavior: SnackBarBehavior.floating,
+        ),
       );
 
-      if (response.statusCode == 201 || response.statusCode == 200) {
-        // Show success message
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Symptom added successfully!'),
-            backgroundColor: Colors.green,
-            behavior: SnackBarBehavior.floating,
-          ),
-        );
-
-        // Clear form
-        _nameController.clear();
-        _descriptionController.clear();
-        _linkOfResourceController.clear();
-        setState(() {
-          _selectedImage = null;
-        });
-
-        // Navigate back
-        Navigator.pop(context, true);
-      } else {
-        setState(() {
-          errorMessage =
-              'Failed to add symptom. Status code: ${response.statusCode}';
-        });
-      }
-    } catch (e) {
+      // Clear form
+      _nameController.clear();
+      _descriptionController.clear();
+      _linkOfResourceController.clear();
       setState(() {
-        errorMessage = 'Error: $e';
+        _selectedImage = null;
       });
-    } finally {
+
+      Navigator.pop(context, true);
+    } else {
       setState(() {
-        isLoading = false;
+        errorMessage =
+            'Failed to add symptom. Status code: ${response.statusCode}\nResponse: $responseBody';
       });
     }
+  } catch (e) {
+    setState(() {
+      errorMessage = 'Error: $e';
+    });
+  } finally {
+    setState(() {
+      isLoading = false;
+    });
   }
+}
+
 
   InputDecoration _buildInputDecoration(String label, IconData icon) {
     return InputDecoration(
