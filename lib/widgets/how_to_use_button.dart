@@ -96,13 +96,13 @@ class HowToUseButton extends StatelessWidget {
                         ),
                       ),
                       const SizedBox(height: 16),
-                      if (role == "admin") ...[
+                      if (role == "Admin") ...[
                         const Text(
                           'Welcome to our medical app! Here you can:\n\n'
                           '• Add,Update or Delete helpful resources\n'
                           '• Supports video link and image uploading\n'
                           '• Take notes\n'
-                          '• Chat with our AI chat bot Ollama\n\n'
+                          '• Chat with our AI chat bot\n\n'
                           'Select any option from the main screen to get started!',
                           style: TextStyle(
                             fontSize: 16,
@@ -115,7 +115,7 @@ class HowToUseButton extends StatelessWidget {
                         const Text(
                           'Welcome to our medical app! Here you can:\n\n'
                           '• Access helpful resources video links and images\n'
-                          '• Chat with our AI chat bot Ollama\n'
+                          '• Chat with our AI chat bot\n'
                           '• Take notes about devices and symptoms\n\n'
                           'Select any option from the main screen to get started!',
                           style: TextStyle(

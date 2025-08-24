@@ -192,10 +192,10 @@ class _UserManagementScreenState extends State<UserManagementScreen> {
             isBack: true,
           ),
           
-          // Main content below the app bar with negative margin to overlap
+          // Main content 
           Expanded(
             child: Transform.translate(
-              offset: const Offset(0, -40),
+              offset: const Offset(0, -20),
               child: Column(
                 children: [
                   // Search Bar Container
