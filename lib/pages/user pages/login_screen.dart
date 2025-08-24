@@ -120,119 +120,160 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
     }
   }
 
-  Future<void> handleAuth() async {
-    if (_emailController.text.isEmpty || _passwordController.text.isEmpty) {
-      _showSnackBar('Please fill in all fields', Colors.red.shade400);
+Future<void> handleAuth() async {
+  if (_emailController.text.isEmpty || _passwordController.text.isEmpty) {
+    _showSnackBar('Please fill in all fields', Colors.red.shade400);
+    return;
+  }
+
+  if (!mounted) return;
+
+  setState(() => isLoading = true);
+
+  try {
+    UserCredential userCredential = await _auth.signInWithEmailAndPassword(
+      email: _emailController.text.trim(),
+      password: _passwordController.text.trim(),
+    );
+
+    if (userCredential.user != null && mounted) {
+      String? token = await userCredential.user!.getIdToken();
+      String uid = userCredential.user!.uid;
+
+      // Check verification status from backend before allowing login
+      bool isVerified = await checkUserVerified(uid);
+      if (!isVerified) {
+        _showSnackBar(
+          'Your account is not verified by admin yet. Please wait for approval.',
+          Colors.red.shade400,
+        );
+        return; // stop login flow
+      }
+
+      // If verified --> proceed with login
+      SharedPreferences prefs = await SharedPreferences.getInstance();
+      await prefs.setString('authToken', token ?? '');
+      await prefs.setString('uid', uid);
+
+      _showSnackBar('Sign-in successful!', Colors.green.shade600);
+
+      if (mounted) {
+        AutoRouter.of(context).push(const BottomNavigationRoute());
+      }
+    }
+  } on FirebaseAuthException catch (e) {
+    // Handle specific Firebase Auth errors
+    String errorMessage;
+    switch (e.code) {
+      case 'user-not-found':
+      case 'wrong-password':
+      case 'invalid-credential':
+      case 'invalid-email':
+        errorMessage = 'Invalid email or password';
+        break;
+      case 'user-disabled':
+        errorMessage = 'This account has been disabled';
+        break;
+      case 'too-many-requests':
+        errorMessage = 'Too many failed attempts. Please try again later';
+        break;
+      default:
+        errorMessage = 'Login failed. Please try again';
+    }
+    _showSnackBar(errorMessage, Colors.red.shade400);
+  } catch (e) {
+    _showSnackBar('Something went wrong. Please try again', Colors.red.shade400);
+  } finally {
+    if (mounted) setState(() => isLoading = false);
+  }
+}
+
+
+ Future<void> handleGoogleSignIn() async {
+  if (!mounted) return;
+
+  try {
+    setState(() => isLoading = true);
+
+    final GoogleSignIn googleSignIn = GoogleSignIn();
+    final GoogleSignInAccount? googleUser = await googleSignIn.signIn();
+
+    if (googleUser == null) {
+      if (mounted) setState(() => isLoading = false);
       return;
     }
 
-    if (!mounted) return;
+    final GoogleSignInAuthentication googleAuth = await googleUser.authentication;
+    final OAuthCredential credential = GoogleAuthProvider.credential(
+      accessToken: googleAuth.accessToken,
+      idToken: googleAuth.idToken,
+    );
 
-    setState(() => isLoading = true);
+    final UserCredential userCredential = await _auth.signInWithCredential(credential);
 
-    try {
-      UserCredential userCredential = await _auth.signInWithEmailAndPassword(
-        email: _emailController.text.trim(),
-        password: _passwordController.text.trim(),
-      );
+    if (userCredential.user != null && mounted) {
+      String? token = await userCredential.user!.getIdToken();
+      String uid = userCredential.user!.uid;
 
-      if (userCredential.user != null && mounted) {
-        String? token = await userCredential.user!.getIdToken();
-        String uid = userCredential.user!.uid;
-
-        // Check verification status from backend before allowing login
-        bool isVerified = await checkUserVerified(uid);
-        if (!isVerified) {
-          _showSnackBar(
-            'Your account is not verified by admin yet. Please wait for approval.',
-            Colors.red.shade400,
-          );
-          return; // stop login flow
-        }
-
-        // If verified --> proceed with login
-        SharedPreferences prefs = await SharedPreferences.getInstance();
-        await prefs.setString('authToken', token ?? '');
-        await prefs.setString('uid', uid);
-
-        _showSnackBar('Sign-in successful!', Colors.green.shade600);
-
-        if (mounted) {
-          AutoRouter.of(context).push(const BottomNavigationRoute());
-        }
-      }
-    } catch (e) {
-      _showSnackBar('Error: ${e.toString()}', Colors.red.shade400);
-    } finally {
-      if (mounted) setState(() => isLoading = false);
-    }
-  }
-
-  Future<void> handleGoogleSignIn() async {
-    if (!mounted) return;
-
-    try {
-      setState(() => isLoading = true);
-
-      final GoogleSignIn googleSignIn = GoogleSignIn();
-      final GoogleSignInAccount? googleUser = await googleSignIn.signIn();
-
-      if (googleUser == null) {
-        if (mounted) setState(() => isLoading = false);
+      // Check if user exists in backend
+      bool userExists = await checkUserExists(uid);
+      
+      if (!userExists) {
+        // Create user in backend first
+        await createUserInBackend(userCredential.user!);
+        _showSnackBar(
+          'Account created! Please wait for admin approval before you can log in.',
+          Colors.orange.shade600,
+        );
         return;
       }
 
-      final GoogleSignInAuthentication googleAuth = await googleUser.authentication;
-      final OAuthCredential credential = GoogleAuthProvider.credential(
-        accessToken: googleAuth.accessToken,
-        idToken: googleAuth.idToken,
-      );
-
-      final UserCredential userCredential = await _auth.signInWithCredential(credential);
-
-      if (userCredential.user != null && mounted) {
-        String? token = await userCredential.user!.getIdToken();
-        String uid = userCredential.user!.uid;
-
-        // Check if user exists in backend
-        bool userExists = await checkUserExists(uid);
-        
-        if (!userExists) {
-          // Create user in backend first
-          await createUserInBackend(userCredential.user!);
-          _showSnackBar(
-            'Account created! Please wait for admin approval before you can log in.',
-            Colors.orange.shade600,
-          );
-          return;
-        }
-
-        // Check verification status
-        bool isVerified = await checkUserVerified(uid);
-        if (!isVerified) {
-          _showSnackBar(
-            'Your account is not verified by admin yet. Please wait for approval.',
-            Colors.red.shade400,
-          );
-          return;
-        }
-
-        SharedPreferences prefs = await SharedPreferences.getInstance();
-        await prefs.setString('authToken', token ?? '');
-        await prefs.setString('uid', uid);
-
-        _showSnackBar('Google Sign-In successful!', Colors.green.shade600);
-        
-        if (mounted) {
-          AutoRouter.of(context).push(const BottomNavigationRoute());
-        }
+      // Check verification status
+      bool isVerified = await checkUserVerified(uid);
+      if (!isVerified) {
+        _showSnackBar(
+          'Your account is not verified by admin yet. Please wait for approval.',
+          Colors.red.shade400,
+        );
+        return;
       }
-    } catch (e) {
-      _showSnackBar('Error: ${e.toString()}', Colors.red.shade400);
-    } finally {
-      if (mounted) setState(() => isLoading = false);
+
+      SharedPreferences prefs = await SharedPreferences.getInstance();
+      await prefs.setString('authToken', token ?? '');
+      await prefs.setString('uid', uid);
+
+      _showSnackBar('Google Sign-In successful!', Colors.green.shade600);
+      
+      if (mounted) {
+        AutoRouter.of(context).push(const BottomNavigationRoute());
+      }
     }
+  } on FirebaseAuthException catch (e) {
+    // Handle specific Firebase Auth errors for Google Sign-In
+    String errorMessage;
+    switch (e.code) {
+      case 'account-exists-with-different-credential':
+        errorMessage = 'An account already exists with this email';
+        break;
+      case 'invalid-credential':
+        errorMessage = 'Google sign-in failed. Please try again';
+        break;
+      case 'user-disabled':
+        errorMessage = 'This account has been disabled';
+        break;
+      case 'network-request-failed':
+        errorMessage = 'Network error. Please check your connection';
+        break;
+      default:
+        errorMessage = 'Google sign-in failed. Please try again';
+    }
+    _showSnackBar(errorMessage, Colors.red.shade400);
+  } catch (e) {
+    _showSnackBar('Something went wrong with Google sign-in. Please try again', Colors.red.shade400);
+  } finally {
+    if (mounted) setState(() => isLoading = false);
   }
+}
 
   @override
   Widget build(BuildContext context) {
