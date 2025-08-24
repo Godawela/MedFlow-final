@@ -32,8 +32,10 @@ class _UserGreetingState extends State<UserGreeting> {
 
       if (response.statusCode == 200) {
         final data = json.decode(response.body);
+        String fullName = data['name'] ?? '';
+        String firstName = fullName.split(' ').isNotEmpty ? fullName.split(' ')[0] : fullName;
         setState(() {
-          userName = _capitalize(data['name']);
+          userName = _capitalize(firstName);
           isLoading = false;
         });
       } else {
