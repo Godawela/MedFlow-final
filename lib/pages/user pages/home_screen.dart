@@ -110,14 +110,8 @@ class HomeScreen extends StatelessWidget {
                         ),
                         child: Column(
                           children: [
-                            const Icon(
-                              Icons.touch_app,
-                              color: Colors.white,
-                              size: 24,
-                            ),
-                            const SizedBox(height: 8),
                             const Text(
-                              'Get Started',
+                              'To Get Started',
                               style: TextStyle(
                                 fontSize: 20,
                                 fontWeight: FontWeight.bold,
@@ -142,17 +136,21 @@ class HomeScreen extends StatelessWidget {
                       const SizedBox(height: 24),
                       
                       // Action buttons container
-                      Container(
+                   Container(
                         width: double.infinity,
-                        padding: const EdgeInsets.all(20),
+                        padding: const EdgeInsets.all(16),
                         decoration: BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.circular(20),
+                          gradient: const LinearGradient(
+                            colors: [Color(0xFF4B00E0), Color(0xFF8E2DE2)],
+                            begin: Alignment.topLeft,
+                            end: Alignment.bottomRight,
+                          ),
+                          borderRadius: BorderRadius.circular(16),
                           boxShadow: [
                             BoxShadow(
-                              color: Colors.black.withValues(alpha:0.08),
+                              color: const Color(0xFF4B00E0).withValues(alpha:0.3),
                               blurRadius: 20,
-                              offset: const Offset(0, 4),
+                              offset: const Offset(0, 8),
                             ),
                           ],
                         ),

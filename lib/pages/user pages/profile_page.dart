@@ -267,7 +267,7 @@ class _ProfilePageState extends State<ProfilePage> {
                           children: [
                             const SizedBox(height: 40),
                             
-                            // Enhanced Profile Avatar
+                            // Profile Avatar
                             Container(
                               padding: const EdgeInsets.all(6),
                               decoration: BoxDecoration(

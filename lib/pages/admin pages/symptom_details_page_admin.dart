@@ -670,7 +670,6 @@ Widget build(BuildContext context) {
                                         ],
                                       ],
                                       
-                                      // Add some space at bottom so content doesn't get hidden behind buttons
                                       const SizedBox(height: 20),
                                     ],
                                   ),

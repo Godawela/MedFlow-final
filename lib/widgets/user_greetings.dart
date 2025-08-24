@@ -12,57 +12,58 @@ class UserGreeting extends StatefulWidget {
 }
 
 class _UserGreetingState extends State<UserGreeting> {
+ String? userName;
+  String? email;
   String? role;
+    bool isLoading = true;
+
+  String _capitalize(String name) {
+    if (name.isEmpty) return name;
+    return name[0].toUpperCase() + name.substring(1);
+  }
+
+   Future<void> fetchUserData() async {
+    final String? uid = FirebaseAuth.instance.currentUser?.uid;
+    if (uid == null) {
+      throw Exception('User not logged in');
+    }
+    try {
+      final response = await http.get(Uri.parse('https://medflow-phi.vercel.app/api/users/$uid'));
+
+      if (response.statusCode == 200) {
+        final data = json.decode(response.body);
+        setState(() {
+          userName = _capitalize(data['name']);
+          isLoading = false;
+        });
+      } else {
+        throw Exception('Failed to load user data');
+      }
+    } catch (e) {
+      setState(() {
+        isLoading = false;
+      });
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Error fetching user data: $e')),
+      );
+    }
+  }
 
  @override
 void initState() {
   super.initState();
-  Future.delayed(Duration.zero, fetchUserRole);
+  Future.delayed(Duration.zero, fetchUserData);
 }
 
 
-  Future<void> fetchUserRole() async {
-  try {
-    final user = FirebaseAuth.instance.currentUser;
-    debugPrint('Current user: $user');
-    
-    final uid = user?.uid;
-    debugPrint('UID: $uid');
-
-    if (uid == null) {
-      debugPrint('UID is null — Firebase not ready yet?');
-      setState(() => role = 'Guest');
-      return;
-    }
-
-    final url = 'https://medflow-phi.vercel.app/api/users/$uid/role';
-    debugPrint('Requesting: $url');
-
-    final response = await http.get(Uri.parse(url));
-    debugPrint('Status code: ${response.statusCode}');
-    debugPrint('Body: ${response.body}');
-
-    if (response.statusCode == 200) {
-      final data = json.decode(response.body);
-      setState(() {
-        role = data['role'] ?? 'Student';
-      });
-    } else {
-      setState(() => role = 'Student');
-    }
-  } catch (e) {
-    debugPrint('Exception: $e');
-    setState(() => role = 'Error');
-  }
-}
 
   @override
   Widget build(BuildContext context) {
     return Column(
       children: [
-        const SizedBox(height: 15),
+        const SizedBox(height: 10),
         Text(
-          role != null ? 'Hi! $role' : 'Loading...',
+          userName != null ? 'Hi! $userName' : 'Loading...',
           style: GoogleFonts.goblinOne(
             fontSize: 20,
             color: Colors.black,
