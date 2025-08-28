@@ -31,14 +31,14 @@ class NotificationService {
       String? token = await _firebaseMessaging.getToken();
       print('FCM Token: $token');
       
-      // Send this token to your backend and associate it with the user
+      // Send token to backend and associate it with the user
       await _sendTokenToBackend(token);
       
       // Listen for token refresh
       _firebaseMessaging.onTokenRefresh.listen(_sendTokenToBackend);
     }
 
-    // Handle foreground messages - just print, no local notification needed
+    // Handle foreground messages
     FirebaseMessaging.onMessage.listen((RemoteMessage message) {
       print('Received foreground message: ${message.notification?.title}');
       // The system will handle showing the notification
@@ -54,7 +54,7 @@ class NotificationService {
     final String userId = FirebaseAuth.instance.currentUser?.uid ?? '';
     
     try {
-      // Send token to your backend
+      // Send token to backend
       await http.post(
         Uri.parse('https://medflow-phi.vercel.app/api/fcm-tokens'),
         headers: {'Content-Type': 'application/json'},
@@ -75,7 +75,7 @@ class NotificationService {
     required String questionPreview,
   }) async {
     try {
-      // Call your backend endpoint to send push notification to all admin devices
+      // Call backend endpoint to send push notification to all admin devices
       final response = await http.post(
         Uri.parse('https://medflow-phi.vercel.app/api/notify-admins'),
         headers: {'Content-Type': 'application/json'},
@@ -96,7 +96,6 @@ class NotificationService {
       }
     } catch (e) {
       print('Error notifying admins: $e');
-      // Don't throw error to prevent breaking the question submission flow
     }
   }
 
@@ -126,11 +125,10 @@ class NotificationService {
       }
     } catch (e) {
       print('Error notifying student: $e');
-      // Don't throw error to prevent breaking the reply flow
     }
   }
 
-  // Get current FCM token (useful for debugging)
+  // Get current FCM token 
   Future<String?> getCurrentToken() async {
     try {
       return await _firebaseMessaging.getToken();
@@ -140,7 +138,7 @@ class NotificationService {
     }
   }
 
-  // Subscribe to topic (useful for role-based notifications)
+  // Subscribe to topic 
   Future<void> subscribeToTopic(String topic) async {
     try {
       await _firebaseMessaging.subscribeToTopic(topic);
@@ -150,44 +148,9 @@ class NotificationService {
     }
   }
 
-  // Unsubscribe from topic
-  Future<void> unsubscribeFromTopic(String topic) async {
-    try {
-      await _firebaseMessaging.unsubscribeFromTopic(topic);
-      print('Unsubscribed from topic: $topic');
-    } catch (e) {
-      print('Error unsubscribing from topic $topic: $e');
-    }
-  }
-
-  // Method to handle role-based topic subscription
-  Future<void> subscribeToRoleBasedNotifications(String role) async {
-    if (role.toLowerCase() == 'admin') {
-      await subscribeToTopic('admin_notifications');
-      await subscribeToTopic('new_questions');
-    } else if (role.toLowerCase() == 'student') {
-      await subscribeToTopic('student_notifications');
-      // Students can subscribe to their specific user ID topic for personal notifications
-      final userId = FirebaseAuth.instance.currentUser?.uid;
-      if (userId != null) {
-        await subscribeToTopic('user_$userId');
-      }
-    }
-  }
-
-  // Method to unsubscribe from role-based notifications (useful during logout)
-  Future<void> unsubscribeFromAllNotifications() async {
-    await unsubscribeFromTopic('admin_notifications');
-    await unsubscribeFromTopic('new_questions');
-    await unsubscribeFromTopic('student_notifications');
-    
-    // Unsubscribe from user-specific topic
-    final userId = FirebaseAuth.instance.currentUser?.uid;
-    if (userId != null) {
-      await unsubscribeFromTopic('user_$userId');
-    }
-  }
 }
+
+
 
 // Top-level function for handling background messages
 Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
