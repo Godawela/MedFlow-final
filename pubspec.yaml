@@ -62,7 +62,10 @@ dependencies:
 
   # Code Generation
   build_runner:
+
+  # Notifications
   flutter_local_notifications: ^18.0.1
+  firebase_messaging: ^15.2.2
 
 dev_dependencies:
   flutter_test:

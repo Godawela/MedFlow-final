@@ -10,7 +10,7 @@ import 'dart:convert';
 import 'package:med/routes/router.dart';
 import 'package:med/widgets/appbar.dart';
 import 'package:med/widgets/user_greetings.dart';
-import 'package:med/services/notification_service.dart'; // Add this import
+import 'package:med/services/notification_service.dart';
 
 @RoutePage()
 class ProfilePage extends StatefulWidget {
@@ -177,8 +177,8 @@ class _ProfilePageState extends State<ProfilePage> {
       );
 
       if (response.statusCode == 200 || response.statusCode == 201) {
-        // Use NotificationService instead of local instance
-        await NotificationService().showStudentQuestionNotification(
+        // ONLY send Firebase notification to admins - no local notification
+        await NotificationService().notifyAdminsOfNewQuestion(
           studentName: userName ?? 'Student',
           questionPreview: questionController.text.trim(),
         );
@@ -219,7 +219,6 @@ class _ProfilePageState extends State<ProfilePage> {
       }
     }
   }
-
 
   Widget _buildAdminQuestionButton() {
     return Container(
@@ -384,7 +383,6 @@ class _ProfilePageState extends State<ProfilePage> {
       },
     );
   }
-
 
   Widget _buildStudentQuestionSection() {
     return Container(
@@ -925,7 +923,6 @@ class _ProfilePageState extends State<ProfilePage> {
                             // Role-based content
                             if (role?.toLowerCase() == 'student') ...[
                               _buildStudentQuestionSection(),
-                         
                               const SizedBox(height: 24),
                             ] else if (role?.toLowerCase() == 'admin') ...[
                               _buildAdminQuestionButton(),

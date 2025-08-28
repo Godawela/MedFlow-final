@@ -1,150 +1,196 @@
-import 'dart:ui';
-
-import 'package:flutter_local_notifications/flutter_local_notifications.dart';
-import 'package:flutter/foundation.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
 
 class NotificationService {
   static final NotificationService _instance = NotificationService._internal();
   factory NotificationService() => _instance;
   NotificationService._internal();
 
-  final FlutterLocalNotificationsPlugin _flutterLocalNotificationsPlugin =
-      FlutterLocalNotificationsPlugin();
+  final FirebaseMessaging _firebaseMessaging = FirebaseMessaging.instance;
 
   Future<void> initialize() async {
-    const AndroidInitializationSettings initializationSettingsAndroid =
-        AndroidInitializationSettings('@mipmap/ic_launcher');
+    // FCM Setup only
+    await _initializeFCM();
+  }
 
-    const DarwinInitializationSettings initializationSettingsIOS =
-        DarwinInitializationSettings(
-      requestAlertPermission: true,
-      requestBadgePermission: true,
-      requestSoundPermission: true,
+  Future<void> _initializeFCM() async {
+    // Request permission for push notifications
+    NotificationSettings settings = await _firebaseMessaging.requestPermission(
+      alert: true,
+      badge: true,
+      sound: true,
+      provisional: false,
     );
 
-    const InitializationSettings initializationSettings =
-        InitializationSettings(
-      android: initializationSettingsAndroid,
-      iOS: initializationSettingsIOS,
-    );
-
-    await _flutterLocalNotificationsPlugin.initialize(
-      initializationSettings,
-      onDidReceiveNotificationResponse: _onNotificationTap,
-    );
-
-    // Request permissions for iOS
-    if (defaultTargetPlatform == TargetPlatform.iOS) {
-      await _flutterLocalNotificationsPlugin
-          .resolvePlatformSpecificImplementation<
-              IOSFlutterLocalNotificationsPlugin>()
-          ?.requestPermissions(
-            alert: true,
-            badge: true,
-            sound: true,
-          );
+    if (settings.authorizationStatus == AuthorizationStatus.authorized) {
+      print('User granted permission');
+      
+      // Get FCM token
+      String? token = await _firebaseMessaging.getToken();
+      print('FCM Token: $token');
+      
+      // Send this token to your backend and associate it with the user
+      await _sendTokenToBackend(token);
+      
+      // Listen for token refresh
+      _firebaseMessaging.onTokenRefresh.listen(_sendTokenToBackend);
     }
 
-    // Request permissions for Android 13+
-    if (defaultTargetPlatform == TargetPlatform.android) {
-      await _flutterLocalNotificationsPlugin
-          .resolvePlatformSpecificImplementation<
-              AndroidFlutterLocalNotificationsPlugin>()
-          ?.requestNotificationsPermission();
+    // Handle foreground messages - just print, no local notification needed
+    FirebaseMessaging.onMessage.listen((RemoteMessage message) {
+      print('Received foreground message: ${message.notification?.title}');
+      // The system will handle showing the notification
+    });
+
+    // Handle background messages
+    FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
+  }
+
+  Future<void> _sendTokenToBackend(String? token) async {
+    if (token == null) return;
+    
+    final String userId = FirebaseAuth.instance.currentUser?.uid ?? '';
+    
+    try {
+      // Send token to your backend
+      await http.post(
+        Uri.parse('https://medflow-phi.vercel.app/api/fcm-tokens'),
+        headers: {'Content-Type': 'application/json'},
+        body: json.encode({
+          'token': token,
+          'userId': userId,
+        }),
+      );
+      print('FCM token sent to backend successfully');
+    } catch (e) {
+      print('Error sending FCM token: $e');
     }
   }
 
-  static void _onNotificationTap(NotificationResponse response) {
-    // Handle notification tap
-    if (response.payload != null) {
-      // You can handle navigation here based on payload
-      print('Notification tapped with payload: ${response.payload}');
-    }
-  }
-
-  Future<void> showStudentQuestionNotification({
+  // Send notification to admins when student submits question
+  Future<void> notifyAdminsOfNewQuestion({
     required String studentName,
     required String questionPreview,
   }) async {
-    const AndroidNotificationDetails androidPlatformChannelSpecifics =
-        AndroidNotificationDetails(
-      'student_questions',
-      'Student Questions',
-      channelDescription: 'Notifications for new student questions',
-      importance: Importance.high,
-      priority: Priority.high,
-      showWhen: true,
-      icon: '@mipmap/ic_launcher',
-      color: Color(0xFF8E2DE2),
-    );
-
-    const DarwinNotificationDetails iOSPlatformChannelSpecifics =
-        DarwinNotificationDetails(
-      presentAlert: true,
-      presentBadge: true,
-      presentSound: true,
-    );
-
-    const NotificationDetails platformChannelSpecifics = NotificationDetails(
-      android: androidPlatformChannelSpecifics,
-      iOS: iOSPlatformChannelSpecifics,
-    );
-
-    await _flutterLocalNotificationsPlugin.show(
-      DateTime.now().millisecondsSinceEpoch ~/ 1000,
-      'New Question from $studentName',
-      questionPreview.length > 50 
-          ? '${questionPreview.substring(0, 50)}...'
-          : questionPreview,
-      platformChannelSpecifics,
-      payload: 'view_questions',
-    );
+    try {
+      // Call your backend endpoint to send push notification to all admin devices
+      final response = await http.post(
+        Uri.parse('https://medflow-phi.vercel.app/api/notify-admins'),
+        headers: {'Content-Type': 'application/json'},
+        body: json.encode({
+          'type': 'new_question',
+          'studentName': studentName,
+          'questionPreview': questionPreview.length > 100 
+              ? '${questionPreview.substring(0, 100)}...' 
+              : questionPreview,
+          'timestamp': DateTime.now().toIso8601String(),
+        }),
+      );
+      
+      if (response.statusCode == 200) {
+        print('Admin notification sent successfully');
+      } else {
+        print('Failed to send admin notification: ${response.statusCode}');
+      }
+    } catch (e) {
+      print('Error notifying admins: $e');
+      // Don't throw error to prevent breaking the question submission flow
+    }
   }
 
-  Future<void> showReplyNotification({
-    required String studentName,
+  // Send notification to student when admin replies
+  Future<void> notifyStudentOfReply({
+    required String studentId,
     required String replyPreview,
   }) async {
-    const AndroidNotificationDetails androidPlatformChannelSpecifics =
-        AndroidNotificationDetails(
-      'admin_replies',
-      'Admin Replies',
-      channelDescription: 'Notifications for admin replies to questions',
-      importance: Importance.high,
-      priority: Priority.high,
-      showWhen: true,
-      icon: '@mipmap/ic_launcher',
-      color: Color(0xFF4B00E0),
-    );
-
-    const DarwinNotificationDetails iOSPlatformChannelSpecifics =
-        DarwinNotificationDetails(
-      presentAlert: true,
-      presentBadge: true,
-      presentSound: true,
-    );
-
-    const NotificationDetails platformChannelSpecifics = NotificationDetails(
-      android: androidPlatformChannelSpecifics,
-      iOS: iOSPlatformChannelSpecifics,
-    );
-
-    await _flutterLocalNotificationsPlugin.show(
-      DateTime.now().millisecondsSinceEpoch ~/ 1000,
-      'Reply from Admin',
-      replyPreview.length > 50 
-          ? '${replyPreview.substring(0, 50)}...'
-          : replyPreview,
-      platformChannelSpecifics,
-      payload: 'view_my_questions',
-    );
+    try {
+      final response = await http.post(
+        Uri.parse('https://medflow-phi.vercel.app/api/notify-student'),
+        headers: {'Content-Type': 'application/json'},
+        body: json.encode({
+          'type': 'admin_reply',
+          'studentId': studentId,
+          'replyPreview': replyPreview.length > 100 
+              ? '${replyPreview.substring(0, 100)}...' 
+              : replyPreview,
+          'timestamp': DateTime.now().toIso8601String(),
+        }),
+      );
+      
+      if (response.statusCode == 200) {
+        print('Student notification sent successfully');
+      } else {
+        print('Failed to send student notification: ${response.statusCode}');
+      }
+    } catch (e) {
+      print('Error notifying student: $e');
+      // Don't throw error to prevent breaking the reply flow
+    }
   }
 
-  Future<void> cancelAllNotifications() async {
-    await _flutterLocalNotificationsPlugin.cancelAll();
+  // Get current FCM token (useful for debugging)
+  Future<String?> getCurrentToken() async {
+    try {
+      return await _firebaseMessaging.getToken();
+    } catch (e) {
+      print('Error getting FCM token: $e');
+      return null;
+    }
   }
 
-  Future<void> cancelNotification(int id) async {
-    await _flutterLocalNotificationsPlugin.cancel(id);
+  // Subscribe to topic (useful for role-based notifications)
+  Future<void> subscribeToTopic(String topic) async {
+    try {
+      await _firebaseMessaging.subscribeToTopic(topic);
+      print('Subscribed to topic: $topic');
+    } catch (e) {
+      print('Error subscribing to topic $topic: $e');
+    }
   }
+
+  // Unsubscribe from topic
+  Future<void> unsubscribeFromTopic(String topic) async {
+    try {
+      await _firebaseMessaging.unsubscribeFromTopic(topic);
+      print('Unsubscribed from topic: $topic');
+    } catch (e) {
+      print('Error unsubscribing from topic $topic: $e');
+    }
+  }
+
+  // Method to handle role-based topic subscription
+  Future<void> subscribeToRoleBasedNotifications(String role) async {
+    if (role.toLowerCase() == 'admin') {
+      await subscribeToTopic('admin_notifications');
+      await subscribeToTopic('new_questions');
+    } else if (role.toLowerCase() == 'student') {
+      await subscribeToTopic('student_notifications');
+      // Students can subscribe to their specific user ID topic for personal notifications
+      final userId = FirebaseAuth.instance.currentUser?.uid;
+      if (userId != null) {
+        await subscribeToTopic('user_$userId');
+      }
+    }
+  }
+
+  // Method to unsubscribe from role-based notifications (useful during logout)
+  Future<void> unsubscribeFromAllNotifications() async {
+    await unsubscribeFromTopic('admin_notifications');
+    await unsubscribeFromTopic('new_questions');
+    await unsubscribeFromTopic('student_notifications');
+    
+    // Unsubscribe from user-specific topic
+    final userId = FirebaseAuth.instance.currentUser?.uid;
+    if (userId != null) {
+      await unsubscribeFromTopic('user_$userId');
+    }
+  }
+}
+
+// Top-level function for handling background messages
+Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
+  print('Handling background message: ${message.messageId}');
+  print('Background message data: ${message.data}');
 }
