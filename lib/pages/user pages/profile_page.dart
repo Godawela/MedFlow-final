@@ -10,6 +10,7 @@ import 'dart:convert';
 import 'package:med/routes/router.dart';
 import 'package:med/widgets/appbar.dart';
 import 'package:med/widgets/user_greetings.dart';
+import 'package:med/services/notification_service.dart'; // Add this import
 
 @RoutePage()
 class ProfilePage extends StatefulWidget {
@@ -25,8 +26,10 @@ class _ProfilePageState extends State<ProfilePage> {
   String? role;
   bool isLoading = true;
   bool isEditingName = false;
+  bool isSubmittingQuestion = false;
 
   final TextEditingController nameController = TextEditingController();
+  final TextEditingController questionController = TextEditingController();
 
   String _capitalize(String name) {
     if (name.isEmpty) return name;
@@ -42,16 +45,21 @@ class _ProfilePageState extends State<ProfilePage> {
   @override
   void dispose() {
     nameController.dispose();
+    questionController.dispose();
     super.dispose();
   }
 
   Future<void> fetchUserData() async {
-    final String? uid = FirebaseAuth.instance.currentUser?.uid;
-    if (uid == null) {
-      throw Exception('User not logged in');
-    }
     try {
-      final response = await http.get(Uri.parse('https://medflow-phi.vercel.app/api/users/$uid'));
+      // Check if user is logged in
+      final user = FirebaseAuth.instance.currentUser;
+      if (user == null) {
+        throw Exception('No user is currently logged in');
+      }
+
+      final String uid = user.uid;
+      final response = await http
+          .get(Uri.parse('https://medflow-phi.vercel.app/api/users/$uid'));
 
       if (response.statusCode == 200) {
         final data = json.decode(response.body);
@@ -63,31 +71,33 @@ class _ProfilePageState extends State<ProfilePage> {
           isLoading = false;
         });
       } else {
-        throw Exception('Failed to load user data');
+        throw Exception('Failed to load user data: ${response.statusCode}');
       }
     } catch (e) {
       setState(() {
         isLoading = false;
       });
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Error fetching user data: $e')),
-      );
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Error fetching user data: $e')),
+        );
+      }
     }
   }
 
   Future<void> updateUserData() async {
-    final String? uid = FirebaseAuth.instance.currentUser?.uid;
-    if (uid == null) {
-      throw Exception('User not logged in');
-    }
-
-    final Map<String, dynamic> updatedData = {
-      'name': nameController.text.trim(),
-    };
-
     try {
+      final user = FirebaseAuth.instance.currentUser;
+      if (user == null) {
+        throw Exception('No user is currently logged in');
+      }
+
+      final Map<String, dynamic> updatedData = {
+        'name': nameController.text.trim(),
+      };
+
       final response = await http.put(
-        Uri.parse('https://medflow-phi.vercel.app/api/users/$uid'),
+        Uri.parse('https://medflow-phi.vercel.app/api/users/${user.uid}'),
         headers: {'Content-Type': 'application/json'},
         body: json.encode(updatedData),
       );
@@ -99,27 +109,165 @@ class _ProfilePageState extends State<ProfilePage> {
           nameController.text = userName!;
           isEditingName = false;
         });
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: const Text('Profile updated successfully'),
-            backgroundColor: Colors.green,
-            behavior: SnackBarBehavior.floating,
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-          ),
-        );
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: const Text('Profile updated successfully'),
+              backgroundColor: Colors.green,
+              behavior: SnackBarBehavior.floating,
+              shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(10)),
+            ),
+          );
+        }
       } else {
-        throw Exception('Failed to update user');
+        throw Exception('Failed to update user: ${response.statusCode}');
       }
     } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Error updating user data: $e'),
+            backgroundColor: Colors.red,
+            behavior: SnackBarBehavior.floating,
+            shape:
+                RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+          ),
+        );
+      }
+    }
+  }
+
+  Future<void> submitQuestion() async {
+    if (questionController.text.trim().isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('Error updating user data: $e'),
-          backgroundColor: Colors.red,
+          content: const Text('Please enter a question'),
+          backgroundColor: Colors.orange,
           behavior: SnackBarBehavior.floating,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+          shape:
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
         ),
       );
+      return;
     }
+
+    setState(() {
+      isSubmittingQuestion = true;
+    });
+
+    try {
+      final user = FirebaseAuth.instance.currentUser;
+      if (user == null) {
+        throw Exception('No user is currently logged in');
+      }
+
+      final Map<String, dynamic> questionData = {
+        'studentId': user.uid,
+        'studentName': userName,
+        'question': questionController.text.trim(),
+        'timestamp': DateTime.now().toIso8601String(),
+        'status': 'pending',
+      };
+
+      final response = await http.post(
+        Uri.parse('https://medflow-phi.vercel.app/api/questions'),
+        headers: {'Content-Type': 'application/json'},
+        body: json.encode(questionData),
+      );
+
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        // Use NotificationService instead of local instance
+        await NotificationService().showStudentQuestionNotification(
+          studentName: userName ?? 'Student',
+          questionPreview: questionController.text.trim(),
+        );
+
+        setState(() {
+          questionController.clear();
+          isSubmittingQuestion = false;
+        });
+
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: const Text('Question submitted successfully!'),
+              backgroundColor: Colors.green,
+              behavior: SnackBarBehavior.floating,
+              shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(10)),
+            ),
+          );
+        }
+      } else {
+        throw Exception('Failed to submit question: ${response.statusCode}');
+      }
+    } catch (e) {
+      setState(() {
+        isSubmittingQuestion = false;
+      });
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Error submitting question: $e'),
+            backgroundColor: Colors.red,
+            behavior: SnackBarBehavior.floating,
+            shape:
+                RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+          ),
+        );
+      }
+    }
+  }
+
+
+  Widget _buildAdminQuestionButton() {
+    return Container(
+      width: double.infinity,
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(12),
+        boxShadow: [
+          BoxShadow(
+            color: const Color(0xFF8E2DE2).withValues(alpha: 0.3),
+            blurRadius: 12,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: Container(
+        decoration: BoxDecoration(
+          gradient: const LinearGradient(
+            colors: [Color(0xFF4B00E0), Color(0xFF8E2DE2)],
+            begin: Alignment.centerLeft,
+            end: Alignment.centerRight,
+          ),
+          borderRadius: BorderRadius.circular(12),
+        ),
+        child: ElevatedButton.icon(
+          onPressed: () => AutoRouter.of(context).push(const QuestionsRoute()),
+          icon: const Icon(
+            Icons.question_answer,
+            color: Colors.white,
+          ),
+          label: const Text(
+            'View Student Questions',
+            style: TextStyle(
+              color: Colors.white,
+              fontSize: 16,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+          style: ElevatedButton.styleFrom(
+            backgroundColor: Colors.transparent,
+            shadowColor: Colors.transparent,
+            minimumSize: const Size.fromHeight(50),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12),
+            ),
+          ),
+        ),
+      ),
+    );
   }
 
   Future<void> logOut() async {
@@ -127,7 +275,8 @@ class _ProfilePageState extends State<ProfilePage> {
       context: context,
       builder: (BuildContext context) {
         return Dialog(
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+          shape:
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
           child: Container(
             padding: const EdgeInsets.all(24),
             decoration: BoxDecoration(
@@ -144,7 +293,7 @@ class _ProfilePageState extends State<ProfilePage> {
                 Container(
                   padding: const EdgeInsets.all(16),
                   decoration: BoxDecoration(
-                    color: Colors.red.withValues(alpha:0.1),
+                    color: Colors.red.withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(12),
                   ),
                   child: const Icon(
@@ -236,6 +385,198 @@ class _ProfilePageState extends State<ProfilePage> {
     );
   }
 
+
+  Widget _buildStudentQuestionSection() {
+    return Container(
+      width: double.infinity,
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(20),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.08),
+            blurRadius: 20,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: Column(
+        children: [
+          // Tab Header
+          Container(
+            padding: const EdgeInsets.all(6),
+            decoration: BoxDecoration(
+              color: const Color(0xFFF8F9FA),
+              borderRadius: BorderRadius.circular(20),
+            ),
+            child: Row(
+              children: [
+                Expanded(
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(vertical: 12),
+                    decoration: BoxDecoration(
+                      gradient: const LinearGradient(
+                        colors: [Color(0xFF4B00E0), Color(0xFF8E2DE2)],
+                        begin: Alignment.centerLeft,
+                        end: Alignment.centerRight,
+                      ),
+                      borderRadius: BorderRadius.circular(14),
+                    ),
+                    child: const Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(Icons.add_comment, color: Colors.white, size: 18),
+                        SizedBox(width: 8),
+                        Text(
+                          'Ask Question',
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 14,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 6),
+                Expanded(
+                  child: GestureDetector(
+                    onTap: () => AutoRouter.of(context)
+                        .push(const StudentQuestionsRoute()),
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(vertical: 12),
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(14),
+                        border: Border.all(
+                          color: const Color(0xFF8E2DE2).withValues(alpha: 0.2),
+                          width: 1,
+                        ),
+                      ),
+                      child: const Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(Icons.forum_outlined,
+                              color: Color(0xFF8E2DE2), size: 18),
+                          SizedBox(width: 8),
+                          Text(
+                            'My Questions',
+                            style: TextStyle(
+                              color: Color(0xFF8E2DE2),
+                              fontSize: 14,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+
+          // Question Form Content
+          Padding(
+            padding: const EdgeInsets.all(24),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(16),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFF8F9FA),
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(
+                      color: const Color(0xFF8E2DE2).withValues(alpha: 0.3),
+                      width: 1,
+                    ),
+                  ),
+                  child: TextField(
+                    controller: questionController,
+                    maxLines: 4,
+                    style: const TextStyle(
+                      fontSize: 14,
+                      color: Color(0xFF2D3748),
+                    ),
+                    decoration: const InputDecoration(
+                      hintText: 'Type your question here...',
+                      border: InputBorder.none,
+                      hintStyle: TextStyle(
+                        color: Color(0xFF4A5568),
+                        fontSize: 14,
+                      ),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 16),
+                Container(
+                  width: double.infinity,
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(12),
+                    boxShadow: [
+                      BoxShadow(
+                        color: const Color(0xFF8E2DE2).withValues(alpha: 0.3),
+                        blurRadius: 12,
+                        offset: const Offset(0, 4),
+                      ),
+                    ],
+                  ),
+                  child: Container(
+                    decoration: BoxDecoration(
+                      gradient: const LinearGradient(
+                        colors: [Color(0xFF4B00E0), Color(0xFF8E2DE2)],
+                        begin: Alignment.centerLeft,
+                        end: Alignment.centerRight,
+                      ),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: ElevatedButton.icon(
+                      onPressed: isSubmittingQuestion ? null : submitQuestion,
+                      icon: isSubmittingQuestion
+                          ? const SizedBox(
+                              width: 16,
+                              height: 16,
+                              child: CircularProgressIndicator(
+                                strokeWidth: 2,
+                                valueColor:
+                                    AlwaysStoppedAnimation<Color>(Colors.white),
+                              ),
+                            )
+                          : const Icon(
+                              Icons.send,
+                              color: Colors.white,
+                            ),
+                      label: Text(
+                        isSubmittingQuestion
+                            ? 'Submitting...'
+                            : 'Submit Question',
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 16,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.transparent,
+                        shadowColor: Colors.transparent,
+                        minimumSize: const Size.fromHeight(50),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -254,7 +595,8 @@ class _ProfilePageState extends State<ProfilePage> {
               child: isLoading
                   ? const Center(
                       child: CircularProgressIndicator(
-                        valueColor: AlwaysStoppedAnimation<Color>(Color(0xFF8E2DE2)),
+                        valueColor:
+                            AlwaysStoppedAnimation<Color>(Color(0xFF8E2DE2)),
                       ),
                     )
                   : SingleChildScrollView(
@@ -266,20 +608,24 @@ class _ProfilePageState extends State<ProfilePage> {
                         child: Column(
                           children: [
                             const SizedBox(height: 40),
-                            
+
                             // Profile Avatar
                             Container(
                               padding: const EdgeInsets.all(6),
                               decoration: BoxDecoration(
                                 shape: BoxShape.circle,
                                 gradient: const LinearGradient(
-                                  colors: [Color(0xFF4B00E0), Color(0xFF8E2DE2)],
+                                  colors: [
+                                    Color(0xFF4B00E0),
+                                    Color(0xFF8E2DE2)
+                                  ],
                                   begin: Alignment.topLeft,
                                   end: Alignment.bottomRight,
                                 ),
                                 boxShadow: [
                                   BoxShadow(
-                                    color: const Color(0xFF4B00E0).withValues(alpha:0.3),
+                                    color: const Color(0xFF4B00E0)
+                                        .withValues(alpha: 0.3),
                                     blurRadius: 20,
                                     offset: const Offset(0, 8),
                                   ),
@@ -290,13 +636,14 @@ class _ProfilePageState extends State<ProfilePage> {
                                 backgroundColor: Colors.white,
                                 child: CircleAvatar(
                                   radius: 45,
-                                  backgroundImage: AssetImage('assets/images/logo.png'),
+                                  backgroundImage:
+                                      AssetImage('assets/images/logo.png'),
                                 ),
                               ),
                             ),
-                            
+
                             const SizedBox(height: 24),
-                            
+
                             // User Greeting Container
                             Container(
                               width: double.infinity,
@@ -306,7 +653,7 @@ class _ProfilePageState extends State<ProfilePage> {
                                 borderRadius: BorderRadius.circular(16),
                                 boxShadow: [
                                   BoxShadow(
-                                    color: Colors.black.withValues(alpha:0.08),
+                                    color: Colors.black.withValues(alpha: 0.08),
                                     blurRadius: 20,
                                     offset: const Offset(0, 4),
                                   ),
@@ -314,9 +661,9 @@ class _ProfilePageState extends State<ProfilePage> {
                               ),
                               child: const UserGreeting(),
                             ),
-                            
+
                             const SizedBox(height: 24),
-                            
+
                             // Profile Information Card
                             Container(
                               width: double.infinity,
@@ -326,7 +673,7 @@ class _ProfilePageState extends State<ProfilePage> {
                                 borderRadius: BorderRadius.circular(20),
                                 boxShadow: [
                                   BoxShadow(
-                                    color: Colors.black.withValues(alpha:0.08),
+                                    color: Colors.black.withValues(alpha: 0.08),
                                     blurRadius: 20,
                                     offset: const Offset(0, 4),
                                   ),
@@ -341,11 +688,15 @@ class _ProfilePageState extends State<ProfilePage> {
                                         padding: const EdgeInsets.all(8),
                                         decoration: BoxDecoration(
                                           gradient: const LinearGradient(
-                                            colors: [Color(0xFF4B00E0), Color(0xFF8E2DE2)],
+                                            colors: [
+                                              Color(0xFF4B00E0),
+                                              Color(0xFF8E2DE2)
+                                            ],
                                             begin: Alignment.topLeft,
                                             end: Alignment.bottomRight,
                                           ),
-                                          borderRadius: BorderRadius.circular(8),
+                                          borderRadius:
+                                              BorderRadius.circular(8),
                                         ),
                                         child: const Icon(
                                           Icons.person,
@@ -365,7 +716,7 @@ class _ProfilePageState extends State<ProfilePage> {
                                     ],
                                   ),
                                   const SizedBox(height: 24),
-                                  
+
                                   // Username Field
                                   Container(
                                     padding: const EdgeInsets.all(16),
@@ -373,8 +724,8 @@ class _ProfilePageState extends State<ProfilePage> {
                                       color: const Color(0xFFF8F9FA),
                                       borderRadius: BorderRadius.circular(12),
                                       border: Border.all(
-                                        color: isEditingName 
-                                            ? const Color(0xFF8E2DE2) 
+                                        color: isEditingName
+                                            ? const Color(0xFF8E2DE2)
                                             : Colors.transparent,
                                         width: 2,
                                       ),
@@ -389,7 +740,8 @@ class _ProfilePageState extends State<ProfilePage> {
                                         const SizedBox(width: 12),
                                         Expanded(
                                           child: Column(
-                                            crossAxisAlignment: CrossAxisAlignment.start,
+                                            crossAxisAlignment:
+                                                CrossAxisAlignment.start,
                                             children: [
                                               const Text(
                                                 'Username',
@@ -408,9 +760,11 @@ class _ProfilePageState extends State<ProfilePage> {
                                                   fontWeight: FontWeight.w600,
                                                   color: Color(0xFF2D3748),
                                                 ),
-                                                decoration: const InputDecoration(
+                                                decoration:
+                                                    const InputDecoration(
                                                   border: InputBorder.none,
-                                                  contentPadding: EdgeInsets.zero,
+                                                  contentPadding:
+                                                      EdgeInsets.zero,
                                                   isDense: true,
                                                 ),
                                               ),
@@ -419,16 +773,20 @@ class _ProfilePageState extends State<ProfilePage> {
                                         ),
                                         Container(
                                           decoration: BoxDecoration(
-                                            color: isEditingName 
-                                                ? const Color(0xFF8E2DE2) 
-                                                : const Color(0xFF8E2DE2).withValues(alpha:0.1),
-                                            borderRadius: BorderRadius.circular(8),
+                                            color: isEditingName
+                                                ? const Color(0xFF8E2DE2)
+                                                : const Color(0xFF8E2DE2)
+                                                    .withValues(alpha: 0.1),
+                                            borderRadius:
+                                                BorderRadius.circular(8),
                                           ),
                                           child: IconButton(
                                             icon: Icon(
-                                              isEditingName ? Icons.check : Icons.edit,
-                                              color: isEditingName 
-                                                  ? Colors.white 
+                                              isEditingName
+                                                  ? Icons.check
+                                                  : Icons.edit,
+                                              color: isEditingName
+                                                  ? Colors.white
                                                   : const Color(0xFF8E2DE2),
                                               size: 18,
                                             ),
@@ -446,9 +804,9 @@ class _ProfilePageState extends State<ProfilePage> {
                                       ],
                                     ),
                                   ),
-                                  
+
                                   const SizedBox(height: 16),
-                                  
+
                                   // Email Field
                                   Container(
                                     padding: const EdgeInsets.all(16),
@@ -466,7 +824,8 @@ class _ProfilePageState extends State<ProfilePage> {
                                         const SizedBox(width: 12),
                                         Expanded(
                                           child: Column(
-                                            crossAxisAlignment: CrossAxisAlignment.start,
+                                            crossAxisAlignment:
+                                                CrossAxisAlignment.start,
                                             children: [
                                               const Text(
                                                 'Email',
@@ -491,9 +850,9 @@ class _ProfilePageState extends State<ProfilePage> {
                                       ],
                                     ),
                                   ),
-                                  
+
                                   const SizedBox(height: 16),
-                                  
+
                                   // Role Field
                                   Container(
                                     padding: const EdgeInsets.all(16),
@@ -511,7 +870,8 @@ class _ProfilePageState extends State<ProfilePage> {
                                         const SizedBox(width: 12),
                                         Expanded(
                                           child: Column(
-                                            crossAxisAlignment: CrossAxisAlignment.start,
+                                            crossAxisAlignment:
+                                                CrossAxisAlignment.start,
                                             children: [
                                               const Text(
                                                 'Role',
@@ -523,17 +883,23 @@ class _ProfilePageState extends State<ProfilePage> {
                                               ),
                                               const SizedBox(height: 4),
                                               Container(
-                                                padding: const EdgeInsets.symmetric(
+                                                padding:
+                                                    const EdgeInsets.symmetric(
                                                   horizontal: 8,
                                                   vertical: 4,
                                                 ),
                                                 decoration: BoxDecoration(
-                                                  gradient: const LinearGradient(
-                                                    colors: [Color(0xFF4B00E0), Color(0xFF8E2DE2)],
+                                                  gradient:
+                                                      const LinearGradient(
+                                                    colors: [
+                                                      Color(0xFF4B00E0),
+                                                      Color(0xFF8E2DE2)
+                                                    ],
                                                     begin: Alignment.centerLeft,
                                                     end: Alignment.centerRight,
                                                   ),
-                                                  borderRadius: BorderRadius.circular(6),
+                                                  borderRadius:
+                                                      BorderRadius.circular(6),
                                                 ),
                                                 child: Text(
                                                   role ?? '',
@@ -553,9 +919,19 @@ class _ProfilePageState extends State<ProfilePage> {
                                 ],
                               ),
                             ),
-                            
-                            const SizedBox(height: 32),
-                            
+
+                            const SizedBox(height: 24),
+
+                            // Role-based content
+                            if (role?.toLowerCase() == 'student') ...[
+                              _buildStudentQuestionSection(),
+                         
+                              const SizedBox(height: 24),
+                            ] else if (role?.toLowerCase() == 'admin') ...[
+                              _buildAdminQuestionButton(),
+                              const SizedBox(height: 24),
+                            ],
+
                             // Logout Button
                             Container(
                               width: double.infinity,
@@ -563,7 +939,7 @@ class _ProfilePageState extends State<ProfilePage> {
                                 borderRadius: BorderRadius.circular(12),
                                 boxShadow: [
                                   BoxShadow(
-                                    color: Colors.red.withValues(alpha:0.3),
+                                    color: Colors.red.withValues(alpha: 0.3),
                                     blurRadius: 12,
                                     offset: const Offset(0, 4),
                                   ),
@@ -603,7 +979,7 @@ class _ProfilePageState extends State<ProfilePage> {
                                 ),
                               ),
                             ),
-                            
+
                             const SizedBox(height: 40),
                           ],
                         ),

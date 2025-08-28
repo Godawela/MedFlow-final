@@ -2,14 +2,16 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:med/routes/router.dart';
+import 'package:med/services/notification_service.dart';
 
 void main() async {
-    // Gemini.init(apiKey: GEMINI_API_KEY);
   WidgetsFlutterBinding.ensureInitialized();
+
   await Firebase.initializeApp();
-   Future.delayed(const Duration(seconds: 1), () {
+      await NotificationService().initialize();
+
     runApp( const ProviderScope( child: MyApp(),));
-  });
+  
  
 }
 
