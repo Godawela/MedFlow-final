@@ -188,14 +188,18 @@ Future<void> handleAuth() async {
   }
 }
 
-
- Future<void> handleGoogleSignIn() async {
+Future<void> handleGoogleSignIn() async {
   if (!mounted) return;
 
   try {
     setState(() => isLoading = true);
 
     final GoogleSignIn googleSignIn = GoogleSignIn();
+    
+    // Always sign out first to allow user to choose different email
+    await googleSignIn.signOut();
+    await _auth.signOut();
+    
     final GoogleSignInAccount? googleUser = await googleSignIn.signIn();
 
     if (googleUser == null) {
@@ -214,6 +218,7 @@ Future<void> handleAuth() async {
     if (userCredential.user != null && mounted) {
       String? token = await userCredential.user!.getIdToken();
       String uid = userCredential.user!.uid;
+      String email = userCredential.user!.email ?? '';
 
       // Check if user exists in backend
       bool userExists = await checkUserExists(uid);
@@ -221,8 +226,13 @@ Future<void> handleAuth() async {
       if (!userExists) {
         // Create user in backend first
         await createUserInBackend(userCredential.user!);
+        
+        // Sign out after creating unverified user
+        await googleSignIn.signOut();
+        await _auth.signOut();
+        
         _showSnackBar(
-          'Account created! Please wait for admin approval before you can log in.',
+          'Account created for $email! Please wait for admin approval before you can log in.',
           Colors.orange.shade600,
         );
         return;
@@ -231,16 +241,24 @@ Future<void> handleAuth() async {
       // Check verification status
       bool isVerified = await checkUserVerified(uid);
       if (!isVerified) {
+        // Sign out the unverified user so they can try different email
+        await googleSignIn.signOut();
+        await _auth.signOut();
+        
         _showSnackBar(
-          'Your account is not verified by admin yet. Please wait for approval.',
+          'Account $email is not verified by admin yet. Try with a different email or wait for approval.',
           Colors.red.shade400,
         );
         return;
       }
 
+      // User is verified - proceed with login
       SharedPreferences prefs = await SharedPreferences.getInstance();
       await prefs.setString('authToken', token ?? '');
       await prefs.setString('uid', uid);
+
+      
+  
 
       _showSnackBar('Google Sign-In successful!', Colors.green.shade600);
       
@@ -249,6 +267,14 @@ Future<void> handleAuth() async {
       }
     }
   } on FirebaseAuthException catch (e) {
+    // Ensure user is signed out on any auth error
+    try {
+      await GoogleSignIn().signOut();
+      await _auth.signOut();
+    } catch (signOutError) {
+      print('Error during sign out: $signOutError');
+    }
+    
     // Handle specific Firebase Auth errors for Google Sign-In
     String errorMessage;
     switch (e.code) {
@@ -269,6 +295,14 @@ Future<void> handleAuth() async {
     }
     _showSnackBar(errorMessage, Colors.red.shade400);
   } catch (e) {
+    // Ensure user is signed out on any error
+    try {
+      await GoogleSignIn().signOut();
+      await _auth.signOut();
+    } catch (signOutError) {
+      print('Error during sign out: $signOutError');
+    }
+    
     _showSnackBar('Something went wrong with Google sign-in. Please try again', Colors.red.shade400);
   } finally {
     if (mounted) setState(() => isLoading = false);

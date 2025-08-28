@@ -127,6 +127,9 @@ class _SignUpScreenState extends State<SignUpScreen> {
         if (!userExists) {
           // Create user in backend first
           await createUserInBackend(userCredential.user!);
+            // Sign out after creating unverified user
+        await googleSignIn.signOut();
+        await _auth.signOut();
           _showSnackBar(
             'Account created! Please wait for admin approval before you can log in.',
             Colors.orange.shade600,
@@ -137,6 +140,9 @@ class _SignUpScreenState extends State<SignUpScreen> {
         // Check verification status
         bool isVerified = await checkUserVerified(uid);
         if (!isVerified) {
+            // Sign out the unverified user so they can try different email
+        await googleSignIn.signOut();
+        await _auth.signOut();
           _showSnackBar(
             'Your account is not verified by admin yet. Please wait for approval.',
             Colors.red.shade400,
