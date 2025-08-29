@@ -6,6 +6,7 @@ import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:intl/intl.dart';
 import 'package:med/widgets/appbar.dart';
+import 'package:med/services/notification_service.dart'; // Add this import
 
 @RoutePage()
 class QuestionsPage extends StatefulWidget {
@@ -60,6 +61,11 @@ class _QuestionsPageState extends State<QuestionsPage> {
 
   Future<void> replyToQuestion(String questionId, String reply) async {
     try {
+      // Find the question to get student information
+      final question = questions.firstWhere((q) => q['_id'] == questionId);
+      final String studentId = question['studentId']; 
+
+      // Update the question with the reply
       final response = await http.put(
         Uri.parse('https://medflow-phi.vercel.app/api/questions/$questionId'),
         headers: {'Content-Type': 'application/json'},
@@ -71,6 +77,18 @@ class _QuestionsPageState extends State<QuestionsPage> {
       );
 
       if (response.statusCode == 200) {
+        // Send notification to the student
+        try {
+          await NotificationService().notifyStudentOfReply(
+            studentId: studentId,
+            replyPreview: reply,
+          );
+          print('✅ Student notification sent successfully');
+        } catch (notificationError) {
+          print('❌ Failed to send student notification: $notificationError');
+          // Don't fail the whole operation if notification fails
+        }
+
         setState(() {
           selectedQuestionId = null;
           replyController.clear();
@@ -78,7 +96,7 @@ class _QuestionsPageState extends State<QuestionsPage> {
         
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: const Text('Reply sent successfully!'),
+            content: const Text('Reply sent successfully and student notified!'),
             backgroundColor: Colors.green,
             behavior: SnackBarBehavior.floating,
             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
