@@ -9,14 +9,46 @@ class NotificationService {
   NotificationService._internal();
 
   final FirebaseMessaging _firebaseMessaging = FirebaseMessaging.instance;
+  bool _isInitialized = false;
 
-  Future<void> initialize() async {
-    // FCM Setup only
-    await _initializeFCM();
+  // Call this during app startup to set up basic FCM
+  Future<void> initializeBasic() async {
+    // Only set up background message handling and permission request
+    await _requestPermission();
+    
+    // Handle background messages
+    FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
+    
+    // Handle foreground messages
+    FirebaseMessaging.onMessage.listen((RemoteMessage message) {
+      print('Received foreground message: ${message.notification?.title}');
+    });
   }
 
-  Future<void> _initializeFCM() async {
-    // Request permission for push notifications
+  // Call this AFTER user authentication is complete
+  Future<void> initializeForUser() async {
+    if (_isInitialized) return;
+    
+    final User? currentUser = FirebaseAuth.instance.currentUser;
+    if (currentUser == null) {
+      print('Cannot initialize FCM - user not authenticated');
+      return;
+    }
+    
+    // Get FCM token and register it
+    String? token = await _firebaseMessaging.getToken();
+    print('FCM Token: $token');
+    
+    await _sendTokenToBackend(token);
+    
+    // Listen for token refresh
+    _firebaseMessaging.onTokenRefresh.listen(_sendTokenToBackend);
+    
+    _isInitialized = true;
+    print('FCM fully initialized for user: ${currentUser.uid}');
+  }
+
+  Future<void> _requestPermission() async {
     NotificationSettings settings = await _firebaseMessaging.requestPermission(
       alert: true,
       badge: true,
@@ -25,49 +57,39 @@ class NotificationService {
     );
 
     if (settings.authorizationStatus == AuthorizationStatus.authorized) {
-      print('User granted permission');
-      
-      // Get FCM token
-      String? token = await _firebaseMessaging.getToken();
-      print('FCM Token: $token');
-      
-      // Send token to backend and associate it with the user
-      await _sendTokenToBackend(token);
-      
-      // Listen for token refresh
-      _firebaseMessaging.onTokenRefresh.listen(_sendTokenToBackend);
-    }
-
-    // Handle foreground messages
-    FirebaseMessaging.onMessage.listen((RemoteMessage message) {
-      print('Received foreground message: ${message.notification?.title}');
-      // The system will handle showing the notification
-    });
-
-    // Handle background messages
-    FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
-  }
-
-  Future<void> _sendTokenToBackend(String? token) async {
-    if (token == null) return;
-    
-    final String userId = FirebaseAuth.instance.currentUser?.uid ?? '';
-    
-    try {
-      // Send token to backend
-      await http.post(
-        Uri.parse('https://medflow-phi.vercel.app/api/fcm-tokens'),
-        headers: {'Content-Type': 'application/json'},
-        body: json.encode({
-          'token': token,
-          'userId': userId,
-        }),
-      );
-      print('FCM token sent to backend successfully');
-    } catch (e) {
-      print('Error sending FCM token: $e');
+      print('User granted notification permission');
     }
   }
+
+Future<void> _sendTokenToBackend(String? token) async {
+  if (token == null) return;
+
+  final User? currentUser = FirebaseAuth.instance.currentUser;
+  if (currentUser == null) {
+    print('No authenticated user - skipping token registration');
+    return;
+  }
+
+  final String userId = currentUser.uid;
+
+  try {
+    final response = await http.post(
+      Uri.parse('https://medflow-phi.vercel.app/api/fcm-tokens'),
+      headers: {'Content-Type': 'application/json'},
+      body: json.encode({'token': token, 'userId': userId}),
+    );
+
+    if (response.statusCode == 200) {
+      print('✅ FCM token registered successfully for user: $userId');
+    } else {
+      print('❌ Failed to register FCM token: ${response.statusCode} - ${response.body}');
+    }
+  } catch (e) {
+    print('Error registering FCM token: $e');
+  }
+}
+
+
 
   // Send notification to admins when student submits question
   Future<void> notifyAdminsOfNewQuestion({
@@ -147,10 +169,7 @@ class NotificationService {
       print('Error subscribing to topic $topic: $e');
     }
   }
-
 }
-
-
 
 // Top-level function for handling background messages
 Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {

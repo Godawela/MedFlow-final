@@ -156,8 +156,9 @@ Future<void> handleAuth() async {
       await prefs.setString('authToken', token ?? '');
       await prefs.setString('uid', uid);
 
+      // Initialize FCM for authenticated user
       try {
-        await NotificationService().initialize();
+        await NotificationService().initializeForUser();
         print('Notification service initialized after login');
       } catch (e) {
         print('Error initializing notification service: $e');
@@ -266,14 +267,14 @@ Future<void> handleGoogleSignIn() async {
       await prefs.setString('authToken', token ?? '');
       await prefs.setString('uid', uid);
 
-      
-  try {
-  await NotificationService().initialize();
-  print('Notification service initialized after Google sign-in');
-} catch (e) {
-  print('Error initializing notification service: $e');
-  // Don't block login if notification service fails
-}
+      // Initialize FCM for authenticated user
+      try {
+        await NotificationService().initializeForUser();
+        print('Notification service initialized after Google sign-in');
+      } catch (e) {
+        print('Error initializing notification service: $e');
+        // Don't block login if notification service fails
+      }
 
       _showSnackBar('Google Sign-In successful!', Colors.green.shade600);
       
