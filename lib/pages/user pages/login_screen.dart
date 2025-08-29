@@ -11,6 +11,7 @@ import 'package:med/routes/router.dart';
 import 'package:med/widgets/social_login_button.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:google_sign_in/google_sign_in.dart';
+import 'package:med/services/notification_service.dart';
 
 @RoutePage()
 class LoginScreen extends StatefulWidget {
@@ -155,6 +156,14 @@ Future<void> handleAuth() async {
       await prefs.setString('authToken', token ?? '');
       await prefs.setString('uid', uid);
 
+      try {
+        await NotificationService().initialize();
+        print('Notification service initialized after login');
+      } catch (e) {
+        print('Error initializing notification service: $e');
+        // Don't block login if notification service fails
+      }
+
       _showSnackBar('Sign-in successful!', Colors.green.shade600);
 
       if (mounted) {
@@ -258,7 +267,13 @@ Future<void> handleGoogleSignIn() async {
       await prefs.setString('uid', uid);
 
       
-  
+  try {
+  await NotificationService().initialize();
+  print('Notification service initialized after Google sign-in');
+} catch (e) {
+  print('Error initializing notification service: $e');
+  // Don't block login if notification service fails
+}
 
       _showSnackBar('Google Sign-In successful!', Colors.green.shade600);
       
