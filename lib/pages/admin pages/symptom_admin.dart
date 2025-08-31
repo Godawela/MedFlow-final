@@ -400,7 +400,7 @@ class _SymptomPageAdminState extends State<SymptomPageAdmin>
                                                                         .circular(
                                                                             16),
                                                               ),
-                                                              child: Icon(
+                                                              child: const Icon(
                                                                 icon,
                                                                 size: 28,
                                                                 color: Colors

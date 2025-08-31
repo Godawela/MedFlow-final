@@ -1,4 +1,3 @@
-// ignore_for_file: library_private_types_in_public_api
 
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
@@ -15,10 +14,10 @@ class AddCategoryPage extends StatefulWidget {
   const AddCategoryPage({super.key});
 
   @override
-  _AddCategoryPageState createState() => _AddCategoryPageState();
+  AddCategoryPageState createState() => AddCategoryPageState();
 }
 
-class _AddCategoryPageState extends State<AddCategoryPage>
+class AddCategoryPageState extends State<AddCategoryPage>
     with TickerProviderStateMixin {
   final _formKey = GlobalKey<FormState>();
   final TextEditingController _nameController = TextEditingController();

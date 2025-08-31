@@ -1,5 +1,6 @@
 //individual catagory information page
-// ignore_for_file: library_private_types_in_public_api, use_build_context_synchronously
+
+// ignore_for_file: use_build_context_synchronously
 
 import 'dart:async';
 import 'package:auto_route/auto_route.dart';
@@ -22,10 +23,10 @@ class DeviceListPageAdmin extends StatefulWidget {
   const DeviceListPageAdmin({super.key, required this.category});
 
   @override
-  _DeviceListPageAdminState createState() => _DeviceListPageAdminState();
+  DeviceListPageAdminState createState() => DeviceListPageAdminState();
 }
 
-class _DeviceListPageAdminState extends State<DeviceListPageAdmin>
+class DeviceListPageAdminState extends State<DeviceListPageAdmin>
     with TickerProviderStateMixin {
   List<dynamic> devices = [];
   bool isLoading = true;

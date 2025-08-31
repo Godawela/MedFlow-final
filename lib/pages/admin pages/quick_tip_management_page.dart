@@ -1,6 +1,7 @@
 // Quick Tips Management Page
 
-// ignore_for_file: use_build_context_synchronously, library_private_types_in_public_api
+
+// ignore_for_file: use_build_context_synchronously
 
 import 'dart:async';
 import 'dart:convert';
@@ -12,10 +13,10 @@ class QuickTipsManagementPage extends StatefulWidget {
   const QuickTipsManagementPage({super.key});
 
   @override
-  _QuickTipsManagementPageState createState() => _QuickTipsManagementPageState();
+  QuickTipsManagementPageState createState() => QuickTipsManagementPageState();
 }
 
-class _QuickTipsManagementPageState extends State<QuickTipsManagementPage>
+class QuickTipsManagementPageState extends State<QuickTipsManagementPage>
     with TickerProviderStateMixin {
   List<dynamic> categories = [];
   List<dynamic> quickTips = [];

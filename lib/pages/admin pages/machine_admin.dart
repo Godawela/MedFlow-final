@@ -1,6 +1,5 @@
 // Admin Category List Page
 
-// ignore_for_file: library_private_types_in_public_api
 
 import 'dart:async';
 
@@ -20,10 +19,10 @@ class MachinePageAdmin extends StatefulWidget {
   const MachinePageAdmin({super.key});
 
   @override
-  _MachinePageAdminState createState() => _MachinePageAdminState();
+  MachinePageAdminState createState() => MachinePageAdminState();
 }
 
-class _MachinePageAdminState extends State<MachinePageAdmin>
+class MachinePageAdminState extends State<MachinePageAdmin>
     with TickerProviderStateMixin {
   List<String> categories = [];
   bool isLoading = true;

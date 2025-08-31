@@ -17,10 +17,10 @@ class MachinePage extends StatefulWidget {
   const MachinePage({super.key});
 
   @override
-  _MachinePageState createState() => _MachinePageState();
+  MachinePageState createState() => MachinePageState();
 }
 
-class _MachinePageState extends State<MachinePage>
+class MachinePageState extends State<MachinePage>
     with TickerProviderStateMixin {
   List<Map<String, dynamic>> categories = [];
   bool isLoading = true;

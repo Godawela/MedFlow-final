@@ -1,4 +1,5 @@
-// ignore_for_file: use_build_context_synchronously, library_private_types_in_public_api
+
+// ignore_for_file: use_build_context_synchronously
 
 import 'dart:io';
 import 'package:auto_route/auto_route.dart';
@@ -12,10 +13,10 @@ class AddSymptomPage extends StatefulWidget {
   const AddSymptomPage({super.key});
 
   @override
-  _AddSymptomPageState createState() => _AddSymptomPageState();
+  AddSymptomPageState createState() => AddSymptomPageState();
 }
 
-class _AddSymptomPageState extends State<AddSymptomPage>
+class AddSymptomPageState extends State<AddSymptomPage>
     with TickerProviderStateMixin {
   final _formKey = GlobalKey<FormState>();
   final TextEditingController _nameController = TextEditingController();

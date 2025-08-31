@@ -367,7 +367,7 @@ class _SymptomPageState extends State<SymptomPage> with TickerProviderStateMixin
                                                                 color: Colors.white.withValues(alpha:0.2),
                                                                 borderRadius: BorderRadius.circular(16),
                                                               ),
-                                                              child: Icon(
+                                                              child: const Icon(
                                                                 icon,
                                                                 size: 28,
                                                                 color: Colors.white,

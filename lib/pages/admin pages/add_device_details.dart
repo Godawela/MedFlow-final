@@ -1,4 +1,5 @@
-// ignore_for_file: use_build_context_synchronously, library_private_types_in_public_api
+
+// ignore_for_file: use_build_context_synchronously
 
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
@@ -10,10 +11,10 @@ class AddDevicePage extends StatefulWidget {
   const AddDevicePage({super.key});
 
   @override
-  _AddDevicePageState createState() => _AddDevicePageState();
+  AddDevicePageState createState() => AddDevicePageState();
 }
 
-class _AddDevicePageState extends State<AddDevicePage> {
+class AddDevicePageState extends State<AddDevicePage> {
   final _formKey = GlobalKey<FormState>();
 
   final TextEditingController _nameController = TextEditingController();

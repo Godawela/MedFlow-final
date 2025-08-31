@@ -1,5 +1,6 @@
 //individual device information page
 
+
 // ignore_for_file: use_build_context_synchronously
 
 import 'package:flutter/material.dart';
@@ -16,10 +17,10 @@ class MachineDetailPage extends StatefulWidget {
   const MachineDetailPage({super.key, required this.machineName});
 
   @override
-  _MachineDetailPageState createState() => _MachineDetailPageState();
+  MachineDetailPageState createState() => MachineDetailPageState();
 }
 
-class _MachineDetailPageState extends State<MachineDetailPage> with TickerProviderStateMixin {
+class MachineDetailPageState extends State<MachineDetailPage> with TickerProviderStateMixin {
   Map<String, dynamic>? machineDetails;
   bool isLoading = true;
   String? error;

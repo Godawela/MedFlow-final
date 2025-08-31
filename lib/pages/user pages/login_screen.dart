@@ -18,10 +18,10 @@ class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
 
   @override
-  _LoginScreenState createState() => _LoginScreenState();
+  LoginScreenState createState() => LoginScreenState();
 }
 
-class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStateMixin {
+class LoginScreenState extends State<LoginScreen> with SingleTickerProviderStateMixin {
   final FirebaseAuth _auth = FirebaseAuth.instance;
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
@@ -159,9 +159,9 @@ Future<void> handleAuth() async {
       // Initialize FCM for authenticated user
       try {
         await NotificationService().initializeForUser();
-        print('Notification service initialized after login');
+        debugPrint('Notification service initialized after login');
       } catch (e) {
-        print('Error initializing notification service: $e');
+        debugPrint('Error initializing notification service: $e');
         // Don't block login if notification service fails
       }
 
@@ -270,9 +270,9 @@ Future<void> handleGoogleSignIn() async {
       // Initialize FCM for authenticated user
       try {
         await NotificationService().initializeForUser();
-        print('Notification service initialized after Google sign-in');
+        debugPrint('Notification service initialized after Google sign-in');
       } catch (e) {
-        print('Error initializing notification service: $e');
+        debugPrint('Error initializing notification service: $e');
         // Don't block login if notification service fails
       }
 
@@ -288,7 +288,7 @@ Future<void> handleGoogleSignIn() async {
       await GoogleSignIn().signOut();
       await _auth.signOut();
     } catch (signOutError) {
-      print('Error during sign out: $signOutError');
+      debugPrint('Error during sign out: $signOutError');
     }
     
     // Handle specific Firebase Auth errors for Google Sign-In
@@ -316,7 +316,7 @@ Future<void> handleGoogleSignIn() async {
       await GoogleSignIn().signOut();
       await _auth.signOut();
     } catch (signOutError) {
-      print('Error during sign out: $signOutError');
+      debugPrint('Error during sign out: $signOutError');
     }
     
     _showSnackBar('Something went wrong with Google sign-in. Please try again', Colors.red.shade400);

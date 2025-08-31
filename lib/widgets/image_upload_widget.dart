@@ -13,7 +13,7 @@ class ImageUploadWidget extends StatefulWidget {
   final bool enabled;
 
   const ImageUploadWidget({
-    Key? key,
+    super.key,
     required this.selectedImage,
     required this.onImageSelected,
 
@@ -21,7 +21,7 @@ class ImageUploadWidget extends StatefulWidget {
     this.borderRadius = 16.0,
     this.backgroundColor = Colors.grey,
     this.enabled = true,
-  }) : super(key: key);
+  });
 
   @override
   State<ImageUploadWidget> createState() => _ImageUploadWidgetState();
@@ -320,7 +320,7 @@ class _ImageUploadWidgetState extends State<ImageUploadWidget>
                   shape: BoxShape.circle,
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.black.withOpacity(0.2),
+                      color: Colors.black.withValues(alpha:0.2),
                       blurRadius: 4,
                       offset: const Offset(0, 2),
                     ),

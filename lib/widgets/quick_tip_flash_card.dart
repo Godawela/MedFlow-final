@@ -13,10 +13,10 @@ class QuickTipsFlashcards extends StatefulWidget {
   });
 
   @override
-  _QuickTipsFlashcardsState createState() => _QuickTipsFlashcardsState();
+  QuickTipsFlashcardsState createState() => QuickTipsFlashcardsState();
 }
 
-class _QuickTipsFlashcardsState extends State<QuickTipsFlashcards>
+class QuickTipsFlashcardsState extends State<QuickTipsFlashcards>
     with TickerProviderStateMixin {
   late AnimationController _cardController;
   late AnimationController _progressController;

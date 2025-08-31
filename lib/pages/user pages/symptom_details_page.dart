@@ -1,3 +1,4 @@
+
 // ignore_for_file: use_build_context_synchronously
 
 import 'dart:async';
@@ -125,7 +126,7 @@ class _SymptomDetailPageState extends State<SymptomDetailPage> with TickerProvid
                     color: Colors.white.withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(16),
                   ),
-                  child: Center(
+                  child: const Center(
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
@@ -133,7 +134,7 @@ class _SymptomDetailPageState extends State<SymptomDetailPage> with TickerProvid
                           strokeWidth: 2,
                           valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
                         ),
-                        const SizedBox(height: 8),
+                        SizedBox(height: 8),
                         Text(
                           'Loading image...',
                           style: TextStyle(color: Colors.white, fontSize: 12),

@@ -1,5 +1,6 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
@@ -17,7 +18,7 @@ class NotificationService {
 
   // Call this during app startup to set up basic FCM
   Future<void> initializeBasic() async {
-    print('🚀 Initializing basic FCM setup...');
+    debugPrint('Initializing basic FCM setup...');
     
     // Initialize local notifications
     await _initializeLocalNotifications();
@@ -30,30 +31,30 @@ class NotificationService {
     
     // Handle foreground messages
     FirebaseMessaging.onMessage.listen((RemoteMessage message) async {
-      print('📱 Received foreground message: ${message.notification?.title}');
-      print('📱 Message data: ${message.data}');
+      debugPrint('Received foreground message: ${message.notification?.title}');
+      debugPrint('Message data: ${message.data}');
       await _showLocalNotification(message);
     });
 
     // Handle notification taps when app is in background/terminated
     FirebaseMessaging.onMessageOpenedApp.listen((RemoteMessage message) {
-      print('🔔 Message clicked: ${message.data}');
+      debugPrint('Message clicked: ${message.data}');
       _handleNotificationTap(message);
     });
 
     // Handle initial message if app was opened from terminated state
     RemoteMessage? initialMessage = await _firebaseMessaging.getInitialMessage();
     if (initialMessage != null) {
-      print('🔔 App opened from notification: ${initialMessage.data}');
+      debugPrint('App opened from notification: ${initialMessage.data}');
       _handleNotificationTap(initialMessage);
     }
 
-    print('✅ Basic FCM setup completed');
+    debugPrint('Basic FCM setup completed');
   }
 
   Future<void> _initializeLocalNotifications() async {
-    print('📱 Initializing local notifications...');
-    
+    debugPrint('Initializing local notifications...');
+
     const AndroidInitializationSettings initializationSettingsAndroid =
         AndroidInitializationSettings('@mipmap/ic_launcher');
     
@@ -73,7 +74,7 @@ class NotificationService {
     await _localNotifications.initialize(
       initializationSettings,
       onDidReceiveNotificationResponse: (NotificationResponse response) {
-        print('🔔 Local notification tapped: ${response.payload}');
+        debugPrint('Local notification tapped: ${response.payload}');
         if (response.payload != null) {
           final data = jsonDecode(response.payload!);
           _handleNotificationData(data);
@@ -98,7 +99,7 @@ class NotificationService {
       await androidImplementation.createNotificationChannel(channel);
     }
 
-    print('✅ Local notifications initialized');
+    debugPrint('Local notifications initialized');
   }
 
   Future<void> _showLocalNotification(RemoteMessage message) async {
@@ -141,75 +142,75 @@ class NotificationService {
 
   void _handleNotificationData(Map<String, dynamic> data) {
     final String? type = data['type'];
-    print('🔔 Handling notification type: $type');
-    
+    debugPrint('Handling notification type: $type');
+
     switch (type) {
       case 'new_question':
         // Navigate to admin questions page
-        print('➡️ Should navigate to admin questions page');
+        debugPrint('Should navigate to admin questions page');
         // Add your navigation logic here
         break;
       case 'admin_reply':
         // Navigate to student questions page
-        print('➡️ Should navigate to student questions page');
+        debugPrint('Should navigate to student questions page');
         // Add your navigation logic here
         break;
       case 'test':
-        print('✅ Test notification received successfully');
+        debugPrint('Test notification received successfully');
         break;
       default:
-        print('❓ Unknown notification type: $type');
+        debugPrint('Unknown notification type: $type');
     }
   }
 
   // Call this AFTER user authentication is complete
   Future<void> initializeForUser() async {
     if (_isInitialized) {
-      print('⚠️ FCM already initialized for user');
+      debugPrint('FCM already initialized for user');
       return;
     }
     
     final User? currentUser = FirebaseAuth.instance.currentUser;
     if (currentUser == null) {
-      print('❌ Cannot initialize FCM - user not authenticated');
+      debugPrint('Cannot initialize FCM - user not authenticated');
       return;
     }
-    
-    print('👤 Initializing FCM for user: ${currentUser.uid}');
-    
+
+    debugPrint('Initializing FCM for user: ${currentUser.uid}');
+
     // Get FCM token and register it with retry logic
     await _registerTokenWithRetry();
     
     // Listen for token refresh
     _firebaseMessaging.onTokenRefresh.listen((newToken) {
-      print('🔄 FCM Token refreshed: ${newToken.substring(0, 20)}...');
+      debugPrint('FCM Token refreshed: ${newToken.substring(0, 20)}...');
       _sendTokenToBackend(newToken);
     });
     
     _isInitialized = true;
-    print('✅ FCM fully initialized for user: ${currentUser.uid}');
+    debugPrint('FCM fully initialized for user: ${currentUser.uid}');
   }
 
   Future<void> _registerTokenWithRetry({int maxRetries = 3}) async {
     for (int attempt = 1; attempt <= maxRetries; attempt++) {
       try {
-        print('🔄 Getting FCM token (attempt $attempt/$maxRetries)...');
+        debugPrint('Getting FCM token (attempt $attempt/$maxRetries)...');
         String? token = await _firebaseMessaging.getToken();
         
         if (token != null) {
-          print('✅ FCM Token obtained: ${token.substring(0, 20)}...');
+          debugPrint('FCM Token obtained: ${token.substring(0, 20)}...');
           await _sendTokenToBackend(token);
           
           // Test the token immediately
           await _testToken(token);
           return; // Success, exit retry loop
         } else {
-          print('❌ FCM token is null');
+          debugPrint('FCM token is null');
         }
       } catch (e) {
-        print('❌ Failed to get/register FCM token (attempt $attempt): $e');
+        debugPrint('Failed to get/register FCM token (attempt $attempt): $e');
         if (attempt == maxRetries) {
-          print('💥 All FCM token registration attempts failed');
+          debugPrint(' All FCM token registration attempts failed');
         } else {
           await Future.delayed(Duration(seconds: attempt * 2)); // Exponential backoff
         }
@@ -218,8 +219,8 @@ class NotificationService {
   }
 
   Future<void> _requestPermission() async {
-    print('🔐 Requesting FCM permissions...');
-    
+    debugPrint('Requesting FCM permissions...');
+
     NotificationSettings settings = await _firebaseMessaging.requestPermission(
       alert: true,
       badge: true,
@@ -230,20 +231,20 @@ class NotificationService {
       announcement: false,
     );
 
-    print('🔐 FCM Permission status: ${settings.authorizationStatus}');
-    
+    debugPrint('FCM Permission status: ${settings.authorizationStatus}');
+
     switch (settings.authorizationStatus) {
       case AuthorizationStatus.authorized:
-        print('✅ User granted notification permission');
+        debugPrint('User granted notification permission');
         break;
       case AuthorizationStatus.provisional:
-        print('⚠️ User granted provisional notification permission');
+        debugPrint('User granted provisional notification permission');
         break;
       case AuthorizationStatus.denied:
-        print('❌ User denied notification permission');
+        debugPrint('User denied notification permission');
         break;
       case AuthorizationStatus.notDetermined:
-        print('❓ Notification permission not determined');
+        debugPrint('Notification permission not determined');
         break;
     }
 
@@ -256,27 +257,27 @@ class NotificationService {
             badge: true,
             sound: true,
           );
-      print('📱 iOS local notification permission: ${result ?? false}');
+      debugPrint('iOS local notification permission: ${result ?? false}');
     }
   }
 
   Future<void> _sendTokenToBackend(String? token) async {
     if (token == null) {
-      print('❌ Cannot send null token to backend');
+      debugPrint('Cannot send null token to backend');
       return;
     }
 
     final User? currentUser = FirebaseAuth.instance.currentUser;
     if (currentUser == null) {
-      print('❌ No authenticated user - skipping token registration');
+      debugPrint('No authenticated user - skipping token registration');
       return;
     }
 
     final String userId = currentUser.uid;
 
     try {
-      print('📤 Registering FCM token for user: $userId');
-      
+      debugPrint('Registering FCM token for user: $userId');
+
       final response = await http.post(
         Uri.parse('$_baseUrl/fcm-tokens'),
         headers: {
@@ -289,24 +290,24 @@ class NotificationService {
           'timestamp': DateTime.now().toIso8601String(),
           'platform': Platform.isAndroid ? 'android' : 'ios',
         }),
-      ).timeout(Duration(seconds: 15));
+      ).timeout(const Duration(seconds: 15));
 
       if (response.statusCode == 200) {
-        print('✅ FCM token registered successfully');
+        debugPrint('FCM token registered successfully');
       } else {
-        print('❌ Failed to register FCM token: ${response.statusCode}');
-        print('Response: ${response.body}');
+        debugPrint('Failed to register FCM token: ${response.statusCode}');
+        debugPrint('Response: ${response.body}');
       }
     } catch (e) {
-      print('💥 Error registering FCM token: $e');
+      debugPrint('Error registering FCM token: $e');
     }
   }
 
   // Test token immediately after registration
   Future<void> _testToken(String token) async {
     try {
-      print('🧪 Testing FCM token...');
-      
+      debugPrint('Testing FCM token...');
+
       final response = await http.post(
         Uri.parse('$_baseUrl/test-fcm'),
         headers: {
@@ -314,17 +315,17 @@ class NotificationService {
           'Accept': 'application/json',
         },
         body: json.encode({'token': token}),
-      ).timeout(Duration(seconds: 15));
+      ).timeout(const Duration(seconds: 15));
 
       if (response.statusCode == 200) {
         final result = jsonDecode(response.body);
-        print('✅ FCM token test successful: ${result['messageId']}');
+        debugPrint('FCM token test successful: ${result['messageId']}');
       } else {
-        print('❌ FCM token test failed: ${response.statusCode}');
-        print('Response: ${response.body}');
+        debugPrint('FCM token test failed: ${response.statusCode}');
+        debugPrint('Response: ${response.body}');
       }
     } catch (e) {
-      print('💥 Error testing FCM token: $e');
+      debugPrint('Error testing FCM token: $e');
     }
   }
 
@@ -334,8 +335,8 @@ class NotificationService {
     required String questionPreview,
   }) async {
     try {
-      print('📤 Notifying admins of new question from: $studentName');
-      
+      debugPrint('Notifying admins of new question from: $studentName');
+
       final response = await http.post(
         Uri.parse('$_baseUrl/notify-admins'),
         headers: {
@@ -350,17 +351,17 @@ class NotificationService {
               : questionPreview,
           'timestamp': DateTime.now().toIso8601String(),
         }),
-      ).timeout(Duration(seconds: 15));
+      ).timeout(const Duration(seconds: 15));
       
       if (response.statusCode == 200) {
         final result = jsonDecode(response.body);
-        print('✅ Admin notification result: $result');
+        debugPrint('Admin notification result: $result');
       } else {
-        print('❌ Failed to send admin notification: ${response.statusCode}');
-        print('Response: ${response.body}');
+        debugPrint('Failed to send admin notification: ${response.statusCode}');
+        debugPrint('Response: ${response.body}');
       }
     } catch (e) {
-      print('💥 Error notifying admins: $e');
+      debugPrint('Error notifying admins: $e');
     }
   }
 
@@ -370,8 +371,8 @@ class NotificationService {
     required String replyPreview,
   }) async {
     try {
-      print('📤 Notifying student of admin reply: $studentId');
-      
+      debugPrint('Notifying student of admin reply: $studentId');
+
       final response = await http.post(
         Uri.parse('$_baseUrl/notify-student'),
         headers: {
@@ -386,17 +387,17 @@ class NotificationService {
               : replyPreview,
           'timestamp': DateTime.now().toIso8601String(),
         }),
-      ).timeout(Duration(seconds: 15));
+      ).timeout(const Duration(seconds: 15));
       
       if (response.statusCode == 200) {
         final result = jsonDecode(response.body);
-        print('✅ Student notification result: $result');
+        debugPrint('Student notification result: $result');
       } else {
-        print('❌ Failed to send student notification: ${response.statusCode}');
-        print('Response: ${response.body}');
+        debugPrint('Failed to send student notification: ${response.statusCode}');
+        debugPrint('Response: ${response.body}');
       }
     } catch (e) {
-      print('💥 Error notifying student: $e');
+      debugPrint('Error notifying student: $e');
     }
   }
 
@@ -405,13 +406,13 @@ class NotificationService {
     try {
       final token = await _firebaseMessaging.getToken();
       if (token != null) {
-        print('🎫 Current FCM token: ${token.substring(0, 20)}...');
+        debugPrint('Current FCM token: ${token.substring(0, 20)}...');
       } else {
-        print('❌ No FCM token available');
+        debugPrint('No FCM token available');
       }
       return token;
     } catch (e) {
-      print('💥 Error getting FCM token: $e');
+      debugPrint('Error getting FCM token: $e');
       return null;
     }
   }
@@ -420,9 +421,9 @@ class NotificationService {
   Future<void> subscribeToTopic(String topic) async {
     try {
       await _firebaseMessaging.subscribeToTopic(topic);
-      print('✅ Subscribed to topic: $topic');
+      debugPrint('Subscribed to topic: $topic');
     } catch (e) {
-      print('💥 Error subscribing to topic $topic: $e');
+      debugPrint('Error subscribing to topic $topic: $e');
     }
   }
 
@@ -430,54 +431,54 @@ class NotificationService {
   Future<void> unsubscribeFromTopic(String topic) async {
     try {
       await _firebaseMessaging.unsubscribeFromTopic(topic);
-      print('✅ Unsubscribed from topic: $topic');
+      debugPrint('Unsubscribed from topic: $topic');
     } catch (e) {
-      print('💥 Error unsubscribing from topic $topic: $e');
+      debugPrint('Error unsubscribing from topic $topic: $e');
     }
   }
 
   // Debug method to get all FCM info
   Future<void> debugFCMInfo() async {
     try {
-      print('=== FCM DEBUG INFO ===');
-      
+      debugPrint('=== FCM DEBUG INFO ===');
+
       final User? user = FirebaseAuth.instance.currentUser;
-      print('User: ${user?.uid ?? 'Not authenticated'}');
-      
+      debugPrint('User: ${user?.uid ?? 'Not authenticated'}');
+
       final String? token = await getCurrentToken();
-      print('Token available: ${token != null}');
-      
+      debugPrint('Token available: ${token != null}');
+
       final NotificationSettings settings = await _firebaseMessaging.getNotificationSettings();
-      print('Permission: ${settings.authorizationStatus}');
-      print('Alert: ${settings.alert}');
-      print('Badge: ${settings.badge}');
-      print('Sound: ${settings.sound}');
-      
-      print('Initialized: $_isInitialized');
-      print('==================');
+      debugPrint('Permission: ${settings.authorizationStatus}');
+      debugPrint('Alert: ${settings.alert}');
+      debugPrint('Badge: ${settings.badge}');
+      debugPrint('Sound: ${settings.sound}');
+
+      debugPrint('Initialized: $_isInitialized');
+      debugPrint('==================');
     } catch (e) {
-      print('💥 Error getting FCM debug info: $e');
+      debugPrint('Error getting FCM debug info: $e');
     }
   }
 
   // Force token refresh
   Future<void> refreshToken() async {
     try {
-      print('🔄 Forcing FCM token refresh...');
+      debugPrint('Forcing FCM token refresh...');
       await _firebaseMessaging.deleteToken();
-      await Future.delayed(Duration(seconds: 1));
+      await Future.delayed(const Duration(seconds: 1));
       final newToken = await _firebaseMessaging.getToken();
       if (newToken != null) {
-        print('✅ New token obtained: ${newToken.substring(0, 20)}...');
+        debugPrint('New token obtained: ${newToken.substring(0, 20)}...');
         await _sendTokenToBackend(newToken);
       }
     } catch (e) {
-      print('💥 Error refreshing FCM token: $e');
+      debugPrint('Error refreshing FCM token: $e');
     }
   }
 }
 
 // Top-level function for handling background messages
 Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
-  print('Received background message: ${message.data}');
+  debugPrint('Received background message: ${message.data}');
 }

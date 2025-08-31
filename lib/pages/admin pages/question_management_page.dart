@@ -1,3 +1,4 @@
+
 // ignore_for_file: use_build_context_synchronously
 
 import 'package:auto_route/auto_route.dart';
@@ -13,10 +14,10 @@ class QuestionsPage extends StatefulWidget {
   const QuestionsPage({super.key});
 
   @override
-  _QuestionsPageState createState() => _QuestionsPageState();
+  QuestionsPageState createState() => QuestionsPageState();
 }
 
-class _QuestionsPageState extends State<QuestionsPage> {
+class QuestionsPageState extends State<QuestionsPage> {
   List<dynamic> questions = [];
   bool isLoading = true;
   String? selectedQuestionId;
@@ -83,9 +84,9 @@ class _QuestionsPageState extends State<QuestionsPage> {
             studentId: studentId,
             replyPreview: reply,
           );
-          print('✅ Student notification sent successfully');
+          debugPrint('Student notification sent successfully');
         } catch (notificationError) {
-          print('❌ Failed to send student notification: $notificationError');
+          debugPrint('Failed to send student notification: $notificationError');
           // Don't fail the whole operation if notification fails
         }
 

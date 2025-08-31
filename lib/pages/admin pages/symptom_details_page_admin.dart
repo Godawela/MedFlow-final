@@ -1,3 +1,4 @@
+
 // ignore_for_file: use_build_context_synchronously
 
 import 'dart:async';
@@ -370,7 +371,7 @@ class _SymptomDetailPageAdminState extends State<SymptomDetailPageAdmin>
                               shape: BoxShape.circle,
                               boxShadow: [
                                 BoxShadow(
-                                  color: Colors.black.withOpacity(0.2),
+                                  color: Colors.black.withValues(alpha: 0.2),
                                   blurRadius: 4,
                                   offset: const Offset(0, 2),
                                 ),
@@ -391,7 +392,7 @@ class _SymptomDetailPageAdminState extends State<SymptomDetailPageAdmin>
                               shape: BoxShape.circle,
                               boxShadow: [
                                 BoxShadow(
-                                  color: Colors.black.withOpacity(0.2),
+                                  color: Colors.black.withValues(alpha:0.2),
                                   blurRadius: 4,
                                   offset: const Offset(0, 2),
                                 ),
@@ -639,7 +640,7 @@ class _SymptomDetailPageAdminState extends State<SymptomDetailPageAdmin>
                             shape: BoxShape.circle,
                             boxShadow: [
                               BoxShadow(
-                                color: Colors.black.withOpacity(0.1),
+                                color: Colors.black.withValues(alpha: 0.1),
                                 blurRadius: 20,
                                 offset: const Offset(0, 10),
                               )
@@ -757,7 +758,7 @@ class _SymptomDetailPageAdminState extends State<SymptomDetailPageAdmin>
                                             boxShadow: [
                                               BoxShadow(
                                                 color: Colors.deepPurple
-                                                    .withOpacity(0.3),
+                                                    .withValues(alpha:0.3),
                                                 blurRadius: 12,
                                                 offset: const Offset(0, 6),
                                               ),
@@ -785,7 +786,7 @@ class _SymptomDetailPageAdminState extends State<SymptomDetailPageAdmin>
                                                   boxShadow: [
                                                     BoxShadow(
                                                       color: Colors.deepPurple
-                                                          .withOpacity(0.3),
+                                                          .withValues(alpha:0.3),
                                                       blurRadius: 12,
                                                       offset:
                                                           const Offset(0, 6),
@@ -902,8 +903,7 @@ class _SymptomDetailPageAdminState extends State<SymptomDetailPageAdmin>
                                                                       .styleFrom(
                                                                 backgroundColor:
                                                                     Colors.white
-                                                                        .withOpacity(
-                                                                            0.2),
+                                                                        .withValues(alpha: 0.2),
                                                                 foregroundColor:
                                                                     Colors
                                                                         .white,
@@ -952,8 +952,8 @@ class _SymptomDetailPageAdminState extends State<SymptomDetailPageAdmin>
                                                                       .styleFrom(
                                                                 backgroundColor:
                                                                     Colors.white
-                                                                        .withOpacity(
-                                                                            0.2),
+                                                                        .withValues(
+                                                                            alpha: 0.2),
                                                                 foregroundColor:
                                                                     Colors
                                                                         .white,

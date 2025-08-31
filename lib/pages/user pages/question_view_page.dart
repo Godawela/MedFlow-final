@@ -1,3 +1,4 @@
+
 // ignore_for_file: use_build_context_synchronously
 
 import 'package:auto_route/auto_route.dart';
@@ -13,10 +14,10 @@ class StudentQuestionsPage extends StatefulWidget {
   const StudentQuestionsPage({super.key});
 
   @override
-  _StudentQuestionsPageState createState() => _StudentQuestionsPageState();
+  StudentQuestionsPageState createState() => StudentQuestionsPageState();
 }
 
-class _StudentQuestionsPageState extends State<StudentQuestionsPage> {
+class StudentQuestionsPageState extends State<StudentQuestionsPage> {
   List<dynamic> myQuestions = [];
   bool isLoading = true;
 

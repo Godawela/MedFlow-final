@@ -14,10 +14,10 @@ class DeviceListPage extends StatefulWidget {
   const DeviceListPage({super.key, required this.category});
 
   @override
-  _DeviceListPageState createState() => _DeviceListPageState();
+  DeviceListPageState createState() => DeviceListPageState();
 }
 
-class _DeviceListPageState extends State<DeviceListPage>
+class DeviceListPageState extends State<DeviceListPage>
     with TickerProviderStateMixin {
   List<dynamic> devices = [];
   bool isLoading = true;
