@@ -61,7 +61,7 @@ class ActionButtons extends StatelessWidget {
           }
         }),
         const SizedBox(height: 20),
-           buildActionButton('Symptom', () async {
+           buildActionButton('Symptoms', () async {
           final role = await fetchUserRole(); 
 
           if (role == 'Admin') {

@@ -4,14 +4,14 @@ import 'package:med/pages/admin%20pages/add_device_details.dart';
 import 'package:med/pages/admin%20pages/add_symptom.dart';
 import 'package:med/pages/admin%20pages/question_management_page.dart';
 import 'package:med/pages/admin%20pages/user_details.dart';
-import 'package:med/pages/user%20pages/bottom_nav.dart';
-import 'package:med/pages/user%20pages/forget_password.dart';
-import 'package:med/pages/user%20pages/home_screen.dart';
-import 'package:med/pages/user%20pages/login_screen.dart';
-import 'package:med/pages/user%20pages/note_page/note_page.dart';
-import 'package:med/pages/user%20pages/profile_page.dart';
+import 'package:med/pages/common%20pages/bottom_nav.dart';
+import 'package:med/pages/common%20pages/forget_password.dart';
+import 'package:med/pages/common%20pages/home_screen.dart';
+import 'package:med/pages/common%20pages/login_screen.dart';
+import 'package:med/pages/common%20pages/note_page/note_page.dart';
+import 'package:med/pages/common%20pages/profile_page.dart';
 import 'package:med/pages/user%20pages/question_view_page.dart';
-import 'package:med/pages/user%20pages/sign_up_screen.dart';
+import 'package:med/pages/common%20pages/sign_up_screen.dart';
 
 part 'router.gr.dart';
 

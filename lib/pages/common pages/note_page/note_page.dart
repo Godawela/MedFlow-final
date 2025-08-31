@@ -8,8 +8,8 @@ import 'package:http/http.dart' as http;
 import 'dart:convert';
 
 import 'package:med/models/note_model.dart';
-import 'package:med/pages/user%20pages/note_page/widgets/pdf_download_button.dart';
-import 'package:med/pages/user%20pages/note_page/widgets/note_dialog.dart'; // Import the new dialog
+import 'package:med/pages/common%20pages/note_page/widgets/pdf_download_button.dart';
+import 'package:med/pages/common%20pages/note_page/widgets/note_dialog.dart'; // Import the new dialog
 import 'package:med/widgets/appbar.dart';
 
 @RoutePage()
