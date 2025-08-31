@@ -17,7 +17,7 @@ final navigationProvider = StateNotifierProvider<NavigationNotifier, int>(
 
 // UserRoleNotifier to manage user role state
 class UserRoleNotifier extends StateNotifier<String> {
-  UserRoleNotifier() : super(''); // Initial role can be set as needed
+  UserRoleNotifier() : super(''); // Initial role
 
   void setRole(String role) {
     state = role;
